@@ -1,0 +1,212 @@
+@page
+@model RealEstateListingPlatform.Pages.IndexModel
+@{
+    ViewData["Title"] = "Find Your Dream Home"; 
+    Layout = "_Layout";
+}
+
+<section class="hero-section text-center d-flex align-items-center">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <h1 class="display-3 fw-bold mb-3 animate__animated animate__fadeInDown">
+                    Find Your Dream Home
+                </h1>
+                <p class="fs-5 mb-5 opacity-75">
+                    A place that connects genuine real estate values.
+                </p>
+                <div class="search-box-container shadow-lg search-wrapper p-2 bg-white">
+                    <form class="row g-0 align-items-center" method="get" action="/Listings/AllListings">
+                        <div class="col-md-4 px-3 border-end">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-geo-alt text-primary me-2"></i>
+                                <input type="text" name="location" class="form-control border-0" placeholder="Where are you looking?" value="">
+                            </div>
+                        </div>
+                        <div class="col-md-3 px-3 border-end">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-house text-primary me-2"></i>
+                                <select class="form-select border-0" name="propertyType">
+                                    <option value="">Type</option>
+                                    <option value="Apartment">Apartment</option>
+                                    <option value="Land">Land</option>
+                                    <option value="Villa">Villa</option>
+                                    <option value="Office">Office</option>
+                                    <option value="Townhouse">Townhouse</option>
+                                    <option value="Room">Room</option>
+                                    <option value="Penthouse">Penthouse</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3 px-3">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-cash-stack text-primary me-2"></i>
+                                <input type="text" name="maxPrice" class="form-control border-0" placeholder="Max Price" value="">
+                            </div>
+                        </div>
+                        <div class="col-md-2 p-1">
+                            <button type="submit" class="btn btn-auth-primary w-100 py-3 rounded-pill fw-bold">
+                                <i class="bi bi-search me-1"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="container py-5">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <h2 class="fw-bold">Featured Listings</h2>
+            <p class="text-muted">Handpicked properties just for you.</p>
+        </div>
+        <a asp-page="/Listings/AllListings" class="btn btn-outline-secondary btn-sm rounded-pill px-4">View All</a>
+    </div>
+
+    <div class="row g-4">
+        @foreach (var item in Model.Properties)
+        {
+            <div class="col-md-4">
+                <div class="card property-card h-100 border-0 shadow-sm">
+                    <div class="position-relative">
+                        <img src="@item.ImageUrl" class="card-img-top rounded-top-4" alt="@item.Title" style="height: 220px; object-fit: cover;">
+                        <span class="badge bg-auth-primary position-absolute top-0 start-0 m-3">@item.TransactionType</span>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold text-truncate">@item.Title</h5>
+                        <p class="text-muted small"><i class="bi bi-geo-alt"></i> @item.Address</p>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span class="h5 text-primary fw-bold mb-0">@item.FormattedPrice</span>
+                            <div class="property-icons text-muted small">
+                                <span><i class="bi bi-door-open"></i> @item.Bedrooms</span>
+                                <span class="ms-2"><i class="bi bi-droplet"></i> @item.Bathrooms</span>
+                                <span class="ms-2"><i class="bi bi-aspect-ratio"></i> @(item.Area)</span>
+                                <span class="ms-2 icon-stairs-inline"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 19h4v-4h4v-4h4v-4h4V3H2v4h4v4H2v4h4v4H2z"/></svg></span> @(item.Floors?.ToString() ?? "—")
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0 pb-3">
+                        <a asp-page="/Listings/PropertyDetail" asp-route-id="@item.Id" class="btn btn-outline-primary w-100 rounded-pill">Details</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #4A90E2;
+            --auth-bg: #f8f9fa;
+        }
+
+        .hero-section {
+            width: 100%;
+            left: 0;
+            right: 0;
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed; 
+            padding: 160px 0; 
+            color: white;
+            position: relative;
+        }
+        .search-box-container {
+            max-width: 900px;
+        }
+
+        .search-form {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px); 
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+            .search-form .form-control,
+            .search-form .form-select {
+                background: transparent;
+                font-size: 0.95rem;
+            }
+
+        .search-wrapper {            
+            border-radius: 50px;
+        }
+
+        @@media (max-width: 767.98px) {
+            .search-wrapper {                
+                border-radius: 15px !important;
+                margin: 0 10px; 
+            }
+            
+            .border-end {                
+                border-bottom: 1px solid #eee;
+                padding-bottom: 10px;
+                margin-bottom: 10px;
+            }
+        }
+
+        .search-form-wrapper {
+            background: #fff;
+            border-radius: 50px; 
+            padding: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .v-divider {
+            width: 1px;
+            height: 30px;
+            background-color: #dee2e6;
+            margin-top: 10px;
+        }
+
+        .search-input-group .form-control:focus,
+        .search-input-group .form-select:focus {
+            box-shadow: none;
+            background-color: transparent;
+        }
+
+        .btn-auth-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+            .btn-auth-primary:hover {
+                opacity: 0.9;
+                transform: translateY(-1px);
+            }
+
+        .property-card {
+            transition: transform 0.3s ease;
+            border-radius: 1rem;
+        }
+
+            .property-card:hover {
+                transform: translateY(-10px);
+            }
+
+        .rounded-top-4 {
+            border-top-left-radius: 1rem !important;
+            border-top-right-radius: 1rem !important;
+        }
+
+        .bg-auth-primary {
+            background-color: var(--primary-color);
+        }
+
+        .icon-stairs-inline {
+            display: inline-block;
+            vertical-align: middle;
+        }
+            .icon-stairs-inline svg {
+                vertical-align: middle;
+            }
+
+        </style>
+
+}

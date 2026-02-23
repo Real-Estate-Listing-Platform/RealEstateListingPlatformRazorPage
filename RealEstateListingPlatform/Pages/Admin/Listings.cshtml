@@ -1,0 +1,28 @@
+@page
+@model RealEstateListingPlatform.Pages.Admin.ListingsModel
+
+@{
+    ViewData["Title"] = "Admin - Listings";
+}
+
+<header class="admin-header">
+    <div>
+        <h2>Listings</h2>
+        <p class="admin-muted mb-0">Use the existing approval workflow to approve or reject submissions.</p>
+    </div>
+    <div class="d-flex flex-wrap align-items-center gap-3">
+        <span class="admin-badge warning">@Model.ViewModel.PendingListings.Count Pending</span>
+    </div>
+</header>
+
+<section class="admin-section">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div>
+            <h3>Pending approvals</h3>
+            <div class="admin-section-subtitle">Review and manage pending submissions</div>
+        </div>
+        <span class="admin-badge warning">@Model.ViewModel.PendingListings.Count Pending</span>
+    </div>
+
+    @await Html.PartialAsync("_ListingApprovalTable", Model.ViewModel.PendingListings)
+</section>

@@ -1,0 +1,507 @@
+@page
+@model RealEstateListingPlatform.Pages.Package.MyPackagesModel
+
+@{
+    ViewData["Title"] = "My Packages";
+    Layout = "_ListerLayout";
+}
+
+<div class="container py-5">
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="fw-bold mb-2">My Packages</h1>
+        <p class="text-muted">Manage your purchased packages and track usage</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <a href="@Url.Page("/Package/Index")" class="btn btn-primary">
+            <i class="bi bi-cart-plus"></i> Buy More Packages
+        </a>
+    </div>
+</div>
+
+    <!-- Pending Payment Alert -->
+    @{
+        var pendingPackages = Model.Packages?.Items.Where(p => p.Status == "Pending").ToList() ?? new List<BLL.DTOs.UserPackageDto>();
+    }
+    @if (pendingPackages.Any())
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <h6 class="alert-heading">
+                <i class="bi bi-exclamation-triangle-fill"></i> Payment Required
+            </h6>
+            <p class="mb-2">
+                You have @pendingPackages.Count package@(pendingPackages.Count > 1 ? "s" : "") waiting for payment completion.
+                Complete your payment to activate your packages.
+            </p>
+            <hr>
+            <div class="d-flex gap-2">
+                <a href="@Url.Page("/Payment/MyTransactions")" class="btn btn-sm btn-warning">
+                    <i class="bi bi-credit-card-fill"></i> View Pending Transactions
+                </a>
+                <a href="@Url.Page("/Package/Index")" class="btn btn-sm btn-outline-warning">
+                    <i class="bi bi-cart-plus"></i> Buy New Package
+                </a>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Active Packages Summary -->
+    @if (Model.ActivePackages.Any())
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <h5 class="fw-bold mb-3"><i class="bi bi-check-circle-fill text-success"></i> Active Packages</h5>
+            </div>
+            @foreach (var userPackage in Model.ActivePackages)
+            {
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card border-success h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="card-title fw-bold mb-0">@userPackage.Package.Name</h6>
+                                <span class="badge bg-success">Active</span>
+                            </div>
+                            <p class="text-muted small mb-3">@userPackage.Package.Description</p>
+
+                            <div class="mb-2">
+                                @if (userPackage.RemainingListings.HasValue)
+                                {
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <small class="text-muted">Remaining Listings:</small>
+                                        <strong>@userPackage.RemainingListings</strong>
+                                    </div>
+                                }
+                                @if (userPackage.RemainingPhotos.HasValue && userPackage.RemainingPhotos > 0)
+                                {
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <small class="text-muted">Extra Photos:</small>
+                                        <strong>@userPackage.RemainingPhotos</strong>
+                                    </div>
+                                }
+                                @if (userPackage.VideoAvailable)
+                                {
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <small class="text-muted">Video Upload:</small>
+                                        <strong class="text-success">Enabled</strong>
+                                    </div>
+                                }
+                                @if (userPackage.RemainingBoosts.HasValue && userPackage.RemainingBoosts > 0)
+                                {
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <small class="text-muted">Boost Credits:</small>
+                                        <strong>@userPackage.RemainingBoosts</strong>
+                                    </div>
+                                }
+                            </div>
+
+                            @if (userPackage.ExpiresAt.HasValue)
+                            {
+                                var daysLeft = (userPackage.ExpiresAt.Value - DateTime.UtcNow).Days;
+                                <div class="mt-2 pt-2 border-top">
+                                    <small class="text-muted">
+                                        <i class="bi bi-clock"></i> Expires in @daysLeft day@(daysLeft != 1 ? "s" : "")
+                                    </small>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info mb-4">
+            <i class="bi bi-info-circle"></i> You don't have any active packages. 
+            <a href="@Url.Page("/Package/Index")" class="alert-link">Browse packages</a> to enhance your listings.
+        </div>
+    }
+
+    <!-- Filter and Search -->
+    <div class="filter-section mb-4">
+        <form asp-page="/Package/MyPackages" method="get">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" name="searchTerm" class="form-control" placeholder="Search packages..." 
+                               value="@Model.SearchTerm">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <select name="status" class="form-select">
+                        <option value="">All Status</option>
+                        <option value="Active" selected="@(Model.Status == "Active")">Active</option>
+                        <option value="Pending" selected="@(Model.Status == "Pending")">Pending</option>
+                        <option value="Expired" selected="@(Model.Status == "Expired")">Expired</option>
+                        <option value="Used" selected="@(Model.Status == "Used")">Used</option>
+                        <option value="Cancelled" selected="@(Model.Status == "Cancelled")">Cancelled</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select name="packageType" class="form-select">
+                        <option value="">All Package Types</option>
+                        <option value="ADDITIONAL_LISTING" selected="@(Model.PackageType == "ADDITIONAL_LISTING")">Additional Listing</option>
+                        <option value="PHOTO_PACK" selected="@(Model.PackageType == "PHOTO_PACK")">Photo Pack</option>
+                        <option value="VIDEO_UPLOAD" selected="@(Model.PackageType == "VIDEO_UPLOAD")">Video Upload</option>
+                        <option value="BOOST_LISTING" selected="@(Model.PackageType == "BOOST_LISTING")">Boost Listing</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select name="sortBy" class="form-select">
+                        <option value="PurchasedAt" selected="@(Model.SortBy == "PurchasedAt")">Purchase Date</option>
+                        <option value="ExpiresAt" selected="@(Model.SortBy == "ExpiresAt")">Expiration Date</option>
+                        <option value="Price" selected="@(Model.SortBy == "Price")">Price</option>
+                        <option value="Name" selected="@(Model.SortBy == "Name")">Package Name</option>
+                        <option value="Status" selected="@(Model.SortBy == "Status")">Status</option>
+                    </select>
+                    <input type="hidden" name="sortOrder" value="@Model.SortOrder" />
+                </div>
+            </div>
+            <div class="row g-3 mt-2">
+                <div class="col-md-3">
+                    <input type="date" name="purchasedAfter" class="form-control" placeholder="Purchased After" 
+                           value="@Model.PurchasedAfter?.ToString("yyyy-MM-dd")">
+                </div>
+                <div class="col-md-3">
+                    <input type="date" name="purchasedBefore" class="form-control" placeholder="Purchased Before" 
+                           value="@Model.PurchasedBefore?.ToString("yyyy-MM-dd")">
+                </div>
+                <div class="col-md-2">
+                    <input type="number" name="pageSize" class="form-control" placeholder="Per Page" 
+                           value="@Model.PageSize" min="5" max="50">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-funnel me-2"></i>Apply Filters
+                    </button>
+                </div>
+                <div class="col-md-2">
+                    <a asp-page="/Package/MyPackages" class="btn btn-outline-secondary w-100">
+                        <i class="bi bi-x-circle me-2"></i>Reset
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- All Packages History -->
+    <div class="row">
+        <div class="col-12">
+            <h5 class="fw-bold mb-3"><i class="bi bi-clock-history"></i> Package History (@Model.Packages.TotalCount total)</h5>
+        </div>
+    </div>
+
+    @if (Model.Packages == null || Model.Packages.Items == null || !Model.Packages.Items.Any())
+    {
+        <div class="row">
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-inbox display-1 text-muted"></i>
+                <p class="text-muted mt-3">No package history</p>
+                <a href="@Url.Page("/Package/Index")" class="btn btn-primary">Browse Packages</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th data-sort="Name" style="cursor: pointer;">
+                                    Package 
+                                    @if (Model.SortBy == "Name")
+                                    {
+                                        <i class="bi bi-@(Model.SortOrder == "asc" ? "sort-up" : "sort-down")"></i>
+                                    }
+                                </th>
+                                <th>Type</th>
+                                <th data-sort="Price" style="cursor: pointer;">
+                                    Price 
+                                    @if (Model.SortBy == "Price")
+                                    {
+                                        <i class="bi bi-@(Model.SortOrder == "asc" ? "sort-up" : "sort-down")"></i>
+                                    }
+                                </th>
+                                <th data-sort="PurchasedAt" style="cursor: pointer;">
+                                    Purchased 
+                                    @if (Model.SortBy == "PurchasedAt")
+                                    {
+                                        <i class="bi bi-@(Model.SortOrder == "asc" ? "sort-up" : "sort-down")"></i>
+                                    }
+                                </th>
+                                <th data-sort="Status" style="cursor: pointer;">
+                                    Status 
+                                    @if (Model.SortBy == "Status")
+                                    {
+                                        <i class="bi bi-@(Model.SortOrder == "asc" ? "sort-up" : "sort-down")"></i>
+                                    }
+                                </th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var userPackage in Model.Packages.Items)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@userPackage.Package.Name</strong><br/>
+                                        <small class="text-muted">@userPackage.Package.Description</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">@userPackage.Package.PackageType.Replace("_", " ")</span>
+                                    </td>
+                                    <td class="fw-bold">@userPackage.Package.Price.ToString("N0") VND</td>
+                                    <td>@userPackage.PurchasedAt.ToString("MMM dd, yyyy")</td>
+                                    <td>
+                                        @switch (userPackage.Status)
+                                        {
+                                            case "Active":
+                                                <span class="badge bg-success">
+                                                    <i class="bi bi-check-circle-fill"></i> Active
+                                                </span>
+                                                break;
+                                            case "Pending":
+                                                <span class="badge bg-warning">
+                                                    <i class="bi bi-hourglass-split"></i> Pending Payment
+                                                </span>
+                                                break;
+                                            case "Expired":
+                                                <span class="badge bg-secondary">
+                                                    <i class="bi bi-clock-history"></i> Expired
+                                                </span>
+                                                break;
+                                            case "Used":
+                                                <span class="badge bg-info">
+                                                    <i class="bi bi-check-all"></i> Used
+                                                </span>
+                                                break;
+                                            case "Cancelled":
+                                                <span class="badge bg-danger">
+                                                    <i class="bi bi-x-circle-fill"></i> Cancelled
+                                                </span>
+                                                break;
+                                            default:
+                                                <span class="badge bg-warning">@userPackage.Status</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (userPackage.Status == "Pending")
+                                        {
+                                            <a href="@Url.Page("/Payment/MyTransactions")" class="btn btn-sm btn-warning">
+                                                <i class="bi bi-credit-card"></i> Complete Payment
+                                            </a>
+                                        }
+                                        else if (userPackage.Status == "Active")
+                                        {
+                                            if (userPackage.RemainingListings.HasValue)
+                                            {
+                                                <span class="badge bg-light text-dark me-1">@userPackage.RemainingListings Listings</span>
+                                            }
+                                            if (userPackage.RemainingPhotos.HasValue && userPackage.RemainingPhotos > 0)
+                                            {
+                                                <span class="badge bg-light text-dark me-1">@userPackage.RemainingPhotos Photos</span>
+                                            }
+                                            if (userPackage.VideoAvailable)
+                                            {
+                                                <span class="badge bg-light text-dark me-1">
+                                                    <i class="bi bi-camera-video"></i> Video
+                                                </span>
+                                            }
+                                            if (userPackage.RemainingBoosts.HasValue && userPackage.RemainingBoosts > 0)
+                                            {
+                                                <span class="badge bg-light text-dark me-1">@userPackage.RemainingBoosts Boosts</span>
+                                            }
+                                        }
+                                        else if (userPackage.ExpiresAt.HasValue)
+                                        {
+                                            <small class="text-muted">
+                                                Expired @userPackage.ExpiresAt.Value.ToString("MMM dd, yyyy")
+                                            </small>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                @if (Model.Packages.TotalPages > 1)
+                {
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <div class="pagination-info text-muted">
+                            @if (Model.Packages.TotalCount > 0)
+                            {
+                                <text>Showing @Model.Packages.StartIndex to @Model.Packages.EndIndex of @Model.Packages.TotalCount entries</text>
+                            }
+                            else
+                            {
+                                <text>No entries found</text>
+                            }
+                        </div>
+                        <nav>
+                            <ul class="pagination mb-0">
+                                <li class="page-item @(!Model.Packages.HasPrevious ? "disabled" : "")">
+                                    <a class="page-link" 
+                                       href="@Url.Page("/Package/MyPackages", new { 
+                                           searchTerm = Model.SearchTerm, 
+                                           status = Model.Status, 
+                                           packageType = Model.PackageType,
+                                           purchasedAfter = Model.PurchasedAfter,
+                                           purchasedBefore = Model.PurchasedBefore,
+                                           sortBy = Model.SortBy,
+                                           sortOrder = Model.SortOrder,
+                                           pageNumber = Model.PageNumber - 1, 
+                                           pageSize = Model.PageSize 
+                                       })"
+                                       tabindex="-1">Previous</a>
+                                </li>
+
+                                @{
+                                    int startPage = Math.Max(1, Model.PageNumber - 2);
+                                    int endPage = Math.Min(Model.Packages.TotalPages, Model.PageNumber + 2);
+                                    
+                                    if (startPage > 1)
+                                    {
+                                        <li class="page-item">
+                                            <a class="page-link" 
+                                               href="@Url.Page("/Package/MyPackages", new { 
+                                                   searchTerm = Model.SearchTerm, 
+                                                   status = Model.Status, 
+                                                   packageType = Model.PackageType,
+                                                   purchasedAfter = Model.PurchasedAfter,
+                                                   purchasedBefore = Model.PurchasedBefore,
+                                                   sortBy = Model.SortBy,
+                                                   sortOrder = Model.SortOrder,
+                                                   pageNumber = 1, 
+                                                   pageSize = Model.PageSize 
+                                               })">1</a>
+                                        </li>
+                                        if (startPage > 2)
+                                        {
+                                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                                        }
+                                    }
+
+                                    for (int i = startPage; i <= endPage; i++)
+                                    {
+                                        <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                                            <a class="page-link" 
+                                               href="@Url.Page("/Package/MyPackages", new { 
+                                                   searchTerm = Model.SearchTerm, 
+                                                   status = Model.Status, 
+                                                   packageType = Model.PackageType,
+                                                   purchasedAfter = Model.PurchasedAfter,
+                                                   purchasedBefore = Model.PurchasedBefore,
+                                                   sortBy = Model.SortBy,
+                                                   sortOrder = Model.SortOrder,
+                                                   pageNumber = i, 
+                                                   pageSize = Model.PageSize 
+                                               })">@i</a>
+                                        </li>
+                                    }
+
+                                    if (endPage < Model.Packages.TotalPages)
+                                    {
+                                        if (endPage < Model.Packages.TotalPages - 1)
+                                        {
+                                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                                        }
+                                        <li class="page-item">
+                                            <a class="page-link" 
+                                               href="@Url.Page("/Package/MyPackages", new { 
+                                                   searchTerm = Model.SearchTerm, 
+                                                   status = Model.Status, 
+                                                   packageType = Model.PackageType,
+                                                   purchasedAfter = Model.PurchasedAfter,
+                                                   purchasedBefore = Model.PurchasedBefore,
+                                                   sortBy = Model.SortBy,
+                                                   sortOrder = Model.SortOrder,
+                                                   pageNumber = Model.Packages.TotalPages, 
+                                                   pageSize = Model.PageSize 
+                                               })">@Model.Packages.TotalPages</a>
+                                        </li>
+                                    }
+                                }
+
+                                <li class="page-item @(!Model.Packages.HasNext ? "disabled" : "")">
+                                    <a class="page-link" 
+                                       href="@Url.Page("/Package/MyPackages", new { 
+                                           searchTerm = Model.SearchTerm, 
+                                           status = Model.Status, 
+                                           packageType = Model.PackageType,
+                                           purchasedAfter = Model.PurchasedAfter,
+                                           purchasedBefore = Model.PurchasedBefore,
+                                           sortBy = Model.SortBy,
+                                           sortOrder = Model.SortOrder,
+                                           pageNumber = Model.PageNumber + 1, 
+                                           pageSize = Model.PageSize 
+                                       })">Next</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        .filter-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        th[data-sort] {
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s ease;
+        }
+
+        th[data-sort]:hover {
+            background-color: #e9ecef;
+        }
+
+        th i {
+            font-size: 0.8rem;
+            margin-left: 0.25rem;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        // Handle table header sorting
+        document.querySelectorAll('th[data-sort]').forEach(header => {
+            header.addEventListener('click', function() {
+                const sortField = this.getAttribute('data-sort');
+                const form = document.querySelector('form');
+                const sortOrderInput = form.querySelector('input[name="sortOrder"]');
+                const sortByInput = form.querySelector('select[name="sortBy"]');
+                
+                // Toggle order if clicking same field, otherwise default to desc
+                if (sortByInput.value === sortField) {
+                    sortOrderInput.value = sortOrderInput.value === 'desc' ? 'asc' : 'desc';
+                } else {
+                    sortByInput.value = sortField;
+                    sortOrderInput.value = 'desc';
+                }
+                
+                // Submit the form
+                form.submit();
+            });
+        });
+    </script>
+}

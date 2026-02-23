@@ -1,0 +1,112 @@
+@page
+@model RealEstateListingPlatform.Pages.Account.VerifyEmailModel
+
+@{
+    ViewData["Title"] = "Verify Email";
+    Layout = "_AuthLayout";
+}
+
+<div class="auth-toggle">
+    <span class="active" style="width: 100%; display: block; text-align: center;">Verify Email</span>
+</div>
+
+<div class="text-center mb-4">
+    <p>Please enter the 6-digit code sent to <strong>@Model.Input.Email</strong></p>
+</div>
+
+<form method="post" class="auth-form">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+    <input type="hidden" asp-for="Input.Email" />
+
+    <div class="mb-3">
+        <input asp-for="Input.OtpCode" class="form-control text-center fs-4 letter-spacing-2" autocomplete="off" placeholder="######" maxlength="6" />
+        <span asp-validation-for="Input.OtpCode" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-auth-primary">Verify</button>
+</form>
+
+<div class="mt-3 text-center">
+    <form asp-page-handler="ResendOtp" method="post" class="d-inline" id="resendForm">
+        <input type="hidden" name="email" value="@Model.Input.Email" />
+        <button type="submit" class="btn btn-link text-decoration-none text-muted small p-0 border-0" id="resendBtn">Resend Code? (Request new OTP)</button>
+    </form>
+    <span id="countdown" class="text-muted small" style="display: none;">Resend available in <span id="timer">60</span>s</span>
+</div>
+
+<style>
+    .letter-spacing-2 {
+        letter-spacing: 5px;
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function() {
+            var email = '@Model.Input.Email';
+            var storageKey = 'otp_cooldown_' + email;
+            var errorMessage = '@TempData["ErrorMessage"]';
+            var successMessage = '@TempData["SuccessMessage"]';
+            
+            // 1. Check for existing cooldown in localStorage on page load
+            var cooldownEnd = localStorage.getItem(storageKey);
+            if (cooldownEnd) {
+                var now = new Date().getTime();
+                var remaining = Math.ceil((parseInt(cooldownEnd) - now) / 1000);
+                
+                if (remaining > 0) {
+                    startCountdown(remaining);
+                } else {
+                    localStorage.removeItem(storageKey);
+                }
+            }
+
+            // 2. Start new countdown if server says so (Success or Wait error)
+            if ((errorMessage && errorMessage.includes("wait 60 seconds")) || successMessage) {
+                setCooldown(60);
+            }
+
+            // 3. Hook into form submit to start timer immediately on click
+            $('#resendForm').submit(function() {
+                setCooldown(60);
+            });
+
+            function setCooldown(seconds) {
+                var newEnd = new Date().getTime() + (seconds * 1000);
+                localStorage.setItem(storageKey, newEnd);
+                startCountdown(seconds);
+            }
+
+            function startCountdown(seconds) {
+                var btn = $('#resendBtn');
+                var countdown = $('#countdown');
+                var timer = $('#timer');
+                
+                // Clear any existing interval to prevent duplicates
+                if (window.countdownInterval) clearInterval(window.countdownInterval);
+
+                btn.hide();
+                countdown.show();
+                
+                var timeLeft = seconds;
+                timer.text(timeLeft);
+
+                window.countdownInterval = setInterval(function() {
+                    timeLeft--;
+                    timer.text(timeLeft);
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(window.countdownInterval);
+                        btn.show();
+                        countdown.hide();
+                        localStorage.removeItem(storageKey); // Clear storage when done
+                    }
+                }, 1000);
+            }
+            
+            // Auto-focus on OTP input
+            $('input[name="Input.OtpCode"]').focus();
+        });
+    </script>
+}

@@ -1,0 +1,431 @@
+@page
+@model RealEstateListingPlatform.Pages.Admin.DashboardModel
+@using BLL.DTOs
+
+@{
+    ViewData["Title"] = "Admin - Dashboard";
+    var stats = Model.DashboardStats;
+}
+
+<header class="admin-header">
+    <div>
+        <h2>Admin Command Center</h2>
+        <p class="admin-muted mb-0">Monitor activity, approve listings, and keep the marketplace trusted.</p>
+    </div>
+</header>
+
+<section class="admin-section">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div>
+            <h3>Overview</h3>
+            <div class="admin-section-subtitle">Performance snapshot across the last 7 days</div>
+        </div>
+        <div class="admin-badge primary">Live</div>
+    </div>
+
+    <div class="row g-3 admin-stats">
+        @if (stats != null)
+        {
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="admin-stat-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stat-title">Listings Pending</div>
+                            <div class="admin-stat-value">@stats.PendingListingsCount</div>
+                            <div class="admin-stat-delta">
+                                @if (stats.NewUsersThisWeek > 0)
+                                {
+                                    <text>+@((stats.PendingListingsCount * 100 / Math.Max(stats.TotalListings, 1)).ToString("F0"))% of total</text>
+                                }
+                                else
+                                {
+                                    <text>@stats.TotalListings total listings</text>
+                                }
+                            </div>
+                        </div>
+                        <div class="admin-stat-icon warning">
+                            <i class="bi bi-hourglass-split"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="admin-stat-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stat-title">New Users</div>
+                            <div class="admin-stat-value">@stats.TotalUsers</div>
+                            <div class="admin-stat-delta">+@stats.NewUsersToday today, +@stats.NewUsersThisWeek this week</div>
+                        </div>
+                        <div class="admin-stat-icon success">
+                            <i class="bi bi-people"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="admin-stat-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stat-title">Total Leads</div>
+                            <div class="admin-stat-value">@stats.TotalLeads</div>
+                            <div class="admin-stat-delta">@stats.LeadConversionRate.ToString("F1")% conversion rate</div>
+                        </div>
+                        <div class="admin-stat-icon primary">
+                            <i class="bi bi-graph-up"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="admin-stat-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stat-title">Total Views</div>
+                            <div class="admin-stat-value">@stats.TotalViews.ToString("N0")</div>
+                            <div class="admin-stat-delta">@stats.ViewsToday today, @stats.ViewsThisWeek this week</div>
+                        </div>
+                        <div class="admin-stat-icon info">
+                            <i class="bi bi-eye"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            @foreach (var stat in Model.ViewModel.Stats)
+            {
+                <div class="col-12 col-md-6 col-xl-3">
+                    <div class="admin-stat-card">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="stat-title">@stat.Title</div>
+                                <div class="admin-stat-value">@stat.Value</div>
+                                <div class="admin-stat-delta">@stat.Delta</div>
+                            </div>
+                            <div class="admin-stat-icon @stat.Tone">
+                                <i class="@stat.Icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <div class="row g-3 mt-2">
+        <div class="col-12 col-lg-7">
+            <div class="p-4 border rounded-4 bg-light h-100">
+                <h5 class="fw-bold">Platform Insights</h5>
+                <p class="admin-muted small mb-4">Key metrics from your real estate platform.</p>
+                @if (stats != null)
+                {
+                    <div class="d-flex flex-wrap gap-3">
+                        <div>
+                            <div class="fw-bold">@stats.PublishedListingsCount</div>
+                            <div class="admin-muted small">Published Listings</div>
+                        </div>
+                        <div>
+                            <div class="fw-bold">@stats.ActiveListers</div>
+                            <div class="admin-muted small">Active Listers</div>
+                        </div>
+                        <div>
+                            <div class="fw-bold">@stats.ActiveSeekers</div>
+                            <div class="admin-muted small">Active Seekers</div>
+                        </div>
+                        <div>
+                            <div class="fw-bold">@stats.BoostedListingsCount</div>
+                            <div class="admin-muted small">Boosted Listings</div>
+                        </div>
+                        <div>
+                            <div class="fw-bold">@stats.AverageListingPrice.ToString("N0") VND</div>
+                            <div class="admin-muted small">Avg. Listing Price</div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex flex-wrap gap-3">
+                        <div>
+                            <div class="fw-bold">74%</div>
+                            <div class="admin-muted small">Auto-verified listings</div>
+                        </div>
+                        <div>
+                            <div class="fw-bold">31</div>
+                            <div class="admin-muted small">Open disputes</div>
+                        </div>
+                        <div>
+                            <div class="fw-bold">2.4h</div>
+                            <div class="admin-muted small">Avg. response time</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="col-12 col-lg-5">
+            <div class="p-4 border rounded-4 bg-light h-100">
+                <h5 class="fw-bold">User Statistics</h5>
+                @if (stats != null)
+                {
+                    <ul class="list-unstyled mb-0 admin-muted small">
+                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>@stats.VerifiedUsers verified users (@((stats.VerifiedUsers * 100.0 / Math.Max(stats.TotalUsers, 1)).ToString("F0"))%)</li>
+                        <li class="mb-2"><i class="bi bi-clock text-warning me-2"></i>@stats.UnverifiedUsers unverified users</li>
+                        <li class="mb-2"><i class="bi bi-calendar-check text-info me-2"></i>@stats.UsersRegisteredLast30Days registered in last 30 days</li>
+                        <li><i class="bi bi-graph-up-arrow text-primary me-2"></i>@stats.NewUsersThisMonth new users this month</li>
+                    </ul>
+                }
+                else
+                {
+                    <ul class="list-unstyled mb-0 admin-muted small">
+                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Prioritize high-value listing reviews</li>
+                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Audit top-performing agents weekly</li>
+                        <li><i class="bi bi-check-circle text-success me-2"></i>Resolve escalations within 2 hours</li>
+                    </ul>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="admin-section">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div>
+            <h3>Dashboard</h3>
+            <div class="admin-section-subtitle">Live operational KPIs and approval pipeline health</div>
+        </div>
+        <span class="admin-badge warning">@Model.ViewModel.PendingListings.Count Pending approvals</span>
+    </div>
+
+    <div class="row g-3 mt-2">
+        <div class="col-12 col-lg-6">
+            <div class="p-4 border rounded-4 bg-light h-100">
+                <h5 class="fw-bold">Listing Distribution</h5>
+                <p class="admin-muted small">Distribution of listings by status.</p>
+                @if (stats != null)
+                {
+                    var totalListings = Math.Max(stats.TotalListings, 1);
+                    var pendingPercent = (stats.PendingListingsCount * 100.0 / totalListings);
+                    var publishedPercent = (stats.PublishedListingsCount * 100.0 / totalListings);
+                    var rejectedPercent = (stats.RejectedListingsCount * 100.0 / totalListings);
+                    var draftPercent = (stats.DraftListingsCount * 100.0 / totalListings);
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between small fw-semibold">
+                            <span>Published</span>
+                            <span>@publishedPercent.ToString("F0")% (@stats.PublishedListingsCount)</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-success" style="width: @publishedPercent%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between small fw-semibold">
+                            <span>Pending Review</span>
+                            <span>@pendingPercent.ToString("F0")% (@stats.PendingListingsCount)</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-warning" style="width: @pendingPercent%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between small fw-semibold">
+                            <span>Draft</span>
+                            <span>@draftPercent.ToString("F0")% (@stats.DraftListingsCount)</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-primary" style="width: @draftPercent%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="d-flex justify-content-between small fw-semibold">
+                            <span>Rejected</span>
+                            <span>@rejectedPercent.ToString("F0")% (@stats.RejectedListingsCount)</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-danger" style="width: @rejectedPercent%"></div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between small fw-semibold">
+                            <span>Initial review</span>
+                            <span>42%</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-warning" style="width: 42%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between small fw-semibold">
+                            <span>Verification</span>
+                            <span>28%</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-primary" style="width: 28%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="d-flex justify-content-between small fw-semibold">
+                            <span>Final sign-off</span>
+                            <span>30%</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-success" style="width: 30%"></div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="col-12 col-lg-6">
+            <div class="p-4 border rounded-4 bg-light h-100">
+                <h5 class="fw-bold">Lead & Activity Stats</h5>
+                <p class="admin-muted small">Critical metrics from your platform.</p>
+                @if (stats != null)
+                {
+                    <div class="d-flex flex-column gap-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-semibold">New Leads</div>
+                                <div class="admin-muted small">@stats.LeadsNew new, @stats.LeadsContacted contacted, @stats.LeadsClosed closed</div>
+                            </div>
+                            <span class="admin-badge primary">@stats.NewLeadsToday today</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-semibold">Platform Views</div>
+                                <div class="admin-muted small">@stats.ViewsThisWeek views this week, @stats.ViewsThisMonth this month</div>
+                            </div>
+                            <span class="admin-badge success">Growing</span>
+                        </div>
+                        @if (stats.TotalRevenue > 0)
+                        {
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-semibold">Revenue</div>
+                                    <div class="admin-muted small">@stats.TotalPackagesPurchased packages sold</div>
+                                </div>
+                                <span class="admin-badge info">@stats.TotalRevenue.ToString("N0") VND</span>
+                            </div>
+                        }
+                        @if (stats.TotalReports > 0)
+                        {
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-semibold">Reports</div>
+                                    <div class="admin-muted small">@stats.PendingReports pending, @stats.ResolvedReports resolved</div>
+                                </div>
+                                @if (stats.UrgentReports > 0)
+                                {
+                                    <span class="admin-badge danger">@stats.UrgentReports urgent</span>
+                                }
+                                else
+                                {
+                                    <span class="admin-badge success">On track</span>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex flex-column gap-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-semibold">Price anomalies</div>
+                                <div class="admin-muted small">12 listings require manual audit.</div>
+                            </div>
+                            <span class="admin-badge warning">High</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-semibold">Inactive agents</div>
+                                <div class="admin-muted small">5 agencies have 0 responses in 48h.</div>
+                            </div>
+                            <span class="admin-badge danger">Urgent</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-semibold">Boost inventory</div>
+                                <div class="admin-muted small">Boost packages are 82% utilized.</div>
+                            </div>
+                            <span class="admin-badge primary">On track</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+@if (stats != null && (stats.TopPerformingListings.Any() || stats.MostViewedListings.Any()))
+{
+    <section class="admin-section">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div>
+                <h3>Performance Insights</h3>
+                <div class="admin-section-subtitle">Top performing and most viewed listings</div>
+            </div>
+        </div>
+
+        <div class="row g-3 mt-2">
+            @if (stats.TopPerformingListings.Any())
+            {
+                <div class="col-12 col-lg-6">
+                    <div class="p-4 border rounded-4 bg-light h-100">
+                        <h5 class="fw-bold mb-3">Top Performing Listings (by Leads)</h5>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Leads</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var listing in stats.TopPerformingListings)
+                                    {
+                                        <tr>
+                                            <td class="small">@listing.Title</td>
+                                            <td class="small fw-bold">@listing.LeadCount</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (stats.MostViewedListings.Any())
+            {
+                <div class="col-12 col-lg-6">
+                    <div class="p-4 border rounded-4 bg-light h-100">
+                        <h5 class="fw-bold mb-3">Most Viewed Listings</h5>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Views</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var listing in stats.MostViewedListings)
+                                    {
+                                        <tr>
+                                            <td class="small">@listing.Title</td>
+                                            <td class="small fw-bold">@listing.ViewCount</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+}

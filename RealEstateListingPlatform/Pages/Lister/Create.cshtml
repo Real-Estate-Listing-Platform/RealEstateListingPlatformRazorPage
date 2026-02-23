@@ -1,0 +1,917 @@
+@page
+@model RealEstateListingPlatform.Pages.Lister.CreateModel
+
+@{
+    ViewData["Title"] = "Create Listing";
+    Layout = "_ListerLayout";
+    var transactionTypes = Model.TransactionTypes;
+    var propertyTypes = Model.PropertyTypes;
+    var legalStatuses = Model.LegalStatuses;
+    var furnitureStatuses = Model.FurnitureStatuses;
+    var directions = Model.Directions;
+}
+
+<div class="create-listing-container">
+<!-- Page Header -->
+<div class="page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="page-title">
+                <i class="bi bi-plus-circle me-2"></i>Create New Listing
+            </h1>
+            <p class="page-subtitle text-muted">Fill in the details to create a new property listing</p>
+        </div>
+            <a asp-page="/Lister/Listings" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Back to Listings
+            </a>
+    </div>
+</div>
+
+<!-- Package Management Section -->
+<div class="form-card mb-4">
+    <div class="form-card-header bg-gradient-package">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="form-card-title mb-0">
+                <i class="bi bi-box-seam me-2"></i>Package Configuration
+            </h4>
+            <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#addPackageModal">
+                <i class="bi bi-plus-circle me-1"></i>Configure Packages
+            </button>
+        </div>
+    </div>
+    <div class="form-card-body">
+        <!-- Current Package Status -->
+        <div class="row g-3 mb-3">
+            <div class="col-md-4">
+                <div class="package-status-card">
+                    <div class="package-status-icon text-primary">
+                        <i class="bi bi-buildings"></i>
+                    </div>
+                    <div class="package-status-label">Listing Slot</div>
+                    <div class="package-status-value" id="listingSlotStatus">Checking...</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="package-status-card">
+                    <div class="package-status-icon text-success">
+                        <i class="bi bi-images"></i>
+                    </div>
+                    <div class="package-status-label">Photo Limit</div>
+                    <div class="package-status-value" id="photoLimit">5 photos</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="package-status-card">
+                    <div class="package-status-icon text-info">
+                        <i class="bi bi-camera-video"></i>
+                    </div>
+                    <div class="package-status-label">Video Upload</div>
+                    <div class="package-status-value" id="videoStatus">Not available</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Selected Packages List -->
+        <div id="selectedPackagesContainer">
+            <h6 class="fw-bold mb-2">
+                <i class="bi bi-check-circle me-1"></i>Selected Packages for This Listing
+            </h6>
+            <div id="selectedPackagesList" class="list-group mb-3">
+                <div class="list-group-item text-center text-muted py-4">
+                    <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                    No additional packages selected. Using free tier limits.
+                    <br>
+                    <small>Click "Configure Packages" to enhance this listing.</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-info mb-0">
+            <i class="bi bi-lightbulb me-2"></i>
+            <strong>Note:</strong> You can select one package of each type (listing, photo, video) to enhance this listing.
+            <a href="@Url.Page("/Package/Index")" class="alert-link">Browse Package Marketplace</a>
+        </div>
+    </div>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+    <form asp-page="/Lister/Create" method="post" enctype="multipart/form-data">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+        <!-- Basic Information -->
+        <div class="form-card mb-4">
+            <div class="form-card-header">
+                <h4 class="form-card-title">
+                    <i class="bi bi-info-circle me-2"></i>Basic Information
+                </h4>
+            </div>
+            <div class="form-card-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label asp-for="Input.Title" class="form-label required"></label>
+                        <input asp-for="Input.Title" class="form-control form-control-lg" placeholder="e.g., Luxury 2BR Apartment in District 1" />
+                        <span asp-validation-for="Input.Title" class="text-danger"></span>
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="Description" class="form-label"></label>
+                        <textarea asp-for="Description" class="form-control" rows="5" placeholder="Describe your property in detail..."></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                        <div class="form-text">Provide a detailed description to attract potential buyers/renters</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="TransactionType" class="form-label required">Transaction Type</label>
+                        <select asp-for="TransactionType" asp-items="transactionTypes" class="form-select">
+                            <option value="">-- Select Transaction Type --</option>
+                        </select>
+                        <span asp-validation-for="TransactionType" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="PropertyType" class="form-label required">Property Type</label>
+                        <select asp-for="PropertyType" asp-items="propertyTypes" class="form-select">
+                            <option value="">-- Select Property Type --</option>
+                        </select>
+                        <span asp-validation-for="PropertyType" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Price" class="form-label required"></label>
+                        <div class="input-group">
+                            <input asp-for="Price" class="form-control" type="number" step="1000" placeholder="0" />
+                            <span class="input-group-text">VND</span>
+                        </div>
+                        <span asp-validation-for="Price" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Location Details -->
+        <div class="form-card mb-4">
+            <div class="form-card-header">
+                <h4 class="form-card-title">
+                    <i class="bi bi-geo-alt me-2"></i>Location Details
+                </h4>
+            </div>
+            <div class="form-card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="City" class="form-label"></label>
+                        <input asp-for="City" class="form-control" placeholder="e.g., Ho Chi Minh City" />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="District" class="form-label"></label>
+                        <input asp-for="District" class="form-control" placeholder="e.g., District 1" />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Ward" class="form-label"></label>
+                        <input asp-for="Ward" class="form-control" placeholder="e.g., Ben Nghe Ward" />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="StreetName" class="form-label">Street Name</label>
+                        <input asp-for="StreetName" class="form-control" placeholder="e.g., Nguyen Hue Street" />
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="HouseNumber" class="form-label">House Number</label>
+                        <input asp-for="HouseNumber" class="form-control" placeholder="e.g., 123" />
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Area" class="form-label"></label>
+                        <input asp-for="Area" class="form-control" placeholder="e.g., 75m?" />
+                        <div class="form-text">Property area (e.g., 75m?, 100sqm)</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Direction" class="form-label"></label>
+                        <select asp-for="Direction" asp-items="directions" class="form-select">
+                            <option value="">-- Select Direction --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Latitude" class="form-label"></label>
+                        <input asp-for="Latitude" class="form-control" type="number" step="0.000001" placeholder="e.g., 10.762622" />
+                        <div class="form-text">GPS coordinates (optional)</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Longitude" class="form-label"></label>
+                        <input asp-for="Longitude" class="form-control" type="number" step="0.000001" placeholder="e.g., 106.660172" />
+                        <div class="form-text">GPS coordinates (optional)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Property Specifications -->
+        <div class="form-card mb-4">
+            <div class="form-card-header">
+                <h4 class="form-card-title">
+                    <i class="bi bi-house me-2"></i>Property Specifications
+                </h4>
+            </div>
+            <div class="form-card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label asp-for="Bedrooms" class="form-label"></label>
+                        <input asp-for="Bedrooms" class="form-control" type="number" min="0" placeholder="0" />
+                        <span asp-validation-for="Bedrooms" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Bathrooms" class="form-label"></label>
+                        <input asp-for="Bathrooms" class="form-control" type="number" min="0" placeholder="0" />
+                        <span asp-validation-for="Bathrooms" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Floors" class="form-label"></label>
+                        <input asp-for="Floors" class="form-control" type="number" min="0" placeholder="0" />
+                        <span asp-validation-for="Floors" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="LegalStatus" class="form-label">Legal Status</label>
+                        <select asp-for="LegalStatus" asp-items="legalStatuses" class="form-select">
+                            <option value="">-- Select Legal Status --</option>
+                        </select>
+                        <div class="form-text">Property ownership documentation status</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="FurnitureStatus" class="form-label">Furniture Status</label>
+                        <select asp-for="FurnitureStatus" asp-items="furnitureStatuses" class="form-select">
+                            <option value="">-- Select Furniture Status --</option>
+                        </select>
+                        <div class="form-text">Current furniture condition</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Media Upload -->
+        <div class="form-card mb-4">
+            <div class="form-card-header">
+                <h4 class="form-card-title">
+                    <i class="bi bi-images me-2"></i>Photos & Videos
+                </h4>
+            </div>
+            <div class="form-card-body">
+                <div class="mb-3">
+                    <label class="form-label">Upload Media Files</label>
+                    <input id="mediaFiles" type="file" name="mediaFiles" multiple accept="image/*,video/*" class="form-control" />
+                    <div class="form-text">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Accepted formats: JPG, PNG, WEBP, MP4, AVI, MOV. Maximum 10MB per file.
+                    </div>
+                </div>
+                <div id="mediaPreview" class="row g-3"></div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <button type="submit" name="action" value="draft" class="btn btn-secondary btn-lg">
+                <i class="bi bi-save me-2"></i>Save as Draft
+            </button>
+            <button type="submit" name="action" value="submit" class="btn btn-primary btn-lg">
+                <i class="bi bi-send me-2"></i>Submit for Review
+            </button>
+            <a asp-page="/Lister/Listings" class="btn btn-outline-secondary btn-lg">
+                <i class="bi bi-x-circle me-2"></i>Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Add Package Modal -->
+<div class="modal fade" id="addPackageModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-gradient-package text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-box-seam me-2"></i>Configure Packages
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Package Selection Rules:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>You can select <strong>one listing slot package</strong> (e.g., +1 Additional Listing)</li>
+                        <li>You can select <strong>one photo pack</strong> (e.g., +10 or +20 photos)</li>
+                        <li>You can select <strong>one video package</strong> to enable video uploads</li>
+                        <li>Selecting a new package of the same type will replace the current selection</li>
+                    </ul>
+                </div>
+                
+                <!-- Listing Slot Packages -->
+                <div class="package-category mb-4">
+                    <h6 class="fw-bold text-primary mb-3">
+                        <i class="bi bi-buildings me-2"></i>Listing Slot Packages
+                    </h6>
+                    <div id="listingSlotPackages" class="row g-3">
+                        <div class="col-12 text-center py-3">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Photo Pack Packages -->
+                <div class="package-category mb-4">
+                    <h6 class="fw-bold text-success mb-3">
+                        <i class="bi bi-images me-2"></i>Photo Pack Packages
+                    </h6>
+                    <div id="photoPackPackages" class="row g-3">
+                        <div class="col-12 text-center py-3">
+                            <div class="spinner-border text-success" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Video Upload Packages -->
+                <div class="package-category mb-4">
+                    <h6 class="fw-bold text-info mb-3">
+                        <i class="bi bi-camera-video me-2"></i>Video Upload Packages
+                    </h6>
+                    <div id="videoUploadPackages" class="row g-3">
+                        <div class="col-12 text-center py-3">
+                            <div class="spinner-border text-info" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>Important:</strong> Packages will be consumed when you create the listing. Make sure to select the right packages before submission.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="@Url.Page("/Package/Index")" class="btn btn-primary" target="_blank">
+                    <i class="bi bi-cart-plus me-2"></i>Purchase More Packages
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        let currentPhotoLimit = 5; // Default
+        let videoAllowed = false;
+        let activePackages = [];
+        let selectedPackages = {
+            ADDITIONAL_LISTING: null,
+            PHOTO_PACK: null,
+            VIDEO_UPLOAD: null
+        };
+        
+        $(document).ready(function() {
+            checkPackageLimits();
+            loadActivePackages();
+            
+            // Open modal trigger
+            $('#addPackageModal').on('show.bs.modal', function() {
+                loadAvailablePackagesForModal();
+            });
+        });
+
+        // Load user's active packages
+        function loadActivePackages() {
+            $.ajax({
+                url: '@Url.Page("/Package/GetMyActivePackages")',
+                type: 'GET',
+                success: function(response) {
+                    if (response.success && response.data) {
+                        activePackages = response.data;
+                        updatePackageDisplay();
+                    }
+                },
+                error: function() {
+                    console.log('Failed to load active packages');
+                }
+            });
+        }
+
+        // Load packages in modal grouped by type
+        function loadAvailablePackagesForModal() {
+            const listingSlotContainer = $('#listingSlotPackages');
+            const photoPackContainer = $('#photoPackPackages');
+            const videoUploadContainer = $('#videoUploadPackages');
+            
+            if (activePackages.length === 0) {
+                const noPackages = '<div class="col-12 text-center py-4">' +
+                                  '<i class="bi bi-inbox fs-2 text-muted d-block mb-2"></i>' +
+                                  '<p class="text-muted">You have no available packages.</p>' +
+                                  '<a href="@Url.Page("/Package/Index")" class="btn btn-primary btn-sm">Browse Packages</a>' +
+                                  '</div>';
+                listingSlotContainer.html(noPackages);
+                photoPackContainer.html(noPackages);
+                videoUploadContainer.html(noPackages);
+                return;
+            }
+
+            // Filter packages by type and availability
+            const listingPackages = activePackages.filter(p => 
+                p.type === 'ADDITIONAL_LISTING' && p.remainingListings > 0
+            );
+            const photoPackages = activePackages.filter(p => 
+                p.type === 'PHOTO_PACK' && p.remainingPhotos > 0
+            );
+            const videoPackages = activePackages.filter(p => 
+                p.type === 'VIDEO_UPLOAD' && p.allowVideo
+            );
+
+            // Render listing slot packages
+            renderPackageCategory(listingSlotContainer, listingPackages, 'ADDITIONAL_LISTING', 'primary');
+            
+            // Render photo pack packages
+            renderPackageCategory(photoPackContainer, photoPackages, 'PHOTO_PACK', 'success');
+            
+            // Render video upload packages
+            renderPackageCategory(videoUploadContainer, videoPackages, 'VIDEO_UPLOAD', 'info');
+        }
+
+        // Render packages for a specific category
+        function renderPackageCategory(container, packages, type, colorClass) {
+            if (packages.length === 0) {
+                container.html(`
+                    <div class="col-12 text-center py-3">
+                        <p class="text-muted mb-0">No ${type.replace('_', ' ').toLowerCase()} packages available</p>
+                    </div>
+                `);
+                return;
+            }
+
+            container.empty();
+            packages.forEach(pkg => {
+                const card = createPackageCard(pkg, colorClass);
+                container.append(card);
+            });
+        }
+
+        // Create package card
+        function createPackageCard(pkg, colorClass) {
+            const isSelected = selectedPackages[pkg.type]?.id === pkg.id;
+            const iconMap = {
+                'ADDITIONAL_LISTING': 'bi-buildings',
+                'PHOTO_PACK': 'bi-images',
+                'VIDEO_UPLOAD': 'bi-camera-video'
+            };
+            
+            const icon = iconMap[pkg.type] || 'bi-box-seam';
+            
+            const card = $('<div class="col-12"></div>');
+            const content = `
+                <div class="package-card ${isSelected ? 'package-card-selected' : ''}" data-package-id="${pkg.id}" data-package-type="${pkg.type}">
+                    <div class="d-flex align-items-start">
+                        <div class="package-card-icon text-${colorClass} me-3">
+                            <i class="bi ${icon} fs-2"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="fw-bold mb-1">${pkg.name}</h6>
+                            <div class="small text-muted mb-2">
+                                ${pkg.type === 'ADDITIONAL_LISTING' ? 
+                                    `<span class="badge bg-${colorClass} bg-opacity-10 text-${colorClass}"><i class="bi bi-check-circle"></i> ${pkg.remainingListings} listing(s) remaining</span>` : ''}
+                                ${pkg.type === 'PHOTO_PACK' ? 
+                                    `<span class="badge bg-${colorClass} bg-opacity-10 text-${colorClass}"><i class="bi bi-image"></i> ${pkg.photoLimit} photos | ${pkg.remainingPhotos} remaining</span>` : ''}
+                                ${pkg.type === 'VIDEO_UPLOAD' ? 
+                                    `<span class="badge bg-${colorClass} bg-opacity-10 text-${colorClass}"><i class="bi bi-camera-video"></i> Video upload enabled</span>` : ''}
+                            </div>
+                            ${pkg.expiresAt ? 
+                                `<small class="text-muted"><i class="bi bi-clock"></i> Expires: ${pkg.expiresAt}</small>` : ''}
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-sm ${isSelected ? 'btn-danger' : 'btn-outline-' + colorClass}" 
+                                    onclick="togglePackageSelection('${pkg.id}', '${pkg.name}', '${pkg.type}', ${pkg.photoLimit || 0}, ${pkg.allowVideo})">
+                                ${isSelected ? '<i class="bi bi-check-circle-fill"></i> Selected' : '<i class="bi bi-circle"></i> Select'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            card.html(content);
+            return card;
+        }
+
+        // Toggle package selection - ONE PER TYPE
+        function togglePackageSelection(id, name, type, photoLimit, allowVideo) {
+            // If clicking the same package, deselect it
+            if (selectedPackages[type]?.id === id) {
+                selectedPackages[type] = null;
+            } else {
+                // Replace existing package of this type
+                selectedPackages[type] = { id, name, type, photoLimit, allowVideo };
+            }
+            
+            updateSelectedPackagesUI();
+            loadAvailablePackagesForModal(); // Refresh modal to show selection states
+            recalculatePackageLimits();
+        }
+
+        // Update selected packages UI
+        function updateSelectedPackagesUI() {
+            const container = $('#selectedPackagesList');
+            const selectedArray = Object.values(selectedPackages).filter(p => p !== null);
+            
+            if (selectedArray.length === 0) {
+                container.html(`
+                    <div class="list-group-item text-center text-muted py-4">
+                        <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                        No additional packages selected. Using free tier limits.
+                        <br>
+                        <small>Click "Configure Packages" to enhance this listing.</small>
+                    </div>
+                `);
+                return;
+            }
+
+            container.empty();
+            selectedArray.forEach(pkg => {
+                const iconMap = {
+                    'ADDITIONAL_LISTING': 'bi-buildings text-primary',
+                    'PHOTO_PACK': 'bi-images text-success',
+                    'VIDEO_UPLOAD': 'bi-camera-video text-info'
+                };
+                const icon = iconMap[pkg.type] || 'bi-box-seam';
+                
+                const badgeMap = {
+                    'ADDITIONAL_LISTING': 'bg-primary',
+                    'PHOTO_PACK': 'bg-success',
+                    'VIDEO_UPLOAD': 'bg-info'
+                };
+                const badgeColor = badgeMap[pkg.type] || 'bg-secondary';
+                
+                const item = $(`
+                    <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi ${icon} me-2 fs-5"></i>
+                            <strong>${pkg.name}</strong>
+                            <span class="badge ${badgeColor} ms-2">${pkg.type.replace('_', ' ')}</span>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-danger" 
+                                onclick="togglePackageSelection('${pkg.id}', '${pkg.name}', '${pkg.type}', ${pkg.photoLimit}, ${pkg.allowVideo})">
+                            <i class="bi bi-x-circle"></i> Remove
+                        </button>
+                    </div>
+                `);
+                container.append(item);
+            });
+        }
+
+        // Recalculate package limits based on selection
+        function recalculatePackageLimits() {
+            let totalPhotoLimit = 5; // Base free tier
+            let hasVideo = false;
+            let hasListingSlot = false;
+
+            // Get selected packages
+            if (selectedPackages.PHOTO_PACK) {
+                totalPhotoLimit = selectedPackages.PHOTO_PACK.photoLimit || 5;
+            }
+            if (selectedPackages.VIDEO_UPLOAD) {
+                hasVideo = selectedPackages.VIDEO_UPLOAD.allowVideo;
+            }
+            if (selectedPackages.ADDITIONAL_LISTING) {
+                hasListingSlot = true;
+            }
+
+            currentPhotoLimit = totalPhotoLimit;
+            videoAllowed = hasVideo;
+
+            // Update display
+            $('#photoLimit').html(`<span class="text-${totalPhotoLimit > 5 ? 'success' : 'muted'}">${totalPhotoLimit} photos</span>`);
+            $('#videoStatus').html(`<span class="text-${hasVideo ? 'success' : 'muted'}">
+                <i class="bi bi-${hasVideo ? 'check-circle' : 'x-circle'}"></i> ${hasVideo ? 'Available' : 'Not available'}
+            </span>`);
+        }
+
+        // Update package display with user's packages
+        function updatePackageDisplay() {
+            // Initial display based on available packages (not selected yet)
+            const photoPacks = activePackages.filter(p => p.type === 'PHOTO_PACK');
+            const videoPackages = activePackages.filter(p => p.type === 'VIDEO_UPLOAD' && p.allowVideo);
+            
+            if (photoPacks.length > 0) {
+                $('#photoLimit').html('<span class="text-muted">5 photos <small>(photo packs available)</small></span>');
+            }
+            
+            if (videoPackages.length > 0) {
+                $('#videoStatus').html('<span class="text-muted"><i class="bi bi-info-circle"></i> Video packs available</span>');
+            }
+        }
+
+        function checkPackageLimits() {
+            // Check listing slots
+            $.ajax({
+                url: '@Url.Page("/Package/CanCreateListing")',
+                type: 'GET',
+                success: function(response) {
+                    if (response.canCreate) {
+                        $('#listingSlotStatus').html('<span class="text-success"><i class="bi bi-check-circle"></i> Available</span>');
+                    } else {
+                        $('#listingSlotStatus').html('<span class="text-danger"><i class="bi bi-x-circle"></i> Limit reached</span>');
+                        
+                        // Show blocking message
+                        const blockMsg = $('<div class="alert alert-danger mt-3"></div>');
+                        blockMsg.html(
+                            '<i class="bi bi-exclamation-triangle"></i> <strong>Cannot create listing!</strong> ' +
+                            '<a href="@Url.Page("/Package/Index", new { type = "ADDITIONAL_LISTING" })" class="alert-link">Purchase additional listing package</a> to continue.'
+                        );
+                        $('.create-listing-container').prepend(blockMsg);
+                        $('form button[type="submit"]').prop('disabled', true);
+                    }
+                }
+            });
+        }
+
+        // Enhanced media file validation
+        document.getElementById('mediaFiles').addEventListener('change', function(e) {
+            const preview = document.getElementById('mediaPreview');
+            preview.innerHTML = '';
+            
+            const files = Array.from(e.target.files);
+            const imageFiles = files.filter(f => f.type.startsWith('image/'));
+            const videoFiles = files.filter(f => f.type.startsWith('video/'));
+            
+            // Validate photo count
+            if (imageFiles.length > currentPhotoLimit) {
+                alert('Photo limit exceeded!\\n\\nYou can only upload ' + currentPhotoLimit + ' photos with your current package selection.\\n\\n' +
+                      'Select a Photo Pack to increase your limit.');
+                e.target.value = '';
+                return;
+            }
+            
+            // Validate video upload
+            if (videoFiles.length > 0) {
+                if (!videoAllowed) {
+                    const confirmOpen = confirm('Video upload is not available!\\n\\n' +
+                          'You need to select a Video Upload package to enable video uploads.\\n\\n' +
+                          'Would you like to configure packages now?');
+                    e.target.value = '';
+                    
+                    if (confirmOpen) {
+                        $('#addPackageModal').modal('show');
+                    }
+                    return;
+                }
+                
+                if (videoFiles.length > 1) {
+                    alert('You can only upload one video per listing.');
+                    e.target.value = '';
+                    return;
+                }
+            }
+            
+            // Show preview
+            files.forEach((file, index) => {
+                const col = document.createElement('div');
+                col.className = 'col-md-3';
+                
+                const card = document.createElement('div');
+                card.className = 'media-preview-card position-relative';
+                
+                if (file.type.startsWith('image/')) {
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(file);
+                    img.className = 'img-fluid rounded';
+                    card.appendChild(img);
+                    
+                    // Add badge
+                    const badge = document.createElement('span');
+                    badge.className = 'badge bg-primary position-absolute top-0 start-0 m-2';
+                    badge.textContent = 'Photo ' + (imageFiles.indexOf(file) + 1) + '/' + currentPhotoLimit;
+                    card.appendChild(badge);
+                } else if (file.type.startsWith('video/')) {
+                    const video = document.createElement('video');
+                    video.src = URL.createObjectURL(file);
+                    video.className = 'img-fluid rounded';
+                    video.controls = true;
+                    card.appendChild(video);
+                    
+                    // Add badge
+                    const badge = document.createElement('span');
+                    badge.className = 'badge bg-success position-absolute top-0 start-0 m-2';
+                    badge.innerHTML = '<i class="bi bi-camera-video"></i> Video';
+                    card.appendChild(badge);
+                }
+                
+                const fileName = document.createElement('div');
+                fileName.className = 'media-file-name mt-2';
+                fileName.textContent = file.name;
+                card.appendChild(fileName);
+                
+                const fileSize = document.createElement('div');
+                fileSize.className = 'text-muted small';
+                fileSize.textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+                card.appendChild(fileSize);
+                
+                col.appendChild(card);
+                preview.appendChild(col);
+            });
+        });
+    </script>
+}
+
+<style>
+    .create-listing-container {
+        max-width: 1200px;
+    }
+
+    .required::after {
+        content: " *";
+        color: #dc3545;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+    .form-card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1.25rem 1.5rem;
+    }
+
+    .bg-gradient-package {
+        background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+    }
+
+    .form-card-title {
+        color: white;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .form-card-body {
+        padding: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control, .form-select {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 0.625rem 0.875rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+
+    /* Package Status Cards */
+    .package-status-card {
+        background: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        transition: all 0.3s;
+    }
+
+    .package-status-card:hover {
+        border-color: #667eea;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .package-status-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .package-status-label {
+        font-size: 0.875rem;
+        color: #6c757d;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.25rem;
+    }
+
+    .package-status-value {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    /* Package Cards in Modal */
+    .package-card {
+        background: white;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 1rem;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+
+    .package-card:hover {
+        border-color: #667eea;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    }
+
+    .package-card-selected {
+        border-color: #28a745;
+        background-color: #f0f9f4;
+    }
+
+    .package-card-icon {
+        font-size: 2rem;
+        margin-right: 1rem;
+    }
+
+    .media-preview-card {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        overflow: hidden;
+        padding: 0.5rem;
+        position: relative;
+    }
+
+    .media-preview-card img,
+    .media-preview-card video {
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+    }
+
+    .media-file-name {
+        font-size: 0.75rem;
+        color: #7f8c8d;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-start;
+        padding: 1.5rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        flex-wrap: wrap;
+    }
+
+    .form-actions .btn {
+        min-width: 180px;
+    }
+
+    .form-actions .btn i {
+        font-size: 1.1rem;
+    }
+
+    /* Modal Enhancements */
+    .modal-header.bg-gradient-package {
+        background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+    }
+
+    .nav-pills .nav-link {
+        color: #667eea;
+        border-radius: 8px;
+    }
+
+    .nav-pills .nav-link.active {
+        background-color: #667eea;
+    }
+
+    /* List Group Enhancements */
+    .list-group-item {
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        border: 1px solid #e9ecef;
+    }
+
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    /* Package Category Sections */
+    .package-category {
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 12px;
+        border: 1px solid #e9ecef;
+    }
+
+    .package-category h6 {
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid currentColor;
+    }
+</style>

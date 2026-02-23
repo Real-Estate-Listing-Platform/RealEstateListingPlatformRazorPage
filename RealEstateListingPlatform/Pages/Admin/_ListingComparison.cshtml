@@ -1,0 +1,76 @@
+@model RealEstateListingPlatform.Models.ListingComparisonViewModel
+
+<div class="row g-4">
+    @if (Model.IsUpdate)
+    {
+        <!-- Original Version (Before Edit) -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-light border-0">
+                    <h6 class="fw-bold mb-0 text-muted">
+                        <i class="bi bi-clock-history me-2"></i>Original Version
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.Original != null)
+                    {
+                        @await Html.PartialAsync("_ListingDataDisplay", Model.Original, new ViewDataDictionary(ViewData) { { "ShowChanges", false } })
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Version (After Edit) -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-primary text-white border-0">
+                    <h6 class="fw-bold mb-0">
+                        <i class="bi bi-pencil-square me-2"></i>Modified Version
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @await Html.PartialAsync("_ListingDataDisplay", Model.Current, new ViewDataDictionary(ViewData) 
+                    { 
+                        { "ShowChanges", true },
+                        { "Comparison", Model }
+                    })
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- New Listing (No Comparison) -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-success text-white border-0">
+                    <h6 class="fw-bold mb-0">
+                        <i class="bi bi-plus-circle me-2"></i>New Listing Submission
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @await Html.PartialAsync("_ListingDataDisplay", Model.Current, new ViewDataDictionary(ViewData) { { "ShowChanges", false } })
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@{
+    var changedCount = 0;
+    if (Model.IsUpdate && Model.Original != null)
+    {
+        var fields = new[] { "Title", "Description", "TransactionType", "PropertyType", "Price", 
+                           "Address", "Area", "Bedrooms", "Bathrooms", "Floors", 
+                           "LegalStatus", "FurnitureStatus", "Direction", "Media" };
+        changedCount = fields.Count(f => Model.HasChanged(f));
+    }
+}
+
+@if (Model.IsUpdate)
+{
+    <div class="alert alert-info mt-3 border-0">
+        <i class="bi bi-info-circle me-2"></i>
+        <strong>@changedCount field(s) modified</strong> in this update. Changed fields are highlighted in the modified version.
+    </div>
+}

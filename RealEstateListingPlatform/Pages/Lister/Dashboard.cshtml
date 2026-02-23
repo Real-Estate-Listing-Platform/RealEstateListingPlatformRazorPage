@@ -1,0 +1,584 @@
+@page
+@model RealEstateListingPlatform.Pages.Lister.DashboardModel
+@using BLL.DTOs
+
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "_ListerLayout";
+    var stats = Model.Stats ?? new DashboardStatsDto();
+}
+
+<div class="dashboard-container">
+    <!-- Page Header -->
+    <div class="page-header mb-4">
+        <h1 class="page-title">
+            <i class="bi bi-speedometer2 me-2"></i>Dashboard
+        </h1>
+        <p class="page-subtitle text-muted">Welcome back! Here's what's happening with your listings today.</p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <!-- Row 1: Primary Listing Metrics -->
+        <div class="col-md-3">
+            <div class="stat-card stat-card-primary">
+                <div class="stat-icon">
+                    <i class="bi bi-buildings"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-number">@stats.TotalListings</h3>
+                    <p class="stat-label">Total Listings</p>
+                    <small class="text-muted">Success Rate: @stats.PublishSuccessRate%</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="stat-card stat-card-success">
+                <div class="stat-icon">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-number">@stats.ActiveListings</h3>
+                    <p class="stat-label">Active Listings</p>
+                    <small class="text-success"><i class="bi bi-arrow-up"></i> Published</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="stat-card stat-card-warning">
+                <div class="stat-icon">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-number">@stats.PendingReview</h3>
+                    <p class="stat-label">Pending Review</p>
+                    <small class="text-warning">Awaiting approval</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="stat-card stat-card-info">
+                <div class="stat-icon">
+                    <i class="bi bi-people"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-number">@stats.TotalLeads</h3>
+                    <p class="stat-label">Total Leads</p>
+                    <span class="badge bg-danger">@stats.NewLeads New</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 2: Additional Metrics -->
+        <div class="col-md-3">
+            <div class="stat-card stat-card-secondary">
+                <div class="stat-icon">
+                    <i class="bi bi-file-earmark-text"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-number">@stats.DraftListings</h3>
+                    <p class="stat-label">Draft Listings</p>
+                    <small class="text-muted">Not yet submitted</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="stat-card stat-card-danger">
+                <div class="stat-icon">
+                    <i class="bi bi-x-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-number">@stats.ExpiredListings</h3>
+                    <p class="stat-label">Expired Listings</p>
+                    @if (stats.ExpiringListingsSoon > 0)
+                    {
+                        <small class="text-danger">@stats.ExpiringListingsSoon expiring soon</small>
+                    }
+                    else
+                    {
+                        <small class="text-muted">None expiring soon</small>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="stat-card stat-card-boost">
+                <div class="stat-icon">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-number">@stats.BoostedListings</h3>
+                    <p class="stat-label">Boosted Listings</p>
+                    <small class="text-warning"><i class="bi bi-star-fill"></i> Featured</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="stat-card stat-card-conversion">
+                <div class="stat-icon">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-number">@stats.ConversionRate%</h3>
+                    <p class="stat-label">Conversion Rate</p>
+                    <small class="text-muted">@stats.ClosedLeads closed leads</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Overview and Top Listings -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="bi bi-bar-chart me-2"></i>Performance Overview
+                    </h5>
+                    <small class="text-muted">Last 7 days</small>
+                </div>
+                <div class="card-body">
+                    <canvas id="performanceChart" height="80"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="bi bi-people-fill me-2"></i>Lead Statistics
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="revenue-item mb-4">
+                        <p class="text-muted mb-1">Total Leads</p>
+                        <h3 class="text-primary mb-2">@stats.TotalLeads</h3>
+                        <div class="progress mb-2" style="height: 8px;">
+                            <div class="progress-bar bg-success" style="width: @(stats.TotalLeads > 0 ? (stats.NewLeads * 100.0 / stats.TotalLeads) : 0)%"></div>
+                            <div class="progress-bar bg-info" style="width: @(stats.TotalLeads > 0 ? (stats.ContactedLeads * 100.0 / stats.TotalLeads) : 0)%"></div>
+                            <div class="progress-bar bg-secondary" style="width: @(stats.TotalLeads > 0 ? (stats.ClosedLeads * 100.0 / stats.TotalLeads) : 0)%"></div>
+                        </div>
+                        <div class="d-flex justify-content-between small">
+                            <span class="text-success"><i class="bi bi-circle-fill"></i> New: @stats.NewLeads</span>
+                            <span class="text-info"><i class="bi bi-circle-fill"></i> Contacted: @stats.ContactedLeads</span>
+                            <span class="text-secondary"><i class="bi bi-circle-fill"></i> Closed: @stats.ClosedLeads</span>
+                        </div>
+                    </div>
+                    <div class="revenue-item">
+                        <p class="text-muted mb-1">Conversion Rate</p>
+                        <h4 class="text-success mb-0">@stats.ConversionRate%</h4>
+                        <small class="text-muted">
+                            @stats.ClosedLeads out of @stats.TotalLeads leads
+                        </small>
+                    </div>
+                    @if (stats.LastLeadReceivedAt.HasValue)
+                    {
+                        <div class="mt-3 pt-3 border-top">
+                            <small class="text-muted">
+                                <i class="bi bi-clock"></i> Last lead received: 
+                                @{
+                                    var timeSpan = DateTime.UtcNow - stats.LastLeadReceivedAt.Value;
+                                    if (timeSpan.TotalMinutes < 60)
+                                    {
+                                        <span>@Math.Floor(timeSpan.TotalMinutes) minutes ago</span>
+                                    }
+                                    else if (timeSpan.TotalHours < 24)
+                                    {
+                                        <span>@Math.Floor(timeSpan.TotalHours) hours ago</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@Math.Floor(timeSpan.TotalDays) days ago</span>
+                                    }
+                                }
+                            </small>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Performing Listings -->
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="dashboard-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-star me-2"></i>Top Performing Listings
+                    </h5>
+                    <a asp-page="/Lister/Listings" class="btn btn-sm btn-outline-primary">View All Listings</a>
+                </div>
+                <div class="card-body">
+                    @if (stats.TopPerformingListings.Any())
+                    {
+                        <div class="top-listings">
+                            @for (int i = 0; i < stats.TopPerformingListings.Count; i++)
+                            {
+                                var listing = stats.TopPerformingListings[i];
+                                <div class="top-listing-item">
+                                    <div class="listing-rank">@(i + 1)</div>
+                                    <div class="listing-info">
+                                        <h6 class="listing-title">@listing.Title</h6>
+                                        <p class="listing-stats text-muted mb-0">
+                                            <i class="bi bi-eye"></i> @listing.ViewCount views  
+                                            <i class="bi bi-people"></i> @listing.LeadCount leads
+                                        </p>
+                                    </div>
+                                    <a asp-page="/Lister/Details" asp-route-id="@listing.Id" class="btn btn-sm btn-outline-primary">View</a>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+                            <p class="text-muted mt-3">No published listings yet</p>
+                            <a asp-page="/Lister/Create" class="btn btn-primary">Create Your First Listing</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .dashboard-container {
+        max-width: 1400px;
+    }
+
+    .page-header {
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+        font-size: 1rem;
+        margin-bottom: 0;
+    }
+
+    /* Stat Cards */
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        flex-shrink: 0;
+    }
+
+    .stat-card-primary .stat-icon {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .stat-card-success .stat-icon {
+        background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+        color: white;
+    }
+
+    .stat-card-warning .stat-icon {
+        background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%);
+        color: white;
+    }
+
+    .stat-card-info .stat-icon {
+        background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%);
+        color: white;
+    }
+
+    .stat-card-secondary .stat-icon {
+        background: linear-gradient(135deg, #8e9eab 0%, #eef2f3 100%);
+        color: #2c3e50;
+    }
+
+    .stat-card-danger .stat-icon {
+        background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+        color: white;
+    }
+
+    .stat-card-boost .stat-icon {
+        background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+        color: white;
+    }
+
+    .stat-card-conversion .stat-icon {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+    }
+
+    .stat-content {
+        flex-grow: 1;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+        color: #2c3e50;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: #7f8c8d;
+        margin-bottom: 0;
+    }
+
+    /* Dashboard Cards */
+    .dashboard-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .dashboard-card .card-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid #f0f0f0;
+        background: white;
+    }
+
+    .dashboard-card .card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .dashboard-card .card-body {
+        padding: 1.5rem;
+    }
+
+    /* Top Listings */
+    .top-listings {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .top-listing-item {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .top-listing-item:hover {
+        background: #e9ecef;
+        transform: translateX(5px);
+    }
+
+    .listing-rank {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .listing-info {
+        flex-grow: 1;
+    }
+
+    .listing-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        color: #2c3e50;
+    }
+
+    .listing-stats {
+        font-size: 0.85rem;
+        margin-bottom: 0;
+    }
+
+    .listing-stats i {
+        margin-right: 0.25rem;
+    }
+
+    /* Revenue */
+    .revenue-item {
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+</style>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Prepare chart data
+            const chartLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(stats.LeadsChartData.Select(d => d.Label)));
+            const leadsData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(stats.LeadsChartData.Select(d => d.Value)));
+            const conversionData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(stats.ConversionChartData.Select(d => d.Value)));
+            const viewsData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(stats.ViewsChartData.Select(d => d.Value)));
+
+            // Create performance chart
+            const ctx = document.getElementById('performanceChart');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartLabels,
+                    datasets: [
+                        {
+                            label: 'Leads',
+                            data: leadsData,
+                            borderColor: '#2193b0',
+                            backgroundColor: 'rgba(33, 147, 176, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Conversion Rate (%)',
+                            data: conversionData,
+                            borderColor: '#56ab2f',
+                            backgroundColor: 'rgba(86, 171, 47, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 15,
+                                font: {
+                                    size: 12,
+                                    family: "'Inter', sans-serif"
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: {
+                                size: 14
+                            },
+                            bodyFont: {
+                                size: 13
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        if (context.dataset.label === 'Conversion Rate (%)') {
+                                            label += context.parsed.y + '%';
+                                        } else {
+                                            label += context.parsed.y;
+                                        }
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Leads',
+                                font: {
+                                    size: 12,
+                                    weight: 'bold'
+                                }
+                            },
+                            ticks: {
+                                precision: 0
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Conversion Rate (%)',
+                                font: {
+                                    size: 12,
+                                    weight: 'bold'
+                                }
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            },
+                            grid: {
+                                drawOnChartArea: false,
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}

@@ -1,0 +1,202 @@
+@page "{id:guid}"
+@model RealEstateListingPlatform.Pages.Package.PurchaseModel
+
+@{
+    ViewData["Title"] = "Purchase Package";
+    Layout = "_ListerLayout";
+}
+
+<div class="container py-5">
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-cart-check"></i> Confirm Purchase</h4>
+            </div>
+            <div class="card-body p-4">
+                @if (Model.PackageData != null)
+                {
+                    <!-- Package Details -->
+                    <div class="text-center mb-4">
+                        @switch (Model.PackageData.PackageType)
+                        {
+                            case "ADDITIONAL_LISTING":
+                                <i class="bi bi-plus-circle-fill text-primary display-3"></i>
+                                break;
+                            case "PHOTO_PACK":
+                                <i class="bi bi-images text-success display-3"></i>
+                                break;
+                            case "VIDEO_UPLOAD":
+                                <i class="bi bi-camera-video-fill text-info display-3"></i>
+                                break;
+                            case "BOOST_LISTING":
+                                <i class="bi bi-rocket-fill text-warning display-3"></i>
+                                break;
+                            default:
+                                <i class="bi bi-box-seam text-secondary display-3"></i>
+                                break;
+                        }
+                        <h3 class="fw-bold mt-3">@Model.PackageData.Name</h3>
+                        <p class="text-muted">@Model.PackageData.Description</p>
+                    </div>
+
+                    <!-- Package Features -->
+                    <div class="bg-light p-3 rounded mb-4">
+                        <h6 class="fw-bold mb-3">Package Includes:</h6>
+                        <ul class="list-unstyled mb-0">
+                            @if (Model.PackageData.ListingCount.HasValue && Model.PackageData.ListingCount > 0)
+                            {
+                                <li class="mb-2">
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    @Model.PackageData.ListingCount additional listing@(Model.PackageData.ListingCount > 1 ? "s" : "")
+                                </li>
+                            }
+                            @if (Model.PackageData.PhotoLimit.HasValue && Model.PackageData.PhotoLimit > 0)
+                            {
+                                <li class="mb-2">
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    +@Model.PackageData.PhotoLimit extra photos
+                                </li>
+                            }
+                            @if (Model.PackageData.AllowVideo)
+                            {
+                                <li class="mb-2">
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    Video upload capability
+                                </li>
+                            }
+                            @if (Model.PackageData.BoostDays.HasValue && Model.PackageData.BoostDays > 0)
+                            {
+                                <li class="mb-2">
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    Boost listing for @Model.PackageData.BoostDays days
+                                </li>
+                            }
+                            @if (Model.PackageData.DurationDays.HasValue && Model.PackageData.DurationDays > 0)
+                            {
+                                <li class="mb-2">
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    Valid for @Model.PackageData.DurationDays days
+                                </li>
+                            }
+                        </ul>
+                    </div>
+
+                    <!-- Price -->
+                    <div class="border-top border-bottom py-3 mb-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Total Price:</h5>
+                            <h3 class="text-primary fw-bold mb-0">@Model.PackageData.Price.ToString("N0") VND</h3>
+                        </div>
+                    </div>
+
+                    <!-- Purchase Form -->
+                    <form method="post">
+                        <input type="hidden" asp-for="PackageId" value="@Model.PackageData.Id" />
+                        <input type="hidden" asp-for="PaymentMethod" value="Transfer" />
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-credit-card-fill text-primary me-2"></i>Payment Methods
+                            </label>
+                            <div class="payment-gateway-info p-3 bg-light rounded">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1 fw-bold text-primary">
+                                            <i class="bi bi-shield-check-fill me-2"></i>PayOS
+                                        </h6>
+                                        <p class="mb-0 small text-muted">
+                                            Secure payment with multiple methods: QR Code, Credit Card, Bank Transfer
+                                        </p>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-lock-fill"></i> Secure
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="mt-3 pt-3 border-top">
+                                    <div class="row g-2 text-center">
+                                        <div class="col-3">
+                                            <i class="bi bi-qr-code fs-4 text-primary"></i>
+                                            <div class="small text-muted">QR Code</div>
+                                        </div>
+                                        <div class="col-3">
+                                            <i class="bi bi-credit-card fs-4 text-primary"></i>
+                                            <div class="small text-muted">Card</div>
+                                        </div>
+                                        <div class="col-3">
+                                            <i class="bi bi-bank fs-4 text-primary"></i>
+                                            <div class="small text-muted">Banking</div>
+                                        </div>
+                                        <div class="col-3">
+                                            <i class="bi bi-phone fs-4 text-primary"></i>
+                                            <div class="small text-muted">E-Wallet</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="notes" class="form-label">Notes (Optional)</label>
+                            <textarea class="form-control" asp-for="Notes" rows="2" 
+                                      placeholder="Add any special notes or instructions"></textarea>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            <strong>How it works:</strong>
+                            <ol class="mb-0 mt-2 ps-3">
+                                <li>Click "Proceed to Secure Payment" below</li>
+                                <li>You'll be redirected to payment page</li>
+                                <li>Complete payment using your preferred method</li>
+                                <li>Package will be activated automatically after successful payment</li>
+                            </ol>
+                        </div>
+
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="terms" required>
+                            <label class="form-check-label" for="terms">
+                                I agree to the <a href="#" class="text-primary">terms and conditions</a> and 
+                                <a href="#" class="text-primary">refund policy</a>
+                            </label>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg py-3">
+                                <i class="bi bi-shield-lock-fill"></i> Proceed to Secure Payment
+                            </button>
+                            <a href="@Url.Page("/Package/Index")" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Back to Packages
+                            </a>
+                        </div>
+                    </form>
+                }
+            </div>
+        </div>
+
+        <!-- Security Notice -->
+        <div class="text-center mt-3">
+            <small class="text-muted">
+                <i class="bi bi-shield-check text-success"></i>
+                Powered by <strong>PayOS</strong> - Your payment is secure and encrypted
+            </small>
+        </div>
+    </div>
+</div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        .payment-gateway-info {
+            border: 2px solid #0d6efd;
+            transition: all 0.3s ease;
+        }
+
+        .payment-gateway-info:hover {
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
+        }
+    </style>
+}
