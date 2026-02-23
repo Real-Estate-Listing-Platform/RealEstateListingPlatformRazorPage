@@ -1,0 +1,67 @@
+@{
+    var section = (ViewData["Section"] as string) ?? string.Empty;
+    var pendingCount = ViewData["PendingCount"] is int count ? count : 0;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - RealEstateListingPlatform</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/RealEstateListingPlatform.styles.css" asp-append-version="true" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/css/admin-portal.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="admin-body">
+    <main role="main" class="admin-layout">
+        <div class="admin-shell">
+            <aside class="admin-sidebar">
+                <div class="admin-brand">
+                    <div class="admin-brand-icon">EA</div>
+                    <div>
+                        <h4>Estately</h4>
+                        <div class="admin-pill">Admin Portal</div>
+                    </div>
+                </div>
+
+                <nav class="admin-nav">
+                    <a class="admin-nav-link @((string.IsNullOrWhiteSpace(section) || section == "dashboard") ? "active" : string.Empty)" asp-page="/Admin/Dashboard">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                    <a class="admin-nav-link @(section == "listings" ? "active" : string.Empty)" asp-page="/Admin/Listings">
+                        <i class="bi bi-house-check"></i> Listings
+                    </a>
+                    <a class="admin-nav-link @(section == "logs" ? "active" : string.Empty)" asp-page="/Admin/Logs">
+                        <i class="bi bi-journal-text"></i> Logs
+                    </a>
+                    <a class="admin-nav-link @(section == "users" ? "active" : string.Empty)" asp-page="/Admin/Users">
+                        <i class="bi bi-people"></i> Users
+                    </a>
+                </nav>
+
+                <div class="admin-sidecard">
+                    <div class="fw-semibold">Pending approvals</div>
+                    <div class="display-6 fw-bold">@pendingCount</div>
+                    <div class="small text-light">Updated @DateTime.Now.ToString("MMM dd, HH:mm")</div>
+                </div>
+            </aside>
+
+            <div class="admin-main">
+                @RenderBody()
+            </div>
+        </div>
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

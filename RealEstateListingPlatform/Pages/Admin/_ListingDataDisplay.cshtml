@@ -1,0 +1,122 @@
+@model RealEstateListingPlatform.Models.ListingDataViewModel
+
+@{
+    var showChanges = ViewData["ShowChanges"] as bool? ?? false;
+    var comparison = ViewData["Comparison"] as RealEstateListingPlatform.Models.ListingComparisonViewModel;
+    
+    string GetHighlightClass(string fieldName)
+    {
+        if (!showChanges || comparison == null) return "";
+        return comparison.HasChanged(fieldName) ? "bg-warning bg-opacity-10 border-start border-warning border-3 ps-3" : "";
+    }
+}
+
+<!-- Title -->
+<div class="mb-3 @GetHighlightClass("Title")">
+    <label class="text-muted small fw-bold mb-1">Title</label>
+    <div class="fw-bold">@Model.Title</div>
+</div>
+
+<!-- Price -->
+<div class="mb-3 @GetHighlightClass("Price")">
+    <label class="text-muted small fw-bold mb-1">Price</label>
+    <div class="fw-bold text-primary">@Model.FormattedPrice</div>
+</div>
+
+<!-- Transaction & Property Type -->
+<div class="row mb-3">
+    <div class="col-6 @GetHighlightClass("TransactionType")">
+        <label class="text-muted small fw-bold mb-1">Transaction Type</label>
+        <div><span class="badge bg-primary">@Model.TransactionType</span></div>
+    </div>
+    <div class="col-6 @GetHighlightClass("PropertyType")">
+        <label class="text-muted small fw-bold mb-1">Property Type</label>
+        <div><span class="badge bg-secondary">@Model.PropertyType</span></div>
+    </div>
+</div>
+
+<!-- Address -->
+<div class="mb-3 @GetHighlightClass("Address")">
+    <label class="text-muted small fw-bold mb-1">Address</label>
+    <div><i class="bi bi-geo-alt me-1"></i>@Model.FormattedAddress</div>
+</div>
+
+<!-- Property Details -->
+<div class="row mb-3 text-center g-2">
+    <div class="col-6 col-md-3">
+        <div class="p-2 bg-light rounded @GetHighlightClass("Area")">
+            <i class="bi bi-rulers d-block mb-1 text-primary"></i>
+            <small class="text-muted d-block">Area</small>
+            <span class="fw-bold small">@Model.Area m²</span>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="p-2 bg-light rounded @GetHighlightClass("Bedrooms")">
+            <i class="bi bi-door-closed d-block mb-1 text-primary"></i>
+            <small class="text-muted d-block">Beds</small>
+            <span class="fw-bold small">@Model.Bedrooms</span>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="p-2 bg-light rounded @GetHighlightClass("Bathrooms")">
+            <i class="bi bi-droplet d-block mb-1 text-primary"></i>
+            <small class="text-muted d-block">Baths</small>
+            <span class="fw-bold small">@Model.Bathrooms</span>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="p-2 bg-light rounded @GetHighlightClass("Floors")">
+            <i class="bi bi-layers d-block mb-1 text-primary"></i>
+            <small class="text-muted d-block">Floors</small>
+            <span class="fw-bold small">@Model.Floors</span>
+        </div>
+    </div>
+</div>
+
+<!-- Additional Details -->
+<div class="row mb-3">
+    <div class="col-md-4 mb-2 @GetHighlightClass("LegalStatus")">
+        <label class="text-muted small fw-bold d-block">Legal Status</label>
+        <span class="small">@Model.LegalStatus</span>
+    </div>
+    <div class="col-md-4 mb-2 @GetHighlightClass("FurnitureStatus")">
+        <label class="text-muted small fw-bold d-block">Furniture</label>
+        <span class="small">@Model.FurnitureStatus</span>
+    </div>
+    <div class="col-md-4 mb-2 @GetHighlightClass("Direction")">
+        <label class="text-muted small fw-bold d-block">Direction</label>
+        <span class="small">@Model.Direction</span>
+    </div>
+</div>
+
+<!-- Description -->
+<div class="mb-3 @GetHighlightClass("Description")">
+    <label class="text-muted small fw-bold mb-1">Description</label>
+    <div class="small" style="white-space: pre-line;">@Model.Description</div>
+</div>
+
+<!-- Media -->
+<div class="@GetHighlightClass("Media")">
+    <label class="text-muted small fw-bold mb-2 d-block">Media (@Model.MediaUrls.Count)</label>
+    @if (Model.MediaUrls.Any())
+    {
+        <div class="row g-2">
+            @foreach (var url in Model.MediaUrls.Take(6))
+            {
+                <div class="col-6 col-md-4">
+                    <div class="ratio ratio-16x9">
+                        <img src="@url" class="rounded object-fit-cover" alt="Listing media" />
+                    </div>
+                </div>
+            }
+        </div>
+        @if (Model.MediaUrls.Count > 6)
+        {
+            <small class="text-muted">+@(Model.MediaUrls.Count - 6) more images</small>
+        }
+    }
+    else
+    {
+        <p class="text-muted small">No images uploaded</p>
+    }
+</div>

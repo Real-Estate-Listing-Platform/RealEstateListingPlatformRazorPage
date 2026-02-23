@@ -1,0 +1,794 @@
+@page
+@model RealEstateListingPlatform.Pages.Lister.ListingsModel
+@using BLL.DTOs
+@using BLL.DTOs
+
+@{
+    ViewData["Title"] = "Listings";
+    Layout = "_ListerLayout";
+}
+
+<div class="listings-container">
+    <!-- Page Header -->
+    <div class="page-header mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="page-title">
+                    <i class="bi bi-buildings me-2"></i>Listings Management
+                </h1>
+                <p class="page-subtitle text-muted">Manage all your property listings</p>
+            </div>
+            <a asp-controller="Lister" asp-action="Create" class="btn btn-primary btn-lg">
+                <i class="bi bi-plus-circle me-2"></i>Create New Listing
+            </a>
+        </div>
+    </div>
+
+    @if (ViewBag.SuccessMessage != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @Model.SuccessMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @Model.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (ViewBag.WarningMessage != null || TempData["Warning"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            @(ViewBag.WarningMessage ?? TempData["Warning"])
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Filter and Search -->
+    <div class="filter-section mb-4">
+        <form asp-controller="Lister" asp-action="Listings" method="get">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" name="searchTerm" class="form-control" placeholder="Search by title, location..." 
+                               value="@Model.SearchTerm">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <select name="status" class="form-select">
+                        <option value="">All Status</option>
+                        <option value="Published" selected="@(ViewBag.CurrentStatus == "Published")">Published</option>
+                        <option value="Draft" selected="@(ViewBag.CurrentStatus == "Draft")">Draft</option>
+                        <option value="PendingReview" selected="@(ViewBag.CurrentStatus == "PendingReview")">Pending Review</option>
+                        <option value="Rejected" selected="@(ViewBag.CurrentStatus == "Rejected")">Rejected</option>
+                        <option value="Expired" selected="@(ViewBag.CurrentStatus == "Expired")">Expired</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="transactionType" class="form-select">
+                        <option value="">All Types</option>
+                        <option value="Sell" selected="@(ViewBag.CurrentTransactionType == "Sell")">For Sale</option>
+                        <option value="Rent" selected="@(ViewBag.CurrentTransactionType == "Rent")">For Rent</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="propertyType" class="form-select">
+                        <option value="">All Properties</option>
+                        <option value="Apartment" selected="@(ViewBag.CurrentPropertyType == "Apartment")">Apartment</option>
+                        <option value="House" selected="@(ViewBag.CurrentPropertyType == "House")">House</option>
+                        <option value="Villa" selected="@(ViewBag.CurrentPropertyType == "Villa")">Villa</option>
+                        <option value="Land" selected="@(ViewBag.CurrentPropertyType == "Land")">Land</option>
+                        <option value="Commercial" selected="@(ViewBag.CurrentPropertyType == "Commercial")">Commercial</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="sortBy" class="form-select" id="sortBySelect">
+                        <option value="CreatedAt" selected="@(ViewBag.CurrentSortBy == "CreatedAt" || ViewBag.CurrentSortBy == null)">Date Created</option>
+                        <option value="UpdatedAt" selected="@(ViewBag.CurrentSortBy == "UpdatedAt")">Date Updated</option>
+                        <option value="Price" selected="@(ViewBag.CurrentSortBy == "Price")">Price</option>
+                        <option value="Title" selected="@(ViewBag.CurrentSortBy == "Title")">Title</option>
+                        <option value="Status" selected="@(ViewBag.CurrentSortBy == "Status")">Status</option>
+                    </select>
+                    <input type="hidden" name="sortOrder" id="sortOrderInput" value="@(ViewBag.CurrentSortOrder ?? "desc")" />
+                </div>
+            </div>
+            <div class="row g-3 mt-2">
+                <div class="col-md-3">
+                    <input type="number" name="minPrice" class="form-control" placeholder="Min Price" 
+                           value="@Model.MinPrice" step="1000000">
+                </div>
+                <div class="col-md-3">
+                    <input type="number" name="maxPrice" class="form-control" placeholder="Max Price" 
+                           value="@Model.MaxPrice" step="1000000">
+                </div>
+                <div class="col-md-2">
+                    <input type="number" name="pageSize" class="form-control" placeholder="Per Page" 
+                           value="@Model.Listings.PageSize" min="5" max="50">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-funnel me-2"></i>Apply Filters
+                    </button>
+                </div>
+                <div class="col-md-2">
+                    <a asp-controller="Lister" asp-action="Listings" class="btn btn-outline-secondary w-100">
+                        <i class="bi bi-x-circle me-2"></i>Reset
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Statistics Summary -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="mini-stat-card">
+                <div class="stat-value">@Model.Listings.TotalCount</div>
+                <div class="stat-label">Total</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="mini-stat-card">
+                <div class="stat-value">@Model.Listings.Items.Count(l => l.Status == "Published")</div>
+                <div class="stat-label">Published</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="mini-stat-card">
+                <div class="stat-value">@Model.Listings.Items.Count(l => l.Status == "Draft")</div>
+                <div class="stat-label">Drafts</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="mini-stat-card">
+                <div class="stat-value">@Model.Listings.Items.Count(l => l.Status == "PendingReview")</div>
+                <div class="stat-label">Pending</div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model == null || Model.Items.Count == 0)
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>You have not created any listings yet. 
+            <a asp-controller="Listings" asp-action="Create" class="alert-link">Create your first listing</a>
+        </div>
+    }
+    else
+    {
+        <!-- Listings Table -->
+        <div class="listings-table-card">
+        <form asp-controller="Lister" asp-action="Listings" method="get" id="sortForm">
+            <input type="hidden" name="searchTerm" value="@Model.SearchTerm" />
+            <input type="hidden" name="status" value="@Model.Status" />
+            <input type="hidden" name="transactionType" value="@Model.TransactionType" />
+            <input type="hidden" name="propertyType" value="@Model.PropertyType" />
+            <input type="hidden" name="city" value="@Model.City" />
+            <input type="hidden" name="district" value="@Model.District" />
+            <input type="hidden" name="minPrice" value="@Model.MinPrice" />
+            <input type="hidden" name="maxPrice" value="@Model.MaxPrice" />
+            <input type="hidden" name="sortBy" id="sortByHidden" value="@(ViewBag.CurrentSortBy ?? "CreatedAt")" />
+            <input type="hidden" name="sortOrder" id="sortOrderHidden" value="@(ViewBag.CurrentSortOrder ?? "desc")" />
+            <input type="hidden" name="pageSize" value="@Model.Listings.PageSize" />
+            <input type="hidden" name="pageNumber" id="pageNumberHidden" value="@Model.Listings.PageNumber" />
+        <div class="table-responsive">
+            <table class="table table-hover listings-table">
+                <thead>
+                    <tr>
+                        <th data-sort="Title">
+                            Property 
+                            @if (ViewBag.CurrentSortBy == "Title")
+                            {
+                                <i class="bi bi-@(ViewBag.CurrentSortOrder == "asc" ? "sort-up" : "sort-down")"></i>
+                            }
+                        </th>
+                        <th>Type</th>
+                        <th data-sort="Price">
+                            Price 
+                            @if (ViewBag.CurrentSortBy == "Price")
+                            {
+                                <i class="bi bi-@(ViewBag.CurrentSortOrder == "asc" ? "sort-up" : "sort-down")"></i>
+                            }
+                        </th>
+                        <th>Location</th>
+                        <th>Boost</th>
+                        <th data-sort="Status">
+                            Status 
+                            @if (ViewBag.CurrentSortBy == "Status")
+                            {
+                                <i class="bi bi-@(ViewBag.CurrentSortOrder == "asc" ? "sort-up" : "sort-down")"></i>
+                            }
+                        </th>
+                        <th data-sort="CreatedAt">
+                            Created 
+                            @if (ViewBag.CurrentSortBy == "CreatedAt" || ViewBag.CurrentSortBy == null)
+                            {
+                                <i class="bi bi-@(ViewBag.CurrentSortOrder == "asc" ? "sort-up" : "sort-down")"></i>
+                            }
+                        </th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var listing in Model.Items)
+                    {
+                        <tr>
+                            <td>
+                                <div class="property-info">
+                                    <div class="property-image">
+                                        <i class="bi bi-building"></i>
+                                    </div>
+                                    <div class="property-details">
+                                        <h6 class="property-title">@listing.Title</h6>
+                                        <span class="property-type-badge">@(listing.PropertyType ?? "N/A")</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                @if (listing.TransactionType == "Sell")
+                                {
+                                    <span class="badge bg-primary">For Sale</span>
+                                }
+                                else if (listing.TransactionType == "Rent")
+                                {
+                                    <span class="badge bg-info">For Rent</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">@listing.TransactionType</span>
+                                }
+                            </td>
+                            <td class="fw-bold text-success">
+                                @listing.Price.ToString("N0") <span class="text-muted small">VND</span>
+                            </td>
+                            <td>
+                                <small class="text-muted">
+                                    <i class="bi bi-geo-alt"></i> 
+                                    @if (!string.IsNullOrEmpty(listing.District) && !string.IsNullOrEmpty(listing.City))
+                                    {
+                                        <text>@listing.District, @listing.City</text>
+                                    }
+                                    else if (!string.IsNullOrEmpty(listing.City))
+                                    {
+                                        <text>@listing.City</text>
+                                    }
+                                    else
+                                    {
+                                        <span>No location</span>
+                                    }
+                                </small>
+                            </td>
+                            <td class="text-center">
+                                @if (listing.IsBoosted)
+                                {
+                                    <span class="badge bg-warning text-dark" title="Boosted">
+                                        <i class="bi bi-rocket-fill"></i> Boosted
+                                    </span>
+                                }
+                                else if (listing.Status == "Published")
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-warning" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#boostModal-@listing.Id" 
+                                            title="Boost this listing">
+                                        <i class="bi bi-rocket"></i>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small" title="Only published listings can be boosted">
+                                        <i class="bi bi-dash-circle"></i>
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                <partial name="_StatusBadge" model="@(listing.Status ?? "Draft")" />
+                            </td>
+                            <td>
+                                <small class="text-muted">
+                                    @(listing.CreatedAt?.ToString("MMM dd, yyyy") ?? "N/A")
+                                </small>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a asp-controller="Lister" asp-action="Edit" asp-route-id="@listing.Id" 
+                                       class="btn btn-sm btn-outline-primary" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a asp-controller="Lister" asp-action="Details" asp-route-id="@listing.Id" 
+                                       class="btn btn-sm btn-outline-info" title="View">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" title="Delete"
+                                            data-bs-toggle="modal" data-bs-target="#deleteModal" 
+                                            data-listing-id="@listing.Id" data-listing-title="@listing.Title">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        </form>
+
+        <!-- Pagination -->
+        <div class="table-footer">
+            <div class="pagination-info">
+                @if (Model.TotalCount > 0)
+                {
+                    <text>Showing @Model.Listings.StartIndex to @Model.Listings.EndIndex of @Model.Listings.TotalCount entries</text>
+                }
+                else
+                {
+                    <text>No entries found</text>
+                }
+            </div>
+            @if (Model.TotalPages > 1)
+            {
+                <nav>
+                    <ul class="pagination mb-0">
+                        <li class="page-item @(!Model.HasPrevious ? "disabled" : "")">
+                            <a class="page-link" 
+                               href="@Url.Action("Listings", new { 
+                                   searchTerm = ViewBag.CurrentSearch, 
+                                   status = ViewBag.CurrentStatus, 
+                                   transactionType = ViewBag.CurrentTransactionType,
+                                   propertyType = ViewBag.CurrentPropertyType,
+                                   city = ViewBag.CurrentCity,
+                                   district = ViewBag.CurrentDistrict,
+                                   minPrice = ViewBag.CurrentMinPrice,
+                                   maxPrice = ViewBag.CurrentMaxPrice,
+                                   sortBy = ViewBag.CurrentSortBy,
+                                   sortOrder = ViewBag.CurrentSortOrder,
+                                   pageNumber = Model.PageNumber - 1, 
+                                   pageSize = Model.PageSize 
+                               })"
+                               tabindex="-1">Previous</a>
+                        </li>
+
+                        @{
+                            int startPage = Math.Max(1, Model.PageNumber - 2);
+                            int endPage = Math.Min(Model.TotalPages, Model.PageNumber + 2);
+                            
+                            if (startPage > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" 
+                                       href="@Url.Action("Listings", new { 
+                                           searchTerm = ViewBag.CurrentSearch, 
+                                           status = ViewBag.CurrentStatus, 
+                                           transactionType = ViewBag.CurrentTransactionType,
+                                           propertyType = ViewBag.CurrentPropertyType,
+                                           city = ViewBag.CurrentCity,
+                                           district = ViewBag.CurrentDistrict,
+                                           minPrice = ViewBag.CurrentMinPrice,
+                                           maxPrice = ViewBag.CurrentMaxPrice,
+                                           sortBy = ViewBag.CurrentSortBy,
+                                           sortOrder = ViewBag.CurrentSortOrder,
+                                           pageNumber = 1, 
+                                           pageSize = Model.PageSize 
+                                       })">1</a>
+                                </li>
+                                if (startPage > 2)
+                                {
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                }
+                            }
+
+                            for (int i = startPage; i <= endPage; i++)
+                            {
+                                <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                                    <a class="page-link" 
+                                       href="@Url.Action("Listings", new { 
+                                           searchTerm = ViewBag.CurrentSearch, 
+                                           status = ViewBag.CurrentStatus, 
+                                           transactionType = ViewBag.CurrentTransactionType,
+                                           propertyType = ViewBag.CurrentPropertyType,
+                                           city = ViewBag.CurrentCity,
+                                           district = ViewBag.CurrentDistrict,
+                                           minPrice = ViewBag.CurrentMinPrice,
+                                           maxPrice = ViewBag.CurrentMaxPrice,
+                                           sortBy = ViewBag.CurrentSortBy,
+                                           sortOrder = ViewBag.CurrentSortOrder,
+                                           pageNumber = i, 
+                                           pageSize = Model.PageSize 
+                                       })">@i</a>
+                                </li>
+                            }
+
+                            if (endPage < Model.TotalPages)
+                            {
+                                if (endPage < Model.TotalPages - 1)
+                                {
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                }
+                                <li class="page-item">
+                                    <a class="page-link" 
+                                       href="@Url.Action("Listings", new { 
+                                           searchTerm = ViewBag.CurrentSearch, 
+                                           status = ViewBag.CurrentStatus, 
+                                           transactionType = ViewBag.CurrentTransactionType,
+                                           propertyType = ViewBag.CurrentPropertyType,
+                                           city = ViewBag.CurrentCity,
+                                           district = ViewBag.CurrentDistrict,
+                                           minPrice = ViewBag.CurrentMinPrice,
+                                           maxPrice = ViewBag.CurrentMaxPrice,
+                                           sortBy = ViewBag.CurrentSortBy,
+                                           sortOrder = ViewBag.CurrentSortOrder,
+                                           pageNumber = Model.TotalPages, 
+                                           pageSize = Model.PageSize 
+                                       })">@Model.Listings.TotalPages</a>
+                                </li>
+                            }
+                        }
+
+                        <li class="page-item @(!Model.HasNext ? "disabled" : "")">
+                            <a class="page-link" 
+                               href="@Url.Action("Listings", new { 
+                                   searchTerm = ViewBag.CurrentSearch, 
+                                   status = ViewBag.CurrentStatus, 
+                                   transactionType = ViewBag.CurrentTransactionType,
+                                   propertyType = ViewBag.CurrentPropertyType,
+                                   city = ViewBag.CurrentCity,
+                                   district = ViewBag.CurrentDistrict,
+                                   minPrice = ViewBag.CurrentMinPrice,
+                                   maxPrice = ViewBag.CurrentMaxPrice,
+                                   sortBy = ViewBag.CurrentSortBy,
+                                   sortOrder = ViewBag.CurrentSortOrder,
+                                   pageNumber = Model.PageNumber + 1, 
+                                   pageSize = Model.PageSize 
+                               })">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            }
+        </div>
+    </div>
+    }
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Delete Listing
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-3">Are you sure you want to delete "<strong id="listingTitleToDelete"></strong>" permanently?</p>
+                <div class="alert alert-warning mb-0">
+                    <i class="bi bi-exclamation-circle me-2"></i>
+                    <strong>Warning:</strong> This action cannot be undone. All data and media associated with this listing will be permanently removed.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-2"></i>Cancel
+                </button>
+                <form id="deleteForm" asp-controller="Lister" asp-action="Delete" method="post" class="d-inline">
+                    <input type="hidden" id="listingIdToDelete" name="id" value="" />
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-2"></i>Yes, Delete It
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Handle delete modal
+        const deleteModal = document.getElementById('deleteModal');
+        deleteModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const listingId = button.getAttribute('data-listing-id');
+            const listingTitle = button.getAttribute('data-listing-title');
+            
+            document.getElementById('listingIdToDelete').value = listingId;
+            document.getElementById('listingTitleToDelete').textContent = listingTitle;
+        });
+
+        // Handle table header sorting
+        document.querySelectorAll('th[data-sort]').forEach(header => {
+            header.style.cursor = 'pointer';
+            header.addEventListener('click', function() {
+                const sortField = this.getAttribute('data-sort');
+                const sortByHidden = document.getElementById('sortByHidden');
+                const sortOrderHidden = document.getElementById('sortOrderHidden');
+                const sortForm = document.getElementById('sortForm');
+                
+                // Toggle order if clicking same field, otherwise default to desc
+                if (sortByHidden.value === sortField) {
+                    sortOrderHidden.value = sortOrderHidden.value === 'desc' ? 'asc' : 'desc';
+                } else {
+                    sortByHidden.value = sortField;
+                    sortOrderHidden.value = 'desc';
+                }
+                
+                // Reset to page 1 when sorting changes
+                document.getElementById('pageNumberHidden').value = '1';
+                
+                // Submit the form
+                sortForm.submit();
+            });
+        });
+    </script>
+}
+
+<style>
+    .listings-container {
+        max-width: 1400px;
+    }
+
+    /* Filter Section */
+    .filter-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    /* Mini Stat Cards */
+    .mini-stat-card {
+        background: white;
+        padding: 1.25rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        text-align: center;
+        transition: transform 0.3s ease;
+    }
+
+    .mini-stat-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .mini-stat-card .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    .mini-stat-card .stat-label {
+        font-size: 0.9rem;
+        color: #7f8c8d;
+        margin-top: 0.25rem;
+    }
+
+    /* Listings Table Card */
+    .listings-table-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+    .listings-table {
+        margin-bottom: 0;
+    }
+
+    .listings-table thead {
+        background: #f8f9fa;
+    }
+
+    .listings-table thead th {
+        border-bottom: 2px solid #dee2e6;
+        font-weight: 600;
+        color: #2c3e50;
+        padding: 1rem;
+        white-space: nowrap;
+    }
+
+    .listings-table thead th[data-sort] {
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 0.2s ease;
+    }
+
+    .listings-table thead th[data-sort]:hover {
+        background-color: #e9ecef;
+    }
+
+    .listings-table thead th i {
+        font-size: 0.8rem;
+        margin-left: 0.25rem;
+    }
+
+    .listings-table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+
+    .listings-table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .listings-table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    /* Property Info */
+    .property-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .property-image {
+        width: 50px;
+        height: 50px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .property-details {
+        flex-grow: 1;
+    }
+
+    .property-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        color: #2c3e50;
+    }
+
+    .property-type-badge {
+        font-size: 0.75rem;
+        color: #7f8c8d;
+        background: #f0f0f0;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+    }
+
+    /* Performance Stats */
+    .performance-stats {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .stat-item {
+        font-size: 0.85rem;
+        white-space: nowrap;
+    }
+
+    .stat-item i {
+        margin-right: 0.25rem;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .action-buttons .btn {
+        padding: 0.375rem 0.625rem;
+    }
+
+    /* Table Footer */
+    .table-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        border-top: 1px solid #dee2e6;
+        background: #f8f9fa;
+    }
+
+    .pagination-info {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .property-info {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .table-footer {
+            flex-direction: column;
+            gap: 1rem;
+        }
+    }
+</style>
+
+@* Boost Listing Modal - Only for Published Listings *@
+@foreach (var listing in Model.Items.Where(l => l.Status == "Published"))
+{
+    <div class="modal fade" id="boostModal-@listing.Id" tabindex="-1" aria-labelledby="boostModalLabel-@listing.Id" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="boostModalLabel-@listing.Id">
+                        <i class="bi bi-rocket-fill text-warning me-2"></i>Boost Listing
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form asp-controller="Lister" asp-action="BoostListing" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="listingId" value="@listing.Id" />
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <h6 class="fw-bold">@listing.Title</h6>
+                            <p class="text-muted small mb-3">
+                                <i class="bi bi-geo-alt"></i> 
+                                @if (!string.IsNullOrEmpty(listing.District) && !string.IsNullOrEmpty(listing.City))
+                                {
+                                    <text>@listing.District, @listing.City</text>
+                                }
+                            </p>
+                        </div>
+
+                        @if (Model.BoostPackages != null && ((List<UserPackageDto>)Model.BoostPackages).Any())
+                        {
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Select Boost Package</label>
+                                <select name="userPackageId" class="form-select" required>
+                                    <option value="">Choose a package...</option>
+                                    @foreach (var package in (List<UserPackageDto>)Model.BoostPackages)
+                                    {
+                                        <option value="@package.Id">
+                                            @package.Package.Name - @package.Package.BoostDays days
+                                            @if (package.ExpiresAt.HasValue)
+                                            {
+                                                <text>(Expires: @package.ExpiresAt.Value.ToString("MMM dd, yyyy"))</text>
+                                            }
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="alert alert-info small mb-0">
+                                <i class="bi bi-info-circle me-1"></i>
+                                <strong>How it works:</strong> Your listing will appear at the top of search results for the selected boost duration.
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning mb-0">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                <p class="mb-2">You don't have any active boost packages.</p>
+                                <a href="@Url.Page("/Package/Index", new { type = "BOOST_LISTING" })" class="btn btn-sm btn-warning">
+                                    <i class="bi bi-cart me-1"></i>Purchase Boost Package
+                                </a>
+                            </div>
+                        }
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        @if (Model.BoostPackages != null && ((List<UserPackageDto>)Model.BoostPackages).Any())
+                        {
+                            <button type="submit" class="btn btn-warning rounded-pill px-4">
+                                <i class="bi bi-rocket-fill me-1"></i>Boost Now
+                            </button>
+                        }
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+

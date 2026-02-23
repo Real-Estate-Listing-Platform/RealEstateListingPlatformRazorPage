@@ -1,0 +1,1028 @@
+@page "{id:guid}"
+@model RealEstateListingPlatform.Pages.Lister.DetailsModel
+
+@{
+    ViewData["Title"] = "Listing Details";
+    Layout = "_ListerLayout";
+}
+
+<div class="listing-details-container">
+    <!-- Page Header -->
+    <div class="page-header mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1 class="page-title mb-2">@Model.Listing.Title</h1>
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <partial name="_StatusBadge" model="@(Model.Listing.Status ?? "Draft")" />
+                    <span class="text-muted">
+                        <i class="bi bi-calendar me-1"></i>
+                        Listed on @(Model.Listing.CreatedAt?.ToString("MMMM dd, yyyy") ?? "N/A")
+                    </span>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <a asp-page="/Lister/Listings" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Back
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Media Gallery -->
+            @if (Model.Listing.ListingMedia != null && Model.Listing.ListingMedia.Any())
+            {
+                <div class="details-card mb-4">
+                    <div class="media-gallery">
+                        <div id="mediaCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-indicators">
+                                @for (int i = 0; i < Model.Listing.ListingMedia.Count; i++)
+                                {
+                                    <button type="button" data-bs-target="#mediaCarousel" data-bs-slide-to="@i" 
+                                            class="@(i == 0 ? "active" : "")" aria-current="@(i == 0 ? "true" : "false")" 
+                                            aria-label="Slide @(i + 1)"></button>
+                                }
+                            </div>
+                            <div class="carousel-inner">
+                                @foreach (var (media, index) in Model.Listing.ListingMedia.Select((m, i) => (m, i)))
+                                {
+                                    <div class="carousel-item @(index == 0 ? "active" : "")">
+                                        @if (media.MediaType == "image")
+                                        {
+                                            <img src="@media.Url" class="d-block w-100 clickable-image" alt="Property image @(index + 1)" 
+                                                 data-image-url="@media.Url" data-image-index="@index" style="cursor: pointer;">
+                                        }
+                                        else if (media.MediaType == "video")
+                                        {
+                                            <video src="@media.Url" class="d-block w-100" controls></video>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#mediaCarousel" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#mediaCarousel" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Thumbnail Grid -->
+                    <div class="thumbnail-grid mt-3 px-3 pb-3">
+                        <div class="row g-2">
+                            @foreach (var (media, index) in Model.Listing.ListingMedia.Where(m => m.MediaType == "image").Select((m, i) => (m, i)))
+                            {
+                                <div class="col-2">
+                                    <img src="@media.Url" class="img-thumbnail clickable-thumbnail" alt="Thumbnail @(index + 1)" 
+                                         data-image-url="@media.Url" data-image-index="@index" style="cursor: pointer; height: 80px; object-fit: cover; width: 100%;">
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="details-card mb-4">
+                    <div class="no-media-placeholder">
+                        <i class="bi bi-image"></i>
+                        <p>No media uploaded</p>
+                    </div>
+                </div>
+            }
+
+            <!-- Description -->
+            <div class="details-card mb-4">
+                <div class="card-header">
+                    <h4 class="card-title">
+                        <i class="bi bi-text-paragraph me-2"></i>Description
+                    </h4>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Model.Listing.Description))
+                    {
+                        <p class="description-text">@Model.Listing.Description</p>
+                    }
+                    else
+                    {
+                        <p class="text-muted"><em>No description provided</em></p>
+                    }
+                </div>
+            </div>
+
+            <!-- Property Details -->
+            <div class="details-card mb-4">
+                <div class="card-header">
+                    <h4 class="card-title">
+                        <i class="bi bi-house me-2"></i>Property Details
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        @if (Model.Bedrooms.HasValue)
+                        {
+                            <div class="col-md-4">
+                                <div class="detail-item">
+                                    <i class="bi bi-door-closed detail-icon"></i>
+                                    <div class="detail-content">
+                                        <span class="detail-label">Bedrooms</span>
+                                        <span class="detail-value">@Model.Bedrooms</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        @if (Model.Bathrooms.HasValue)
+                        {
+                            <div class="col-md-4">
+                                <div class="detail-item">
+                                    <i class="bi bi-droplet detail-icon"></i>
+                                    <div class="detail-content">
+                                        <span class="detail-label">Bathrooms</span>
+                                        <span class="detail-value">@Model.Bathrooms</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        @if (Model.Floors.HasValue)
+                        {
+                            <div class="col-md-4">
+                                <div class="detail-item">
+                                    <i class="bi bi-building detail-icon"></i>
+                                    <div class="detail-content">
+                                        <span class="detail-label">Floors</span>
+                                        <span class="detail-value">@Model.Floors</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.Area))
+                        {
+                            <div class="col-md-4">
+                                <div class="detail-item">
+                                    <i class="bi bi-rulers detail-icon"></i>
+                                    <div class="detail-content">
+                                        <span class="detail-label">Area</span>
+                                        <span class="detail-value">@Model.Area</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.Direction))
+                        {
+                            <div class="col-md-4">
+                                <div class="detail-item">
+                                    <i class="bi bi-compass detail-icon"></i>
+                                    <div class="detail-content">
+                                        <span class="detail-label">Direction</span>
+                                        <span class="detail-value">@Model.Direction</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.LegalStatus))
+                        {
+                            <div class="col-md-4">
+                                <div class="detail-item">
+                                    <i class="bi bi-file-text detail-icon"></i>
+                                    <div class="detail-content">
+                                        <span class="detail-label">Legal Status</span>
+                                        <span class="detail-value">@Model.LegalStatus</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.FurnitureStatus))
+                        {
+                            <div class="col-md-4">
+                                <div class="detail-item">
+                                    <i class="bi bi-house-door detail-icon"></i>
+                                    <div class="detail-content">
+                                        <span class="detail-label">Furniture</span>
+                                        <span class="detail-value">@Model.FurnitureStatus</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Location -->
+            <div class="details-card mb-4">
+                <div class="card-header">
+                    <h4 class="card-title">
+                        <i class="bi bi-geo-alt me-2"></i>Location
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="location-info">
+                        @{
+                            var addressParts = new List<string>();
+                            if (!string.IsNullOrEmpty(Model.HouseNumber)) { addressParts.Add(Model.HouseNumber); }
+                            if (!string.IsNullOrEmpty(Model.StreetName)) { addressParts.Add(Model.StreetName); }
+                            if (!string.IsNullOrEmpty(Model.Ward)) { addressParts.Add(Model.Ward); }
+                            if (!string.IsNullOrEmpty(Model.District)) { addressParts.Add(Model.District); }
+                            if (!string.IsNullOrEmpty(Model.City)) { addressParts.Add(Model.City); }
+                            
+                            var fullAddress = string.Join(", ", addressParts);
+                        }
+                        
+                        @if (!string.IsNullOrEmpty(fullAddress))
+                        {
+                            <p class="address-text">
+                                <i class="bi bi-pin-map me-2 text-primary"></i>
+                                @fullAddress
+                            </p>
+                        }
+                        else
+                        {
+                            <p class="text-muted"><em>No location specified</em></p>
+                        }
+                        
+                        @if (Model.Latitude.HasValue && Model.Longitude.HasValue)
+                        {
+                            <p class="coordinates-text text-muted">
+                                <i class="bi bi-globe me-2"></i>
+                                Coordinates: @Model.Latitude.Value.ToString("F6"), @Model.Longitude.Value.ToString("F6")
+                            </p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- View Statistics Card -->
+            @if (ViewBag.ViewStats != null)
+            {
+                var stats = (BLL.DTOs.ListingViewStats)ViewBag.ViewStats;
+                <div class="details-card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h4 class="card-title mb-0">
+                            <i class="bi bi-eye me-2"></i>View Statistics
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="view-stats-grid">
+                            <div class="view-stat-item">
+                                <div class="stat-icon bg-primary">
+                                    <i class="bi bi-eye-fill"></i>
+                                </div>
+                                <div class="stat-details">
+                                    <div class="stat-label">Total Views</div>
+                                    <div class="stat-value">@stats.TotalViews</div>
+                                </div>
+                            </div>
+                            <div class="view-stat-item">
+                                <div class="stat-icon bg-success">
+                                    <i class="bi bi-calendar-day"></i>
+                                </div>
+                                <div class="stat-details">
+                                    <div class="stat-label">Today</div>
+                                    <div class="stat-value">@stats.ViewsToday</div>
+                                </div>
+                            </div>
+                            <div class="view-stat-item">
+                                <div class="stat-icon bg-warning">
+                                    <i class="bi bi-calendar-week"></i>
+                                </div>
+                                <div class="stat-details">
+                                    <div class="stat-label">This Week</div>
+                                    <div class="stat-value">@stats.ViewsThisWeek</div>
+                                </div>
+                            </div>
+                            <div class="view-stat-item">
+                                <div class="stat-icon bg-danger">
+                                    <i class="bi bi-calendar-month"></i>
+                                </div>
+                                <div class="stat-details">
+                                    <div class="stat-label">This Month</div>
+                                    <div class="stat-value">@stats.ViewsThisMonth</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Views Over Time Chart -->
+                        <div class="mt-4">
+                            <h6 class="mb-3 fw-bold">Views Over Time (Last 30 Days)</h6>
+                            <canvas id="viewsChart" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Price Card -->
+            <div class="details-card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="card-title mb-0">
+                        <i class="bi bi-cash-stack me-2"></i>Price
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="price-display">
+                        @Model.Price.ToString("N0") VND
+                    </div>
+                    @if (Model.TransactionType == "Rent")
+                    {
+                        <p class="text-muted mb-0 text-center">/month</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Quick Info -->
+            <div class="details-card mb-4">
+                <div class="card-header">
+                    <h4 class="card-title">
+                        <i class="bi bi-info-circle me-2"></i>Quick Info
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="info-list">
+                        <div class="info-item">
+                            <span class="info-label">Transaction Type</span>
+                            <span class="info-value">
+                                @if (Model.TransactionType == "Sale")
+                                {
+                                    <span class="badge bg-primary">For Sale</span>
+                                }
+                                else if (Model.TransactionType == "Rent")
+                                {
+                                    <span class="badge bg-info">For Rent</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">@Model.TransactionType</span>
+                                }
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Property Type</span>
+                            <span class="info-value">@(Model.PropertyType ?? "N/A")</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Status</span>
+                            <span class="info-value">
+                                <partial name="_StatusBadge" model="@(Model.Status ?? "Draft")" />
+                            </span>
+                        </div>
+                        @if (Model.ExpirationDate.HasValue)
+                        {
+                            <div class="info-item">
+                                <span class="info-label">Expires On</span>
+                                <span class="info-value">@Model.ExpirationDate.Value.ToString("MMM dd, yyyy")</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Package Info Card -->
+            <div class="details-card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="card-title mb-0">
+                        <i class="bi bi-box-seam me-2"></i>Package Info
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="info-list">
+                        <div class="info-item">
+                            <span class="info-label">Type</span>
+                            <span class="info-value">
+                                @if (Model.IsFreeListingorder)
+                                {
+                                    <span class="badge bg-success">Free Tier</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning">Premium</span>
+                                }
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Photo Limit</span>
+                            <span class="info-value">@Model.MaxPhotos photos</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Video Upload</span>
+                            <span class="info-value">
+                                @if (Model.AllowVideo)
+                                {
+                                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> Enabled</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary"><i class="bi bi-x-circle"></i> Disabled</span>
+                                }
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Boost Status</span>
+                            <span class="info-value">
+                                @if (Model.IsBoosted)
+                                {
+                                    <span class="badge bg-warning"><i class="bi bi-rocket-fill"></i> Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Not Boosted</span>
+                                }
+                            </span>
+                        </div>
+                    </div>
+                    @if (!Model.IsBoosted)
+                    {
+                        <div class="mt-3 d-grid">
+                            <a href="@Url.Page("/Package/Index", new { type = "BOOST_LISTING" })" class="btn btn-warning btn-sm">
+                                <i class="bi bi-rocket-fill me-2"></i>Boost This Listing
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="details-card">
+                <div class="card-header">
+                    <h4 class="card-title">
+                        <i class="bi bi-lightning me-2"></i>Actions
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a asp-controller="Lister" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                            <i class="bi bi-pencil me-2"></i>Edit Listing
+                        </a>
+                        @if (string.Equals(Model.Status, "Draft", StringComparison.OrdinalIgnoreCase))
+                        {
+                            <form asp-controller="Lister" asp-action="SubmitForReview" asp-route-id="@Model.Id" method="post">
+                                <button type="submit" class="btn btn-warning w-100">
+                                    <i class="bi bi-send me-2"></i>Submit for Review
+                                </button>
+                            </form>
+                        }
+                        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                            <i class="bi bi-trash me-2"></i>Delete Listing
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Delete Listing
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-3">Are you sure you want to delete "<strong>@Model.Title</strong>" permanently?</p>
+                <div class="alert alert-warning mb-0">
+                    <i class="bi bi-exclamation-circle me-2"></i>
+                    <strong>Warning:</strong> This action cannot be undone.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form asp-controller="Lister" asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-2"></i>Yes, Delete It
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Image Lightbox Modal -->
+<div class="modal fade" id="imageLightboxModal" tabindex="-1" aria-labelledby="imageLightboxLabel" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content bg-dark">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-white" id="imageLightboxLabel">
+                    <i class="bi bi-images me-2"></i>Property Images
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body d-flex align-items-center justify-content-center p-0">
+                <div class="lightbox-container">
+                    <button class="lightbox-nav lightbox-prev" id="lightboxPrev">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <img id="lightboxImage" src="" alt="Full size image" class="lightbox-image">
+                    <button class="lightbox-nav lightbox-next" id="lightboxNext">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer border-0 justify-content-center">
+                <span class="text-white" id="imageCounter">1 / 1</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+@if (ViewBag.ViewStats != null)
+{
+    var stats = (BLL.DTOs.ListingViewStats)ViewBag.ViewStats;
+    <script>
+        (function() {
+            // Prepare chart data
+            const labels = @Html.Raw(Json.Serialize(stats.DailyStats.Select(s => s.Date).ToList()));
+            const data = @Html.Raw(Json.Serialize(stats.DailyStats.Select(s => s.Views).ToList()));
+
+            // Create the chart
+            const ctx = document.getElementById('viewsChart').getContext('2d');
+            const viewsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels.map(date => {
+                        const d = new Date(date);
+                        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    }),
+                    datasets: [{
+                        label: 'Views',
+                        data: data,
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 3,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: 'rgba(102, 126, 234, 1)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: {
+                                size: 14
+                            },
+                            bodyFont: {
+                                size: 13
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Views: ' + context.parsed.y;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                precision: 0
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        })();
+    </script>
+}
+    
+<script>
+        (function() {
+            const imageModal = document.getElementById('imageLightboxModal');
+            const lightboxImage = document.getElementById('lightboxImage');
+            const imageCounter = document.getElementById('imageCounter');
+            const prevBtn = document.getElementById('lightboxPrev');
+            const nextBtn = document.getElementById('lightboxNext');
+            
+            // Get all images
+            const images = @Html.Raw(Json.Serialize(Model.ListingMedia?.Where(m => m.MediaType == "image").Select(m => m.Url).ToList() ?? new List<string>()));
+            let currentIndex = 0;
+
+            // Function to show image
+            function showImage(index) {
+                if (images.length === 0) return;
+                
+                currentIndex = index;
+                if (currentIndex < 0) currentIndex = images.length - 1;
+                if (currentIndex >= images.length) currentIndex = 0;
+                
+                lightboxImage.src = images[currentIndex];
+                imageCounter.textContent = `${currentIndex + 1} / ${images.length}`;
+                
+                // Show/hide navigation buttons
+                prevBtn.style.display = images.length > 1 ? 'flex' : 'none';
+                nextBtn.style.display = images.length > 1 ? 'flex' : 'none';
+            }
+
+            // Click on carousel image or thumbnail
+            document.querySelectorAll('.clickable-image, .clickable-thumbnail').forEach(img => {
+                img.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const imageUrl = this.getAttribute('data-image-url');
+                    const index = images.indexOf(imageUrl);
+                    
+                    if (index !== -1) {
+                        showImage(index);
+                        const modal = new bootstrap.Modal(imageModal);
+                        modal.show();
+                    }
+                });
+            });
+
+            // Navigation buttons
+            prevBtn.addEventListener('click', () => showImage(currentIndex - 1));
+            nextBtn.addEventListener('click', () => showImage(currentIndex + 1));
+
+            // Keyboard navigation
+            imageModal.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowLeft') {
+                    showImage(currentIndex - 1);
+                } else if (e.key === 'ArrowRight') {
+                    showImage(currentIndex + 1);
+                } else if (e.key === 'Escape') {
+                    bootstrap.Modal.getInstance(imageModal)?.hide();
+                }
+            });
+
+            // Reset on modal close
+            imageModal.addEventListener('hidden.bs.modal', function() {
+                currentIndex = 0;
+            });
+        })();
+    </script>
+}
+
+<style>
+    .listing-details-container {
+        max-width: 1400px;
+    }
+
+    .details-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+    .card-header {
+        background: #f8f9fa;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .card-header.bg-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        border-bottom: none;
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .card-header.bg-primary .card-title {
+        color: white;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    /* Media Gallery */
+    .media-gallery .carousel-item img,
+    .media-gallery .carousel-item video {
+        height: 500px;
+        object-fit: cover;
+        border-radius: 0;
+    }
+
+    .no-media-placeholder {
+        height: 400px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9fa;
+        color: #7f8c8d;
+    }
+
+    .no-media-placeholder i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Description */
+    .description-text {
+        line-height: 1.8;
+        color: #2c3e50;
+        white-space: pre-line;
+    }
+
+    /* Detail Items */
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .detail-icon {
+        font-size: 1.75rem;
+        color: #667eea;
+    }
+
+    .detail-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .detail-label {
+        font-size: 0.85rem;
+        color: #7f8c8d;
+        margin-bottom: 0.25rem;
+    }
+
+    .detail-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    /* Location */
+    .location-info {
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .address-text {
+        font-size: 1.05rem;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .coordinates-text {
+        font-size: 0.9rem;
+        margin-bottom: 0;
+    }
+
+    /* Price Display */
+    .price-display {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #667eea;
+        text-align: center;
+        padding: 1rem 0;
+    }
+
+    /* Info List */
+    .info-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #7f8c8d;
+    }
+
+    .info-value {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    /* Clickable Images */
+    .clickable-image,
+    .clickable-thumbnail {
+        transition: transform 0.2s, opacity 0.2s;
+    }
+
+    .clickable-image:hover,
+    .clickable-thumbnail:hover {
+        transform: scale(1.02);
+        opacity: 0.9;
+    }
+
+    .clickable-thumbnail {
+        border: 2px solid transparent;
+    }
+
+    .clickable-thumbnail:hover {
+        border-color: #667eea;
+    }
+
+    /* View Statistics Styles */
+    .card-header.bg-info {
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%) !important;
+        border-bottom: none;
+    }
+
+    .card-header.bg-info .card-title {
+        color: white;
+    }
+
+    .view-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .view-stat-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .view-stat-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        flex-shrink: 0;
+    }
+
+    .stat-icon.bg-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .stat-icon.bg-success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+
+    .stat-icon.bg-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    }
+
+    .stat-icon.bg-danger {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    }
+
+    .stat-details {
+        flex-grow: 1;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        color: #7f8c8d;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    #viewsChart {
+        max-height: 200px;
+    }
+
+    /* Lightbox Modal Styles */
+    #imageLightboxModal .modal-content {
+        background-color: rgba(0, 0, 0, 0.95) !important;
+    }
+
+    .lightbox-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
+
+    .lightbox-image {
+        max-width: 100%;
+        max-height: calc(100vh - 150px);
+        object-fit: contain;
+        animation: fadeIn 0.3s ease-in;
+    }
+
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    .lightbox-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        font-size: 2.5rem;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        z-index: 10;
+    }
+
+    .lightbox-nav:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .lightbox-prev {
+        left: 2rem;
+    }
+
+    .lightbox-next {
+        right: 2rem;
+    }
+
+    #imageCounter {
+        font-size: 1.2rem;
+        padding: 0.5rem 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .lightbox-nav {
+            width: 45px;
+            height: 45px;
+            font-size: 1.5rem;
+        }
+        
+        .lightbox-prev {
+            left: 1rem;
+        }
+        
+        .lightbox-next {
+            right: 1rem;
+        }
+        
+        .lightbox-container {
+            padding: 1rem;
+        }
+    }
+</style>

@@ -1,0 +1,318 @@
+@page "{id:guid}"
+@model RealEstateListingPlatform.Pages.Listings.PropertyDetailModel
+
+@{
+    ViewData["Title"] = "Property Detail";
+    Layout = "_Layout";
+}
+
+
+<div class="container mt-4 mb-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-page="/Index">Home</a></li>
+            <li class="breadcrumb-item"><a asp-page="/Listings/BrowseListings" asp-route-type="@(Model.Property.TransactionType == "Sell" ? "Sell" : "Rent")">@(Model.Property.TransactionType == "Sell" ? "For Sale" : "For Rent")</a></li>
+            <li class="breadcrumb-item active">Detail</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 position-relative" id="detail-gallery">
+                @if (Model.Property.ImageUrls != null && Model.Property.ImageUrls.Count > 1)
+                {
+                    <div class="detail-gallery-viewport">
+                        <div class="detail-gallery-track" id="detail-gallery-track">
+                            @foreach (var url in Model.Property.ImageUrls)
+                            {
+                                <div class="detail-gallery-slide">
+                                    <img src="@url" class="img-fluid w-100" style="max-height: 500px; object-fit: cover;" alt="@Model.Property.Title">
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-light btn-lg position-absolute top-50 start-0 translate-middle-y rounded-circle shadow ms-2 ms-md-3 detail-prev" style="opacity: 0.9; z-index: 2;" aria-label="Ảnh trước">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <button type="button" class="btn btn-light btn-lg position-absolute top-50 end-0 translate-middle-y rounded-circle shadow me-2 me-md-3 detail-next" style="opacity: 0.9; z-index: 2;" aria-label="Ảnh tiếp theo">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                    <div class="position-absolute bottom-0 end-0 m-3 px-3 py-1 rounded-pill bg-dark bg-opacity-50 text-white small" id="detail-counter" style="z-index: 2;">1 / @Model.Property.ImageUrls.Count</div>
+                }
+                else
+                {
+                    <img src="@(Model.Property.ImageUrls?.Any() == true ? Model.Property.ImageUrls[0] : Model.Property.ImageUrl)" class="img-fluid w-100" style="max-height: 500px; object-fit: cover;" alt="@Model.Property.Title">
+                }
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h2 class="fw-bold text-dark">@Model.Property.Title</h2>
+                    <span class="badge @(Model.Property.TransactionType == "Sell" ? "bg-primary" : "bg-success") rounded-pill px-3 py-2">
+                        @(Model.Property.TransactionType == "Sell" ? "For Sale" : "For Rent")
+                    </span>
+                </div>
+                <p class="text-muted"><i class="bi bi-geo-alt-fill text-primary"></i> @Model.Property.Address</p>
+                <hr class="my-4 opacity-25">
+
+                <h5 class="fw-bold mb-3">Overall Information</h5>
+                <div class="row text-center g-3 mb-4">
+                    <div class="col-4 col-md-3">
+                        <div class="p-3 bg-light rounded-4">
+                            <i class="bi bi-aspect-ratio fs-4 text-primary"></i>
+                            <p class="small mb-0 mt-2 text-muted">Area</p>
+                            <p class="fw-bold mb-0">@Model.Property.Area m²</p>
+                        </div>
+                    </div>
+                    <div class="col-4 col-md-3">
+                        <div class="p-3 bg-light rounded-4">
+                            <i class="bi bi-door-open fs-4 text-primary"></i>
+                            <p class="small mb-0 mt-2 text-muted">Bedroom</p>
+                            <p class="fw-bold mb-0">@Model.Property.Bedrooms</p>
+                        </div>
+                    </div>
+                    <div class="col-4 col-md-3">
+                        <div class="p-3 bg-light rounded-4">
+                            <i class="bi bi-droplet fs-4 text-primary"></i>
+                            <p class="small mb-0 mt-2 text-muted">Bathroom</p>
+                            <p class="fw-bold mb-0">@Model.Property.Bathrooms</p>
+                        </div>
+                    </div>
+                    <div class="col-4 col-md-3">
+                        <div class="p-3 bg-light rounded-4">
+                            <span class="icon-stairs fs-4 text-primary" aria-hidden="true">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 24 24"><path d="M2 19h4v-4h4v-4h4v-4h4V3H2v4h4v4H2v4h4v4H2z"/></svg>
+                            </span>
+                            <p class="small mb-0 mt-2 text-muted">Floors</p>
+                            <p class="fw-bold mb-0">@(Model.Property.Floors?.ToString() ?? "—")</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h5 class="fw-bold mb-3">Detail Description</h5>
+                <p class="text-muted lh-lg">
+                    @Model.Property.Description
+                </p>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 sticky-top" style="top: 100px;">
+                <p class="text-muted mb-1">Price</p>
+                <h3 class="fw-bold text-primary mb-4">@Model.Property.FormattedPrice</h3>
+                
+                <div class="d-grid gap-2">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <button class="btn btn-outline-primary py-3 rounded-pill fw-bold" data-bs-toggle="modal" data-bs-target="#interestedModal">
+                            <i class="bi bi-chat-dots-fill me-2"></i> I'm Interested
+                        </button>
+                    }
+                    else
+                    {
+                        <a asp-page="/Account/Login" asp-route-returnUrl="@HttpContext.Request.Path" class="btn btn-outline-primary py-3 rounded-pill fw-bold">
+                            <i class="bi bi-chat-dots-fill me-2"></i> Login to Express Interest
+                        </a>
+                    }
+                </div>
+
+                <hr class="my-4 opacity-25">
+
+                <div class="agent-info d-flex align-items-center">
+                    <div>
+                        <p class="mb-0 fw-bold">@Model.Property.ListerName</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Interested Modal -->
+<div class="modal fade" id="interestedModal" tabindex="-1" aria-labelledby="interestedModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="interestedModalLabel">Express Your Interest</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <div class="alert alert-info border-0 rounded-3 mb-3">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <small>Your contact information will be shared with the property owner.</small>
+                </div>
+                
+                <form id="leadForm">
+                    <input type="hidden" id="listingId" value="@Model.Property.Id" />
+                    
+                    <div class="mb-3">
+                        <label for="message" class="form-label fw-semibold">Message (Optional)</label>
+                        <textarea class="form-control rounded-3" id="message" name="message" rows="4" 
+                                  placeholder="Tell the owner about your interest, questions, or preferred viewing time..."></textarea>
+                        <div class="form-text">Maximum 1000 characters</div>
+                    </div>
+
+                    <div id="leadFormError" class="alert alert-danger d-none rounded-3" role="alert"></div>
+                    <div id="leadFormSuccess" class="alert alert-success d-none rounded-3" role="alert"></div>
+                </form>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary rounded-pill px-4" id="submitLeadBtn">
+                    <i class="bi bi-send me-2"></i>Send Interest
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        .breadcrumb-item a {
+            color: #6c757d;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+            .breadcrumb-item a:hover {
+                color: #0d6efd;
+            }
+        
+        .bg-light i {
+            transition: transform 0.3s ease;
+        }
+
+        .bg-light:hover i {
+            transform: translateY(-3px);
+        }
+
+        @@media (max-width: 991.98px) {
+            .sticky-top {
+                position: relative !important;
+                top: 0 !important;
+            }
+        }
+
+        #detail-gallery .detail-prev:hover,
+        #detail-gallery .detail-next:hover {
+            opacity: 1 !important;
+        }
+
+        .detail-gallery-viewport {
+            overflow: hidden;
+            max-height: 500px;
+        }
+
+        .detail-gallery-track {
+            display: flex;
+            transition: transform 0.4s ease-out;
+        }
+
+        .detail-gallery-slide {
+            flex: 0 0 100%;
+            min-width: 100%;
+        }
+
+            .detail-gallery-slide img {
+                display: block;
+                width: 100%;
+                max-height: 500px;
+                object-fit: cover;
+            }
+
+        .icon-stairs {
+            display: inline-block;
+            line-height: 1;
+        }
+            .icon-stairs svg {
+                display: block;
+                vertical-align: middle;
+            }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        (function () {
+            var track = document.getElementById('detail-gallery-track');
+            if (!track) return;
+
+            var slides = track.querySelectorAll('.detail-gallery-slide');
+            var total = slides.length;
+            if (total <= 1) return;
+
+            var counterEl = document.getElementById('detail-counter');
+            var idx = 0;
+
+            function showImage(i) {
+                idx = ((i % total) + total) % total;
+                track.style.transform = 'translateX(-' + (idx * 100) + '%)';
+                if (counterEl) counterEl.textContent = (idx + 1) + ' / ' + total;
+            }
+
+            document.querySelector('.detail-prev')?.addEventListener('click', function () { showImage(idx - 1); });
+            document.querySelector('.detail-next')?.addEventListener('click', function () { showImage(idx + 1); });
+        })();
+
+        // Lead form submission
+        document.getElementById('submitLeadBtn')?.addEventListener('click', function() {
+            const btn = this;
+            const originalText = btn.innerHTML;
+            const listingId = document.getElementById('listingId').value;
+            const message = document.getElementById('message').value;
+            
+            // Hide previous messages
+            document.getElementById('leadFormError').classList.add('d-none');
+            document.getElementById('leadFormSuccess').classList.add('d-none');
+            
+            // Disable button and show loading
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Sending...';
+            
+            // Prepare data
+            const data = {
+                listingId: listingId,
+                message: message || null
+            };
+            
+            // Send request
+            fetch('/api/Leads/Create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    document.getElementById('leadFormSuccess').textContent = result.message || 'Your interest has been sent successfully!';
+                    document.getElementById('leadFormSuccess').classList.remove('d-none');
+                    
+                    // Clear form
+                    document.getElementById('message').value = '';
+                    
+                    // Close modal after 2 seconds
+                    setTimeout(function() {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('interestedModal'));
+                        if (modal) modal.hide();
+                    }, 2000);
+                } else {
+                    document.getElementById('leadFormError').textContent = result.message || 'Failed to send your interest. Please try again.';
+                    document.getElementById('leadFormError').classList.remove('d-none');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('leadFormError').textContent = 'An error occurred. Please try again later.';
+                document.getElementById('leadFormError').classList.remove('d-none');
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            });
+        });
+    </script>
+}

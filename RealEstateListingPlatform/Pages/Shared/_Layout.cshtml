@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+@await RenderSectionAsync("Styles", required: false)
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - RealEstateListingPlatform</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/RealEstateListingPlatform.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar fixed-top navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-page="/Index">
+                    <img src="~/images/logo.png" alt="Estately Logo" height="40" class="d-inline-block align-top" />
+                </a>   
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">                      
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-page="/Listings/BrowseListings" asp-route-type="Sell">For Sale</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-page="/Listings/BrowseListings" asp-route-type="Rent">For Rent</a>
+                        </li>
+                        @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Seeker"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-page="/Seeker/InterestedListings">
+                                    My Interests
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                    <partial name="_LoginPartial" />
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div>
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="footer-modern bg-light text-dark pt-5 pb-4 border-top">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <a class="navbar-brand mb-3 d-inline-block" asp-page="/Index">
+                        <img src="~/images/logo.png" alt="Estately Logo" height="50" class="d-inline-block" />
+                    </a>
+                    <p class="text-muted-custom small">
+                        A leading and reputable real estate trading platform, helping you find your dream home with just a few clicks.
+                    </p>
+                    <div class="social-links mt-3">
+                        <a href="#" class="btn btn-sm btn-outline-light rounded-circle me-2"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="btn btn-sm btn-outline-light rounded-circle me-2"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="btn btn-sm btn-outline-light rounded-circle"><i class="bi bi-linkedin"></i></a>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="fw-bold mb-4">Quick Links</h6>
+                    <ul class="list-unstyled footer-links">
+                        <li><a asp-page="/Index" class="text-muted-custom">Home</a></li>
+                        <li><a href="#" class="text-muted-custom">All Listings</a></li>
+                        <li><a href="#" class="text-muted-custom">About Us</a></li>
+                        <li><a asp-page="/Privacy" class="text-muted-custom">Privacy Policy</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="fw-bold mb-4">Contact Us</h6>
+                    <ul class="list-unstyled footer-contact">
+                        <li class="mb-2 text-muted-custom small">
+                            <i class="bi bi-geo-alt text-primary me-2"></i> 123 Dist. 1, Ho Chi Minh City
+                        </li>
+                        <li class="mb-2 text-muted-custom small">
+                            <i class="bi bi-telephone text-primary me-2"></i> +84 123 456 789
+                        </li>
+                        <li class="text-muted-custom small">
+                            <i class="bi bi-envelope text-primary me-2"></i> contact@estately.vn
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="fw-bold mb-4">Newsletter</h6>
+                    <p class="text-muted-custom small">Sign up to receive the latest updates on projects.</p>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control form-control-sm border-secondary text-dark" placeholder="Email Address">
+                        <button class="btn btn-primary btn-sm" type="button">Join</button>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="mt-4 border-secondary opacity-25">
+
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="text-muted-custom small mb-0">&copy; 2026 - Estately. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+
+<style>
+    html, body {
+        height: 100%;
+        margin: 0;
+    }
+
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    main {
+        flex: 1 0 auto;
+    }
+
+    .navbar-nav .nav-link {
+        position: relative;
+        transition: color 0.3s ease;
+        font-weight: 500;
+    }
+
+        .navbar-nav .nav-link:hover {
+            color: #0d6efd !important; 
+        }
+        .navbar-nav .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background-color: #0d6efd;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .navbar-nav .nav-link:hover::after {
+            width: 80%;
+        }
+
+    .footer-modern {
+        background-color: #f8f9fa !important; 
+        border-top: 1px solid #dee2e6 !important;
+    }
+
+        .footer-modern a {
+            color: #6c757d;
+            transition: color 0.3s;
+        }
+
+            .footer-modern a:hover {
+                color: #0d6efd !important;
+            }
+
+        .footer-modern .form-control {
+            border-color: #ced4da;
+            font-size: 0.9rem;
+        }
+</style>

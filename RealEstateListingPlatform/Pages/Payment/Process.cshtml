@@ -1,0 +1,183 @@
+@page "{transactionId:guid}"
+@model RealEstateListingPlatform.Pages.Payment.ProcessModel
+
+@{
+    ViewData["Title"] = "Complete Payment";
+    Layout = "_ListerLayout";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h4 class="mb-0"><i class="bi bi-credit-card"></i> Complete Your Payment</h4>
+                </div>
+                <div class="card-body p-4">
+                    @if (Model.Transaction != null)
+                    {
+                        <div class="alert alert-info mb-4">
+                            <i class="bi bi-info-circle"></i> Transaction ID: <strong>@Model.Transaction.Id.ToString().Substring(0, 8)</strong>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="bg-light p-3 rounded">
+                                    <small class="text-muted">Amount</small>
+                                    <h4 class="text-primary fw-bold mb-0">@Model.Transaction.Amount.ToString("N0") VND</h4>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="bg-light p-3 rounded">
+                                    <small class="text-muted">Payment Method</small>
+                                    <h5 class="mb-0">PayOS</h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(Model.CheckoutUrl))
+                        {
+                            <div class="text-center mb-4">
+                                <h5 class="fw-bold mb-3">Complete Your Payment</h5>
+                                
+                                <div class="p-4 bg-white rounded shadow-sm">
+                                    <p class="text-muted mb-3">Click the button below to proceed to secure payment page</p>
+                                    <a href="@Model.CheckoutUrl" target="_self" class="btn btn-primary btn-lg w-100 mb-3">
+                                        <i class="bi bi-box-arrow-up-right"></i> Proceed to Payment
+                                    </a>
+                                    <small class="text-muted">
+                                        <i class="bi bi-info-circle"></i> After completing payment, click "Check Payment Status" below to verify
+                                    </small>
+                                </div>
+                            </div>
+                        }
+
+                        <hr class="my-4">
+
+                        <!-- Status Check Section -->
+                        <div id="status-section" class="text-center">
+                            <p class="text-muted mb-3">
+                                <i class="bi bi-shield-check"></i> After completing your payment, click the button below to verify
+                            </p>
+                            
+                            <div id="status-message" class="alert alert-secondary" style="display: none;">
+                                <span id="status-text"></span>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="button" id="checkStatusBtn" class="btn btn-success btn-lg" onclick="checkPaymentStatus()">
+                                    <i class="bi bi-check-circle"></i> Check Payment Status
+                                </button>
+                                <a href="@Url.Page("/Package/Index")" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left"></i> Cancel Payment
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-list-ol"></i> Payment Instructions:</h6>
+                    <ol class="mb-0 small text-muted">
+                        <li>Click "Proceed to Payment" to open the secure payment page</li>
+                        <li>Complete the payment using your preferred method (QR code, card, etc.)</li>
+                        <li>After payment is successful, return to this page and click "Check Payment Status"</li>
+                        <li>You will be redirected to confirmation page once payment is verified</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        .btn-lg {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+        }
+    </style>
+}
+
+@section Scripts {
+<script>
+    var transactionId = '@Model.TransactionId';
+
+        function checkPaymentStatus() {
+            var btn = $('#checkStatusBtn');
+            var statusMsg = $('#status-message');
+            var statusText = $('#status-text');
+            
+            // Disable button and show loading
+            btn.prop('disabled', true);
+            btn.html('<span class="spinner-border spinner-border-sm me-2"></span>Checking...');
+            statusMsg.removeClass('alert-success alert-danger alert-warning alert-secondary').addClass('alert-secondary').show();
+            statusText.html('<i class="bi bi-hourglass-split"></i> Verifying payment status...');
+
+            $.ajax({
+                url: '@Url.Page("/Payment/CheckStatus")',
+                type: 'GET',
+                data: { transactionId: transactionId },
+                success: function(response) {
+                    if (response.success && response.status === 'Completed') {
+                        statusMsg.removeClass('alert-secondary').addClass('alert-success');
+                        statusText.html('<i class="bi bi-check-circle"></i> ' + response.message);
+                        
+                        // Redirect to success page
+                        setTimeout(function() {
+                            window.location.href = response.redirectUrl;
+                        }, 1500);
+                    } else if (response.success && response.status === 'Pending') {
+                        statusMsg.removeClass('alert-secondary').addClass('alert-warning');
+                        statusText.html('<i class="bi bi-clock"></i> ' + response.message);
+                        
+                        // Re-enable button
+                        btn.prop('disabled', false);
+                        btn.html('<i class="bi bi-check-circle"></i> Check Payment Status');
+                    } else if (!response.success && response.status === 'Cancelled') {
+                        statusMsg.removeClass('alert-secondary').addClass('alert-danger');
+                        statusText.html('<i class="bi bi-x-circle"></i> ' + response.message);
+                        
+                        // Redirect to failed page
+                        setTimeout(function() {
+                            window.location.href = response.redirectUrl;
+                        }, 2000);
+                    } else {
+                        statusMsg.removeClass('alert-secondary').addClass('alert-danger');
+                        statusText.html('<i class="bi bi-exclamation-triangle"></i> ' + (response.message || 'Failed to check status'));
+                        
+                        // Re-enable button
+                        btn.prop('disabled', false);
+                        btn.html('<i class="bi bi-check-circle"></i> Check Payment Status');
+                    }
+                },
+                error: function(xhr) {
+                    statusMsg.removeClass('alert-secondary').addClass('alert-danger');
+                    statusText.html('<i class="bi bi-exclamation-triangle"></i> Error checking payment status. Please try again.');
+                    
+                    // Re-enable button
+                    btn.prop('disabled', false);
+                    btn.html('<i class="bi bi-check-circle"></i> Check Payment Status');
+                }
+            });
+        }
+
+        // DISABLED auto-check - user must manually click the button
+        // Uncomment below to enable auto-check every 10 seconds
+        /*
+        var autoCheckInterval = setInterval(function() {
+            if (!$('#checkStatusBtn').prop('disabled')) {
+                checkPaymentStatus();
+            }
+        }, 10000);
+
+        $(window).on('beforeunload', function() {
+            clearInterval(autoCheckInterval);
+        });
+        */
+    </script>
+}

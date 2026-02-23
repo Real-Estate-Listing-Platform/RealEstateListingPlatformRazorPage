@@ -1,0 +1,197 @@
+@page
+@model RealEstateListingPlatform.Pages.Admin.LogsModel
+
+@{
+    ViewData["Title"] = "Admin - Logs";
+}
+
+<header class="admin-header">
+    <div>
+        <h2>Logs</h2>
+        <p class="admin-muted mb-0">Recent operational updates and automated alerts.</p>
+    </div>
+    <div class="d-flex flex-wrap align-items-center gap-3">
+        <span class="admin-badge primary">Last 24 hours</span>
+    </div>
+</header>
+
+<section class="admin-section">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div>
+            <h3>Activity feed</h3>
+            <div class="admin-section-subtitle">Operational updates and automated alerts</div>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <span class="admin-badge primary">@Model.ViewModel.TotalLogs Total Entries</span>
+            <select class="form-select form-select-sm" style="width: auto;" id="pageSizeSelector" onchange="changePageSize(this.value)">
+                @if (Model.ViewModel.PageSize == 10)
+                {
+                    <option value="10" selected>10 per page</option>
+                }
+                else
+                {
+                    <option value="10">10 per page</option>
+                }
+                @if (Model.ViewModel.PageSize == 20)
+                {
+                    <option value="20" selected>20 per page</option>
+                }
+                else
+                {
+                    <option value="20">20 per page</option>
+                }
+                @if (Model.ViewModel.PageSize == 50)
+                {
+                    <option value="50" selected>50 per page</option>
+                }
+                else
+                {
+                    <option value="50">50 per page</option>
+                }
+                @if (Model.ViewModel.PageSize == 100)
+                {
+                    <option value="100" selected>100 per page</option>
+                }
+                else
+                {
+                    <option value="100">100 per page</option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <div class="table-responsive mt-3">
+        <table class="table table-hover align-middle mb-0 admin-table">
+            <thead class="bg-light">
+                <tr>
+                    <th class="text-uppercase small text-muted">Event</th>
+                    <th class="text-uppercase small text-muted">Category</th>
+                    <th class="text-uppercase small text-muted">Status</th>
+                    <th class="text-uppercase small text-muted">Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.ViewModel.Logs.Any())
+                {
+                    @foreach (var log in Model.ViewModel.Logs)
+                    {
+                        var tone = log.Status.Contains("Pending", StringComparison.OrdinalIgnoreCase) || log.Status.Contains("Review", StringComparison.OrdinalIgnoreCase) ? "warning"
+                            : log.Status.Contains("Reject", StringComparison.OrdinalIgnoreCase) || log.Status.Contains("Fail", StringComparison.OrdinalIgnoreCase) ? "danger"
+                            : log.Status.Contains("Complete", StringComparison.OrdinalIgnoreCase) || log.Status.Contains("Success", StringComparison.OrdinalIgnoreCase)
+                                ? "success"
+                                : "primary";
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">@log.Title</div>
+                                <div class="admin-muted small">@log.Detail</div>
+                            </td>
+                            <td><span class="admin-muted">@log.Category</span></td>
+                            <td><span class="admin-badge @tone">@log.Status</span></td>
+                            <td class="admin-muted">@log.OccurredAt</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="4" class="text-center py-5 admin-muted">
+                            <i class="bi bi-inbox display-4 d-block mb-3"></i>
+                            <p>No audit logs available yet.</p>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (Model.ViewModel.TotalPages > 1)
+    {
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <div class="admin-muted small">
+                Showing @((Model.ViewModel.CurrentPage - 1) * Model.ViewModel.PageSize + 1) to @Math.Min(Model.ViewModel.CurrentPage * Model.ViewModel.PageSize, Model.ViewModel.TotalLogs) of @Model.ViewModel.TotalLogs entries
+            </div>
+            <nav aria-label="Log pagination">
+                <ul class="pagination pagination-sm mb-0">
+                    <!-- First Page -->
+                    @if (Model.ViewModel.CurrentPage > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1&pageSize=@Model.ViewModel.PageSize" aria-label="First">
+                                <span aria-hidden="true">&laquo;&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=@(Model.ViewModel.CurrentPage - 1)&pageSize=@Model.ViewModel.PageSize" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link">&laquo;&laquo;</span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link">&laquo;</span>
+                        </li>
+                    }
+
+                    <!-- Page Numbers -->
+                    @{
+                        var startPage = Math.Max(1, Model.ViewModel.CurrentPage - 2);
+                        var endPage = Math.Min(Model.ViewModel.TotalPages, Model.ViewModel.CurrentPage + 2);
+                        
+                        if (startPage > 1)
+                        {
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        }
+
+                        for (int i = startPage; i <= endPage; i++)
+                        {
+                            <li class="page-item @(i == Model.ViewModel.CurrentPage ? "active" : "")">
+                                <a class="page-link" href="?page=@i&pageSize=@Model.ViewModel.PageSize">@i</a>
+                            </li>
+                        }
+
+                        if (endPage < Model.ViewModel.TotalPages)
+                        {
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        }
+                    }
+
+                    <!-- Last Page -->
+                    @if (Model.ViewModel.CurrentPage < Model.ViewModel.TotalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="?page=@(Model.ViewModel.CurrentPage + 1)&pageSize=@Model.ViewModel.PageSize" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=@Model.ViewModel.TotalPages&pageSize=@Model.ViewModel.PageSize" aria-label="Last">
+                                <span aria-hidden="true">&raquo;&raquo;</span>
+                            </a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link">&raquo;</span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link">&raquo;&raquo;</span>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </div>
+    }
+</section>
+
+@section Scripts {
+    <script>
+        function changePageSize(pageSize) {
+            window.location.href = '?page=1&pageSize=' + pageSize;
+        }
+    </script>
+}

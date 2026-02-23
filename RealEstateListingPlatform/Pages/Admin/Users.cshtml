@@ -1,0 +1,63 @@
+@page
+@model RealEstateListingPlatform.Pages.Admin.UsersModel
+
+@{
+    ViewData["Title"] = "Admin - Users";
+}
+
+<header class="admin-header">
+    <div>
+        <h2>Users</h2>
+        <p class="admin-muted mb-0">Snapshot of recently active accounts.</p>
+    </div>
+    <div class="d-flex flex-wrap align-items-center gap-3">
+        <span class="admin-badge success">@Model.ViewModel.Users.Count Active reviews</span>
+        <button class="btn btn-dark px-4">Invite user</button>
+    </div>
+</header>
+
+<section class="admin-section">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div>
+            <h3>Account overview</h3>
+            <div class="admin-section-subtitle">Review active accounts and their current status</div>
+        </div>
+        <span class="admin-badge success">@Model.ViewModel.Users.Count Active reviews</span>
+    </div>
+
+    <div class="table-responsive mt-3">
+        <table class="table table-hover align-middle mb-0 admin-table">
+            <thead class="bg-light">
+                <tr>
+                    <th class="text-uppercase small text-muted">User</th>
+                    <th class="text-uppercase small text-muted">Role</th>
+                    <th class="text-uppercase small text-muted">Plan</th>
+                    <th class="text-uppercase small text-muted">Status</th>
+                    <th class="text-uppercase small text-muted">Last Active</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model.ViewModel.Users)
+                {
+                    var tone = user.Status.Equals("Active", StringComparison.OrdinalIgnoreCase) ? "success" : "danger";
+                    var initial = string.IsNullOrWhiteSpace(user.Name) ? "?" : user.Name.Trim().Substring(0, 1).ToUpperInvariant();
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="admin-avatar">@initial</div>
+                                <div>
+                                    <div class="fw-semibold">@user.Name</div>
+                                    <div class="admin-muted small">@user.Email</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="admin-muted">@user.Role</td>
+                        <td class="admin-muted">@user.Plan</td>
+                        <td><span class="admin-badge @tone">@user.Status</span></td>
+                        <td class="admin-muted">@user.LastActive</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

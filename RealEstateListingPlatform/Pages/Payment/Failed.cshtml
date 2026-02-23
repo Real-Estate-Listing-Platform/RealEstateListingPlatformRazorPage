@@ -1,0 +1,100 @@
+@page "{transactionId:guid}"
+@model RealEstateListingPlatform.Pages.Payment.FailedModel
+
+@{
+    ViewData["Title"] = "Payment Failed";
+    Layout = "_ListerLayout";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow text-center border-danger">
+                <div class="card-body p-5">
+                    <div class="mb-4">
+                        <i class="bi bi-x-circle-fill text-danger" style="font-size: 5rem;"></i>
+                    </div>
+                    
+                    <h2 class="text-danger fw-bold mb-3">Payment Failed</h2>
+                    <p class="text-muted mb-4">Unfortunately, we couldn't process your payment</p>
+
+                    @if (Model.Transaction != null)
+                    {
+                        <div class="bg-light p-4 rounded mb-4 text-start">
+                            <h6 class="fw-bold mb-3">Transaction Details</h6>
+                            <div class="row mb-2">
+                                <div class="col-6 text-muted">Transaction ID:</div>
+                                <div class="col-6 text-end"><small class="font-monospace">@Model.Transaction.Id.ToString().Substring(0, 13)...</small></div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-6 text-muted">Amount:</div>
+                                <div class="col-6 text-end fw-bold">@Model.Transaction.Amount.ToString("N0") VND</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-6 text-muted">Payment Method:</div>
+                                <div class="col-6 text-end">@Model.Transaction.PaymentMethod</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6 text-muted">Status:</div>
+                                <div class="col-6 text-end">
+                                    <span class="badge bg-danger">@Model.Transaction.Status</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="alert alert-danger mb-4">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Common reasons for payment failure:</strong>
+                        <ul class="text-start mt-2 mb-0 small">
+                            <li>Insufficient funds</li>
+                            <li>Card declined by bank</li>
+                            <li>Incorrect payment details</li>
+                            <li>Network timeout</li>
+                        </ul>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        @if (Model.Transaction?.PackageId != null)
+                        {
+                            <a href="@Url.Page("/Package/Purchase", new { id = Model.Transaction.PackageId })" class="btn btn-primary btn-lg">
+                                <i class="bi bi-arrow-repeat"></i> Try Again
+                            </a>
+                        }
+                        <a href="@Url.Page("/Package/Index")" class="btn btn-outline-primary">
+                            <i class="bi bi-arrow-left"></i> Back to Packages
+                        </a>
+                        <a href="@Url.Page("/Lister/Dashboard")" class="btn btn-outline-secondary">
+                            <i class="bi bi-house-door"></i> Go to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-3">
+                <small class="text-muted">
+                    <i class="bi bi-headset"></i> Need assistance? 
+                    <a href="#" class="text-primary">Contact our support team</a>
+                </small>
+            </div>
+
+            <!-- Help Information -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-question-circle text-primary"></i> What should I do?</h6>
+                    <ul class="small mb-0">
+                        <li class="mb-2">Check your account balance or card limit</li>
+                        <li class="mb-2">Verify your payment details are correct</li>
+                        <li class="mb-2">Try a different payment method</li>
+                        <li class="mb-2">Contact your bank if the issue persists</li>
+                        <li>Reach out to our support team for help</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+}

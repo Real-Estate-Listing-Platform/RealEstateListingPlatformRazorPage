@@ -1,0 +1,230 @@
+@page
+@model RealEstateListingPlatform.Pages.Listings.AllListingsModel
+
+@{
+    ViewData["Title"] = Model.Title;
+    Layout = "_Layout";
+    var formAction = "/Listings/AllListings";
+    string? formType = null;
+
+    string GeneratePaginationUrl(int page)
+    {
+        var routeValues = new Dictionary<string, string?>();
+        
+        if (!string.IsNullOrEmpty(Model.FilterLocation))
+            routeValues["location"] = Model.FilterLocation;
+        
+        if (!string.IsNullOrEmpty(Model.FilterMaxPriceRaw))
+            routeValues["maxPrice"] = Model.FilterMaxPriceRaw;
+        
+        routeValues["page"] = page.ToString();
+        
+        var queryParams = new List<string>();
+        
+        foreach (var kvp in routeValues)
+        {
+            if (!string.IsNullOrEmpty(kvp.Value))
+                queryParams.Add($"{kvp.Key}={Uri.EscapeDataString(kvp.Value)}");
+        }
+        
+        if (Model.FilterPropertyTypes != null && Model.FilterPropertyTypes.Any())
+        {
+            foreach (var type in Model.FilterPropertyTypes)
+                queryParams.Add($"propertyType={Uri.EscapeDataString(type)}");
+        }
+        
+        var queryString = string.Join("&", queryParams);
+        return $"{formAction}?{queryString}";
+    }
+}
+
+<div class="container pt-5 mt-5 mb-5">
+    <div class="row">
+        <aside class="col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 sticky-top" style="top: 100px;">
+                <h5 class="fw-bold mb-3">Search filters</h5>
+                <form method="get" action="@formAction" id="searchFiltersForm">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Area</label>
+                        <input type="text" name="location" class="form-control form-control-sm border-light bg-light" placeholder="Quận, phường, đường, thành phố..." value="@Model.FilterLocation" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Price</label>
+                        <input type="text" name="maxPrice" id="maxPriceInput" class="form-control form-control-sm border-light bg-light" placeholder="VD: 5 tỷ, 5B, 5000000000" value="@Model.FilterMaxPriceRaw" />
+                        <p class="small text-muted mt-1 mb-0">Mức giá gợi ý:</p>
+                        <div class="d-flex flex-wrap gap-1 mt-1">
+                            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill price-suggestion" data-value="">Bất kỳ</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill price-suggestion" data-value="1 tỷ">Dưới 1 tỷ</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill price-suggestion" data-value="5 tỷ">1–5 tỷ</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill price-suggestion" data-value="10 tỷ">5–10 tỷ</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill price-suggestion" data-value="50 tỷ">10–50 tỷ</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill price-suggestion" data-value="100 tỷ">50 tỷ+</button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Property Type</label>
+                        <div class="d-flex flex-column gap-1">
+                            @if (Model.FilterPropertyTypes.Contains("Apartment", StringComparer.OrdinalIgnoreCase)) { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Apartment" checked /> Apartment</label> } else { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Apartment" /> Apartment</label> }
+                            @if (Model.FilterPropertyTypes.Contains("Land", StringComparer.OrdinalIgnoreCase)) { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Land" checked /> Land</label> } else { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Land" /> Land</label> }
+                            @if (Model.FilterPropertyTypes.Contains("Villa", StringComparer.OrdinalIgnoreCase)) { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Villa" checked /> Villa</label> } else { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Villa" /> Villa</label> }
+                            @if (Model.FilterPropertyTypes.Contains("Office", StringComparer.OrdinalIgnoreCase)) { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Office" checked /> Office</label> } else { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Office" /> Office</label> }
+                            @if (Model.FilterPropertyTypes.Contains("Townhouse", StringComparer.OrdinalIgnoreCase)) { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Townhouse" checked /> Townhouse</label> } else { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Townhouse" /> Townhouse</label> }
+                            @if (Model.FilterPropertyTypes.Contains("Room", StringComparer.OrdinalIgnoreCase)) { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Room" checked /> Room</label> } else { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Room" /> Room</label> }
+                            @if (Model.FilterPropertyTypes.Contains("Penthouse", StringComparer.OrdinalIgnoreCase)) { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Penthouse" checked /> Penthouse</label> } else { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Penthouse" /> Penthouse</label> }
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-auth-primary w-100 rounded-pill btn-sm mt-2">Apply</button>
+                </form>
+            </div>
+        </aside>
+
+        <main class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="fw-bold mb-0">@ViewData["Title"]</h3>
+                <span class="text-muted small">Showing <b>@((Model.CurrentPage - 1) * Model.PageSize + 1)</b>-<b>@Math.Min(Model.CurrentPage * Model.PageSize, Model.TotalCount)</b> of <b>@Model.TotalCount</b> results</span>
+            </div>
+
+            <div class="row g-4">
+                @foreach (var item in Model.Listings)
+                {
+                    <div class="col-md-6 col-xl-4">
+                        <div class="card property-card h-100 border-0 shadow-sm overflow-hidden rounded-4 @(item.IsBoosted ? "boosted-card" : "")">
+                            <div class="position-relative">
+                                <img src="@item.ImageUrl" class="card-img-top" style="height: 200px; object-fit: cover;">
+                                @if (item.IsBoosted)
+                                {
+                                    <div class="position-absolute top-0 start-0 m-2">
+                                        <span class="badge bg-warning text-dark fw-bold">
+                                            <i class="bi bi-lightning-fill"></i> BOOSTED
+                                        </span>
+                                    </div>
+                                }
+                                <span class="badge @(item.TransactionType == "Sell" ? "bg-primary" : "bg-success") position-absolute bottom-0 start-0 m-3 rounded-pill px-3">
+                                    @(item.TransactionType == "Sell" ? "Sale" : "Rent")
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <h6 class="card-title fw-bold text-truncate">@item.Title</h6>
+                                <p class="text-muted small"><i class="bi bi-geo-alt"></i> @item.Address</p>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <span class="h5 text-primary fw-bold mb-0">@item.FormattedPrice</span>
+                                    <div class="property-icons text-muted small">
+                                        <span><i class="bi bi-door-open"></i> @item.Bedrooms</span>
+                                        <span class="ms-2"><i class="bi bi-droplet"></i> @item.Bathrooms</span>
+                                        <span class="ms-2 d-inline-flex align-items-center" title="Floors"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 24 24"><path d="M2 19h4v-4h4v-4h4v-4h4V3H2v4h4v4H2v4h4v4H2z"/></svg> <span class="ms-1">@item.Floors</span></span>
+                                        <span class="ms-2"><i class="bi bi-aspect-ratio"></i> @(item.Area)m²</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent border-top-0 pb-3">
+                                <a asp-page="/Listings/PropertyDetail" asp-route-id="@item.Id" class="btn btn-outline-primary w-100 rounded-pill">Details</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @if (Model.TotalPages > 1)
+            {
+                <nav aria-label="Page navigation" class="mt-5">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                            <a class="page-link" href="@GeneratePaginationUrl(Model.CurrentPage - 1)" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        
+                        @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                        {
+                            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                <a class="page-link" href="@GeneratePaginationUrl(i)">@i</a>
+                            </li>
+                        }
+
+                        <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                            <a class="page-link" href="@GeneratePaginationUrl(Model.CurrentPage + 1)" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            }
+        </main>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        aside .card {
+            transition: box-shadow 0.3s ease;
+        }
+
+        .property-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .property-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 1rem 3rem rgba(0,0,0,0.1) !important;
+        }
+
+        .boosted-card {
+            border: 2px solid #ffc107 !important;
+            box-shadow: 0 0.5rem 2rem rgba(255, 193, 7, 0.2) !important;
+        }
+
+        .boosted-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 1.5rem 3.5rem rgba(255, 193, 7, 0.3) !important;
+        }
+
+        .bg-success {
+            background-color: #28a745 !important;
+        }
+
+        .bg-primary {
+            background-color: #0d6efd !important;
+        }
+
+        .pagination .page-link {
+            color: #0d6efd;
+            border-radius: 0.5rem;
+            margin: 0 0.2rem;
+            border: 1px solid #dee2e6;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+
+        .pagination .page-link:hover {
+            background-color: #e9ecef;
+        }
+
+        @@media (max-width: 991.98px) {
+            aside .card {
+                position: relative !important;
+                top: 0 !important;
+                margin-bottom: 2rem;
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        (function () {
+            var input = document.getElementById('maxPriceInput');
+            document.querySelectorAll('.price-suggestion').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    if (input) input.value = this.getAttribute('data-value') || '';
+                });
+            });
+        })();
+    </script>
+}

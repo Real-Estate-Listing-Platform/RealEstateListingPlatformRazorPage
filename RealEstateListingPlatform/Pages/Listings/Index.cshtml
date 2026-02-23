@@ -1,0 +1,70 @@
+@page
+@model RealEstateListingPlatform.Pages.Listings.IndexModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-page="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Transaction Type</th>
+            <th>Property Type</th>
+            <th>Price</th>
+            <th>Street Name</th>
+            <th>Ward</th>
+            <th>District</th>
+            <th>City</th>
+            <th>Area</th>
+            <th>House Number</th>
+            <th>Bedrooms</th>
+            <th>Bathrooms</th>
+            <th>Floors</th>
+            <th>Legal Status</th>
+            <th>Furniture Status</th>
+            <th>Direction</th>
+            <th>Status</th>
+            <th>Created At</th>
+            <th>Lister</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Listings) {
+        <tr>
+            <td>@item.Title</td>
+            <td>@item.Description</td>
+            <td>@item.TransactionType</td>
+            <td>@item.PropertyType</td>
+            <td>@item.Price</td>
+            <td>@item.StreetName</td>
+            <td>@item.Ward</td>
+            <td>@item.District</td>
+            <td>@item.City</td>
+            <td>@item.Area</td>
+            <td>@item.HouseNumber</td>
+            <td>@item.Bedrooms</td>
+            <td>@item.Bathrooms</td>
+            <td>@item.Floors</td>
+            <td>@item.LegalStatus</td>
+            <td>@item.FurnitureStatus</td>
+            <td>@item.Direction</td>
+            <td>@item.Status</td>
+            <td>@item.CreatedAt</td>
+            <td>@item.ListerName</td>
+            <td>
+                <a asp-page="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-page="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-page="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

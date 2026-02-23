@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Estately</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="auth-body">
+    <div class="container-fluid p-0">
+        <div class="row g-0 h-100vh">
+            <!-- Left Side: Image -->
+            <div class="col-lg-7 d-none d-lg-block position-relative">
+                <div class="auth-bg-image">
+                    <div class="overlay"></div>
+                    <div class="auth-text">
+                        <h1 class="display-3 fw-bold text-white">Welcome Home</h1>
+                    </div>
+                </div>
+            </div>
+            <!-- Right Side: Content -->
+            <div class="col-lg-5 d-flex align-items-center justify-content-center bg-white">
+                <div class="auth-content w-75">
+                    <div class="mb-4">
+                        <a href="/" class="d-flex align-items-center text-decoration-none text-dark mb-4">
+                            <img src="~/images/logo.png" alt="Estately Logo" height="50" />
+                        </a>
+                    </div>
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success" role="alert">
+                            @TempData["SuccessMessage"]
+                        </div>
+                    }
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            @TempData["ErrorMessage"]
+                        </div>
+                    }
+                    @RenderBody()
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        $(document).on('click', '.js-auth-switch', function(e) {
+            e.preventDefault();
+            window.location.replace($(this).attr('href'));
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
