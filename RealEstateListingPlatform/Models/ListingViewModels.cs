@@ -58,7 +58,7 @@ namespace RealEstateListingPlatform.Models
         
         // Package-related properties
         public bool IsBoosted { get; set; }
-        public bool IsFreeListingorder { get; set; }
+        public bool IsFreeListingSlot { get; set; }
         public int MaxPhotos { get; set; } = 5;
         public bool AllowVideo { get; set; }
     }

@@ -161,7 +161,7 @@ namespace BLL.Services.Implementation
             {
                 // This is a new listing rejection
                 // Refund package slot if listing was using a paid package
-                if (!listing.IsFreeListingorder && listing.UserPackageId.HasValue)
+                if (!listing.IsFreeListingSlot && listing.UserPackageId.HasValue)
                 {
                     var refundResult = await _packageService.RefundListingSlotAsync(listing.UserPackageId.Value);
                     if (refundResult.Success)
@@ -203,7 +203,7 @@ namespace BLL.Services.Implementation
             // Check for active free listings
             var userListings = await _listingRepository.GetListingsByListerIdAsync(listerId);
             var activeFreeListings = userListings.Count(l => 
-                l.IsFreeListingorder && 
+                l.IsFreeListingSlot && 
                 (l.Status == "Published" || l.Status == "PendingReview") &&
                 (!l.ExpirationDate.HasValue || l.ExpirationDate > DateTime.UtcNow));
 
@@ -261,7 +261,7 @@ namespace BLL.Services.Implementation
                 FurnitureStatus = dto.FurnitureStatus,
                 Direction = dto.Direction,
                 UserPackageId = userPackageId,
-                IsFreeListingorder = isFreeListingorder,
+                IsFreeListingSlot = isFreeListingorder,
                 MaxPhotos = maxPhotos,
                 AllowVideo = allowVideo,
                 ExpirationDate = expirationDate,
@@ -892,7 +892,7 @@ namespace BLL.Services.Implementation
                 CreatedAt = listing.CreatedAt,
                 UpdatedAt = listing.UpdatedAt,
                 UserPackageId = listing.UserPackageId,
-                IsFreeListingorder = listing.IsFreeListingorder,
+                IsFreeListingSlot = listing.IsFreeListingSlot,
                 MaxPhotos = listing.MaxPhotos,
                 AllowVideo = listing.AllowVideo,
                 IsBoosted = listing.IsBoosted,

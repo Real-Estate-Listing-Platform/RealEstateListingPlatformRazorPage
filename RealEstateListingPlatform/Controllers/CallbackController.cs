@@ -1,11 +1,11 @@
-﻿using BLL.DTOs;
+using BLL.DTOs;
 using BLL.Services;
 using Microsoft.AspNetCore.Mvc;
 using PayOS.Models.Webhooks;
 
 namespace RealEstateListingPlatform.Controllers
 {
-    [Route("api")]
+    [Route("api/[controller]")]
     [ApiController]
     public class CallbackController : ControllerBase
     {
@@ -23,8 +23,8 @@ namespace RealEstateListingPlatform.Controllers
             _payOSService = payOSService;
         }
 
-        [HttpPost("payment")]
-        public async Task<IActionResult> Callback(Webhook webhook)
+        [HttpPost("PayOS")]
+        public async Task<IActionResult> PayOSCallback(Webhook webhook)
         {
             Console.WriteLine($"[PayOS Webhook] Received webhook for OrderCode: {webhook.Data.OrderCode}");
 

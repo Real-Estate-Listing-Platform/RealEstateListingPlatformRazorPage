@@ -46,7 +46,7 @@ namespace RealEstateListingPlatform.Pages.Lister
         public string? Status => Listing?.Status;
         public DateTime? ExpirationDate => Listing?.ExpirationDate;
         public bool IsBoosted => Listing?.IsBoosted ?? false;
-        public bool IsFreeListingorder => Listing?.IsFreeListingorder ?? false;
+        public bool IsFreeListingSlot => Listing?.IsFreeListingSlot ?? false;
         public int MaxPhotos => Listing?.MaxPhotos ?? 0;
         public bool AllowVideo => Listing?.AllowVideo ?? false;
         public List<ListingMediaDto> ListingMedia => Listing?.ListingMedia ?? new List<ListingMediaDto>();

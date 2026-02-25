@@ -61,7 +61,7 @@ namespace RealEstateListingPlatform.Pages.Lister
         public DateTime? UpdatedAt { get => Input.UpdatedAt; set => Input.UpdatedAt = value; }
         public List<ListingMediaDto>? ExistingMedia { get => Input.ExistingMedia; set => Input.ExistingMedia = value; }
         public bool IsBoosted { get => Input.IsBoosted; set => Input.IsBoosted = value; }
-        public bool IsFreeListingorder { get => Input.IsFreeListingorder; set => Input.IsFreeListingorder = value; }
+        public bool IsFreeListingSlot { get => Input.IsFreeListingSlot; set => Input.IsFreeListingSlot = value; }
         public int MaxPhotos { get => Input.MaxPhotos; set => Input.MaxPhotos = value; }
         public bool AllowVideo { get => Input.AllowVideo; set => Input.AllowVideo = value; }
 
@@ -301,7 +301,7 @@ namespace RealEstateListingPlatform.Pages.Lister
                 UpdatedAt = listing.UpdatedAt,
                 ExistingMedia = listing.ListingMedia ?? new List<ListingMediaDto>(),
                 IsBoosted = listing.IsBoosted,
-                IsFreeListingorder = listing.IsFreeListingorder,
+                IsFreeListingSlot = listing.IsFreeListingSlot,
                 MaxPhotos = listing.MaxPhotos,
                 AllowVideo = listing.AllowVideo
             };

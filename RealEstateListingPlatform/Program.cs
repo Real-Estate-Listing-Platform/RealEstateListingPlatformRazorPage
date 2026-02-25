@@ -38,7 +38,11 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 
+// SignalR Service
+builder.Services.AddSingleton<RealEstateListingPlatform.Services.ISignalRNotificationService, RealEstateListingPlatform.Services.SignalRNotificationService>();
 
+// SignalR
+builder.Services.AddSignalR();
 
 builder.Services.AddHttpClient();
 builder.Services.AddDistributedMemoryCache();
@@ -208,6 +212,9 @@ app.MapStaticAssets();
 
 // Map API controllers with attribute routing
 app.MapControllers();
+
+// Map SignalR Hub
+app.MapHub<RealEstateListingPlatform.Hubs.NotificationHub>("/notificationHub");
 
 // Map Razor Pages
 app.MapRazorPages();

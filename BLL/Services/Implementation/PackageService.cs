@@ -292,7 +292,7 @@ public class PackageService : IPackageService
                 if (userPackage.RemainingListings.HasValue && userPackage.RemainingListings > 0)
                 {
                     listing.UserPackageId = userPackage.Id;
-                    listing.IsFreeListingorder = false;
+                    listing.IsFreeListingSlot = false;
                     
                     // Apply any photo/video benefits from the listing package
                     if (userPackage.Package.PhotoLimit.HasValue)
@@ -336,7 +336,7 @@ public class PackageService : IPackageService
         // Check active free listings
         var listings = await _listingRepository.GetListingsByListerIdAsync(userId);
         var activeFreeListings = listings.Count(l => 
-            l.IsFreeListingorder && 
+            l.IsFreeListingSlot && 
             (l.Status == "Published" || l.Status == "PendingReview") &&
             (!l.ExpirationDate.HasValue || l.ExpirationDate > DateTime.UtcNow));
 

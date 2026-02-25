@@ -530,11 +530,11 @@ namespace BLL.Services.Implementation
                         Value = conversionRate
                     });
 
-                    // Views placeholder (would need ListingViewRepository)
+                    // Views placeholder
                     stats.ViewsChartData.Add(new ChartDataPoint
                     {
                         Label = dateLabel,
-                        Value = 0  // TODO: Implement with IListingViewRepository
+                        Value = 0  // Implement with IListingViewRepository when view tracking is ready
                     });
                 }
 

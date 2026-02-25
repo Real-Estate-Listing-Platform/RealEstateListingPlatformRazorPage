@@ -33,7 +33,7 @@ namespace BLL.DTOs
         
         // Package and payment tracking
         public Guid? UserPackageId { get; set; }
-        public bool IsFreeListingorder { get; set; }
+        public bool IsFreeListingSlot { get; set; }
         public int MaxPhotos { get; set; }
         public bool AllowVideo { get; set; }
         public bool IsBoosted { get; set; }

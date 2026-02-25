@@ -34,9 +34,10 @@ Desktop.ini
 # ========================================
 # ASP.NET Core
 # ========================================
-appsettings.Development.json
+# appsettings.Development.json  # Keep this for development
 appsettings.Local.json
 appsettings.*.local.json
+appsettings.Production.json
 
 # ========================================
 # Environment variables / secrets

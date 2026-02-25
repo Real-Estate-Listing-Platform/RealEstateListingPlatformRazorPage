@@ -11,6 +11,10 @@ public class TransactionDto
     public string Status { get; set; } = null!;
     public string? PaymentMethod { get; set; }
     public string? PaymentReference { get; set; }
+    public long? PayOSOrderCode { get; set; }  // PayOS order code
+    public string? PayOSCheckoutUrl { get; set; }
+    public string? PayOSQrCode { get; set; }
+    public string? PayOSTransactionId { get; set; }
     public string? Notes { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? CompletedAt { get; set; }

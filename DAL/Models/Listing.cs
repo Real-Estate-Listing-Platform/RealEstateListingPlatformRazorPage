@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Models;
@@ -61,7 +62,10 @@ public partial class Listing
 
     // Package and payment tracking
     public Guid? UserPackageId { get; set; } // Reference to package used for this listing
-    public bool IsFreeListingorder { get; set; } = true; // True if using free tier
+    
+    [Column("IsFreeListingorder")] // Database column name (keep for compatibility)
+    public bool IsFreeListingSlot { get; set; } = true; // True if using free tier
+    
     public int MaxPhotos { get; set; } = 5; // Default 5 photos for free tier
     public bool AllowVideo { get; set; } = false; // Video upload permission
     public bool IsBoosted { get; set; } = false; // Is currently boosted to top
