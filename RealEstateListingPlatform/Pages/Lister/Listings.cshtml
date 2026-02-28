@@ -18,7 +18,7 @@
                 </h1>
                 <p class="page-subtitle text-muted">Manage all your property listings</p>
             </div>
-            <a asp-controller="Lister" asp-action="Create" class="btn btn-primary btn-lg">
+            <a asp-page="/Lister/Create" class="btn btn-primary btn-lg">
                 <i class="bi bi-plus-circle me-2"></i>Create New Listing
             </a>
         </div>
@@ -48,7 +48,7 @@
 
     <!-- Filter and Search -->
     <div class="filter-section mb-4">
-        <form asp-controller="Lister" asp-action="Listings" method="get">
+        <form asp-page="/Lister/Listings" method="get">
             <div class="row g-3">
                 <div class="col-md-4">
                     <div class="input-group">
@@ -116,7 +116,7 @@
                     </button>
                 </div>
                 <div class="col-md-2">
-                    <a asp-controller="Lister" asp-action="Listings" class="btn btn-outline-secondary w-100">
+                    <a asp-page="/Lister/Listings" class="btn btn-outline-secondary w-100">
                         <i class="bi bi-x-circle me-2"></i>Reset
                     </a>
                 </div>
@@ -156,14 +156,14 @@
     {
         <div class="alert alert-info">
             <i class="bi bi-info-circle me-2"></i>You have not created any listings yet. 
-            <a asp-controller="Listings" asp-action="Create" class="alert-link">Create your first listing</a>
+            <a asp-page="/Lister/Create" class="alert-link">Create your first listing</a>
         </div>
     }
     else
     {
         <!-- Listings Table -->
         <div class="listings-table-card">
-        <form asp-controller="Lister" asp-action="Listings" method="get" id="sortForm">
+        <form asp-page="/Lister/Listings" method="get" id="sortForm">
             <input type="hidden" name="searchTerm" value="@Model.SearchTerm" />
             <input type="hidden" name="status" value="@Model.Status" />
             <input type="hidden" name="transactionType" value="@Model.TransactionType" />
@@ -296,11 +296,11 @@
                             </td>
                             <td>
                                 <div class="action-buttons">
-                                    <a asp-controller="Lister" asp-action="Edit" asp-route-id="@listing.Id" 
+                                    <a asp-page="/Lister/Edit" asp-route-id="@listing.Id" 
                                        class="btn btn-sm btn-outline-primary" title="Edit">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    <a asp-controller="Lister" asp-action="Details" asp-route-id="@listing.Id" 
+                                    <a asp-page="/Lister/Details" asp-route-id="@listing.Id" 
                                        class="btn btn-sm btn-outline-info" title="View">
                                         <i class="bi bi-eye"></i>
                                     </a>
@@ -336,7 +336,7 @@
                     <ul class="pagination mb-0">
                         <li class="page-item @(!Model.HasPrevious ? "disabled" : "")">
                             <a class="page-link" 
-                               href="@Url.Action("Listings", new { 
+                               href="@Url.Page("/Lister/Listings", new { 
                                    searchTerm = ViewBag.CurrentSearch, 
                                    status = ViewBag.CurrentStatus, 
                                    transactionType = ViewBag.CurrentTransactionType,
@@ -361,7 +361,7 @@
                             {
                                 <li class="page-item">
                                     <a class="page-link" 
-                                       href="@Url.Action("Listings", new { 
+                                       href="@Url.Page("/Lister/Listings", new { 
                                            searchTerm = ViewBag.CurrentSearch, 
                                            status = ViewBag.CurrentStatus, 
                                            transactionType = ViewBag.CurrentTransactionType,
@@ -386,7 +386,7 @@
                             {
                                 <li class="page-item @(i == Model.PageNumber ? "active" : "")">
                                     <a class="page-link" 
-                                       href="@Url.Action("Listings", new { 
+                                       href="@Url.Page("/Lister/Listings", new { 
                                            searchTerm = ViewBag.CurrentSearch, 
                                            status = ViewBag.CurrentStatus, 
                                            transactionType = ViewBag.CurrentTransactionType,
@@ -411,7 +411,7 @@
                                 }
                                 <li class="page-item">
                                     <a class="page-link" 
-                                       href="@Url.Action("Listings", new { 
+                                       href="@Url.Page("/Lister/Listings", new { 
                                            searchTerm = ViewBag.CurrentSearch, 
                                            status = ViewBag.CurrentStatus, 
                                            transactionType = ViewBag.CurrentTransactionType,
@@ -431,7 +431,7 @@
 
                         <li class="page-item @(!Model.HasNext ? "disabled" : "")">
                             <a class="page-link" 
-                               href="@Url.Action("Listings", new { 
+                               href="@Url.Page("/Lister/Listings", new { 
                                    searchTerm = ViewBag.CurrentSearch, 
                                    status = ViewBag.CurrentStatus, 
                                    transactionType = ViewBag.CurrentTransactionType,
@@ -475,7 +475,7 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="bi bi-x-circle me-2"></i>Cancel
                 </button>
-                <form id="deleteForm" asp-controller="Lister" asp-action="Delete" method="post" class="d-inline">
+                <form id="deleteForm" asp-page="/Lister/Listings" asp-page-handler="Delete" method="post" class="d-inline">
                     <input type="hidden" id="listingIdToDelete" name="id" value="" />
                     <button type="submit" class="btn btn-danger">
                         <i class="bi bi-trash me-2"></i>Yes, Delete It
@@ -727,7 +727,7 @@
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form asp-controller="Lister" asp-action="BoostListing" method="post">
+                <form asp-page="/Lister/Listings" asp-page-handler="BoostListing" method="post">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="listingId" value="@listing.Id" />
                     <div class="modal-body p-4">

@@ -143,6 +143,7 @@
                 </div>
                 
                 <form id="leadForm">
+                    @Html.AntiForgeryToken()
                     <input type="hidden" id="listingId" value="@Model.Property.Id" />
                     
                     <div class="mb-3">
@@ -234,7 +235,8 @@
 }
 
 @section Scripts {
-    <script>
+<partial name="_PublicListingsSignalR" />
+<script>
         (function () {
             var track = document.getElementById('detail-gallery-track');
             if (!track) return;
@@ -278,10 +280,11 @@
             };
             
             // Send request
-            fetch('/api/Leads/Create', {
+            fetch('/Listings/PropertyDetail/@Model.Property.Id?handler=CreateLead', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
                 },
                 body: JSON.stringify(data)
             })

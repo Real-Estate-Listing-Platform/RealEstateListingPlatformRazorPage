@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 namespace RealEstateListingPlatform.Pages.Payment
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,Lister,Seeker")]
     public class FailedModel : PageModel
     {
         private readonly IPaymentService _paymentService;

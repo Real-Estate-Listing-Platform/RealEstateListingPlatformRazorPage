@@ -9,10 +9,12 @@ namespace RealEstateListingPlatform.Pages.Listings
     public class PropertyDetailModel : PageModel
     {
         private readonly IListingService _listingService;
+        private readonly ILeadService _leadService;
 
-        public PropertyDetailModel(IListingService listingService)
+        public PropertyDetailModel(IListingService listingService, ILeadService leadService)
         {
             _listingService = listingService;
+            _leadService = leadService;
         }
 
         [BindProperty(SupportsGet = true)]
@@ -72,6 +74,24 @@ namespace RealEstateListingPlatform.Pages.Listings
             };
 
             return Page();
+        }
+
+        public async Task<IActionResult> OnPostCreateLeadAsync([FromBody] CreateLeadDto dto)
+        {
+            if (!User.Identity?.IsAuthenticated ?? true)
+            {
+                return new JsonResult(new { success = false, message = "You must be logged in to express interest." });
+            }
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var seekerId))
+            {
+                return new JsonResult(new { success = false, message = "Invalid user session." });
+            }
+
+            var result = await _leadService.CreateLeadAsync(dto.ListingId, seekerId, dto.Message, dto.AppointmentDate);
+
+            return new JsonResult(new { success = result.Success, message = result.Message });
         }
     }
 }

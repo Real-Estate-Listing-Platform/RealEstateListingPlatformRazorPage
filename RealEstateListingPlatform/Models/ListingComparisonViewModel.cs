@@ -79,9 +79,9 @@ namespace RealEstateListingPlatform.Models
             get
             {
                 if (Price >= 1000000000)
-                    return $"{Price / 1000000000:N1} t?";
+                    return $"{Price / 1000000000:N1} tỷ";
                 if (Price >= 1000000)
-                    return $"{Price / 1000000:N0} tri?u";
+                    return $"{Price / 1000000:N0} triệu";
                 return Price.ToString("N0") + " VND";
             }
         }

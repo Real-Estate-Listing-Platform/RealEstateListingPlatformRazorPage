@@ -259,14 +259,19 @@
         <!-- Sidebar -->
         <div class="col-lg-4">
             <!-- View Statistics Card -->
-            @if (ViewBag.ViewStats != null)
+            @if (Model.ViewStats != null)
             {
-                var stats = (BLL.DTOs.ListingViewStats)ViewBag.ViewStats;
+                var stats = Model.ViewStats;
                 <div class="details-card mb-4">
                     <div class="card-header bg-info text-white">
-                        <h4 class="card-title mb-0">
-                            <i class="bi bi-eye me-2"></i>View Statistics
-                        </h4>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="card-title mb-0">
+                                <i class="bi bi-eye me-2"></i>View Statistics
+                            </h4>
+                            <span class="badge bg-light text-dark" id="view-connection-badge">
+                                <i class="bi bi-wifi-off"></i> Connecting...
+                            </span>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div class="view-stats-grid">
@@ -276,7 +281,7 @@
                                 </div>
                                 <div class="stat-details">
                                     <div class="stat-label">Total Views</div>
-                                    <div class="stat-value">@stats.TotalViews</div>
+                                    <div class="stat-value" id="vs-totalViews">@stats.TotalViews</div>
                                 </div>
                             </div>
                             <div class="view-stat-item">
@@ -285,7 +290,7 @@
                                 </div>
                                 <div class="stat-details">
                                     <div class="stat-label">Today</div>
-                                    <div class="stat-value">@stats.ViewsToday</div>
+                                    <div class="stat-value" id="vs-viewsToday">@stats.ViewsToday</div>
                                 </div>
                             </div>
                             <div class="view-stat-item">
@@ -294,7 +299,7 @@
                                 </div>
                                 <div class="stat-details">
                                     <div class="stat-label">This Week</div>
-                                    <div class="stat-value">@stats.ViewsThisWeek</div>
+                                    <div class="stat-value" id="vs-viewsThisWeek">@stats.ViewsThisWeek</div>
                                 </div>
                             </div>
                             <div class="view-stat-item">
@@ -303,7 +308,7 @@
                                 </div>
                                 <div class="stat-details">
                                     <div class="stat-label">This Month</div>
-                                    <div class="stat-value">@stats.ViewsThisMonth</div>
+                                    <div class="stat-value" id="vs-viewsThisMonth">@stats.ViewsThisMonth</div>
                                 </div>
                             </div>
                         </div>
@@ -455,12 +460,12 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        <a asp-controller="Lister" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                        <a asp-page="/Lister/Edit" asp-route-id="@Model.Id" class="btn btn-primary">
                             <i class="bi bi-pencil me-2"></i>Edit Listing
                         </a>
                         @if (string.Equals(Model.Status, "Draft", StringComparison.OrdinalIgnoreCase))
                         {
-                            <form asp-controller="Lister" asp-action="SubmitForReview" asp-route-id="@Model.Id" method="post">
+                            <form asp-page="/Lister/Details" asp-page-handler="SubmitForReview" asp-route-id="@Model.Id" method="post">
                                 <button type="submit" class="btn btn-warning w-100">
                                     <i class="bi bi-send me-2"></i>Submit for Review
                                 </button>
@@ -495,7 +500,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form asp-controller="Lister" asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-inline">
+                <form asp-page="/Lister/Details" asp-page-handler="Delete" asp-route-id="@Model.Id" method="post" class="d-inline">
                     <button type="submit" class="btn btn-danger">
                         <i class="bi bi-trash me-2"></i>Yes, Delete It
                     </button>
@@ -536,11 +541,14 @@
 @section Scripts {
 <!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
     
-@if (ViewBag.ViewStats != null)
+@if (Model.ViewStats != null)
 {
-    var stats = (BLL.DTOs.ListingViewStats)ViewBag.ViewStats;
+    var stats = Model.ViewStats;
     <script>
+        let viewsChart = null;
+
         (function() {
             // Prepare chart data
             const labels = @Html.Raw(Json.Serialize(stats.DailyStats.Select(s => s.Date).ToList()));
@@ -548,7 +556,7 @@
 
             // Create the chart
             const ctx = document.getElementById('viewsChart').getContext('2d');
-            const viewsChart = new Chart(ctx, {
+            viewsChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels.map(date => {
@@ -680,6 +688,100 @@
             });
         })();
     </script>
+
+<script>
+    (function () {
+        const listingId = '@Model.Id';
+        const badge = document.getElementById('view-connection-badge');
+
+        // Animate a stat value
+        function animateViewStat(elementId, newValue) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            el.textContent = newValue;
+            el.classList.remove('vs-updated');
+            void el.offsetWidth;
+            el.classList.add('vs-updated');
+        }
+
+        // Fetch fresh view stats from server and update all elements
+        async function refreshViewStats() {
+            try {
+                const response = await fetch(`/Lister/Details/${listingId}?handler=ViewStats&id=${listingId}`);
+                const result = await response.json();
+                if (!result.success || !result.data) return;
+
+                const d = result.data;
+                animateViewStat('vs-totalViews', d.totalViews);
+                animateViewStat('vs-viewsToday', d.viewsToday);
+                animateViewStat('vs-viewsThisWeek', d.viewsThisWeek);
+                animateViewStat('vs-viewsThisMonth', d.viewsThisMonth);
+
+                // Update chart
+                if (typeof viewsChart !== 'undefined' && viewsChart && d.dailyStats) {
+                    viewsChart.data.labels = d.dailyStats.map(s => {
+                        const dt = new Date(s.date);
+                        return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    });
+                    viewsChart.data.datasets[0].data = d.dailyStats.map(s => s.views);
+                    viewsChart.update('none');
+                }
+            } catch (error) {
+                console.error('Error refreshing view stats:', error);
+            }
+        }
+
+        // Initialize SignalR
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl('/hubs/dashboard')
+            .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
+            .build();
+
+        connection.on('ReceiveDashboardUpdate', function (eventType, data) {
+            if (eventType === 'ViewTracked' && data.listingId === listingId) {
+                refreshViewStats();
+            }
+        });
+
+        connection.onreconnecting(function () {
+            if (badge) {
+                badge.className = 'badge bg-warning text-dark';
+                badge.innerHTML = '<i class="bi bi-arrow-repeat"></i> Reconnecting...';
+            }
+        });
+
+        connection.onreconnected(function () {
+            if (badge) {
+                badge.className = 'badge bg-light text-success';
+                badge.innerHTML = '<i class="bi bi-wifi"></i> Live';
+            }
+            connection.invoke('JoinListingGroup', listingId).catch(console.error);
+        });
+
+        connection.onclose(function () {
+            if (badge) {
+                badge.className = 'badge bg-light text-danger';
+                badge.innerHTML = '<i class="bi bi-wifi-off"></i> Offline';
+            }
+        });
+
+        connection.start()
+            .then(function () {
+                if (badge) {
+                    badge.className = 'badge bg-light text-success';
+                    badge.innerHTML = '<i class="bi bi-wifi"></i> Live';
+                }
+                connection.invoke('JoinListingGroup', listingId).catch(console.error);
+            })
+            .catch(function (err) {
+                console.error('SignalR connection error:', err);
+                if (badge) {
+                    badge.className = 'badge bg-light text-danger';
+                    badge.innerHTML = '<i class="bi bi-wifi-off"></i> Offline';
+                }
+            });
+    })();
+</script>
 }
 
 <style>
@@ -937,6 +1039,17 @@
 
     #viewsChart {
         max-height: 200px;
+    }
+
+    /* Stat update animation */
+    .vs-updated {
+        animation: vsPulse 0.6s ease-in-out;
+    }
+
+    @@keyframes vsPulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.2); color: #0d6efd; }
+        100% { transform: scale(1); }
     }
 
     /* Lightbox Modal Styles */

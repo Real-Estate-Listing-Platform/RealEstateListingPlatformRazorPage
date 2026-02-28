@@ -1,7 +1,9 @@
 using BLL.DTOs;
+using BLL.Hubs;
 using BLL.Services;
 using DAL.Models;
 using DAL.Repositories;
+using Microsoft.AspNetCore.SignalR;
 
 namespace BLL.Services.Implementation;
 
@@ -11,17 +13,20 @@ public class PackageService : IPackageService
     private readonly IUserRepository _userRepository;
     private readonly IListingRepository _listingRepository;
     private readonly IPaymentService _paymentService;
+    private readonly IHubContext<DashboardHub, IDashboardClient> _dashboardHub;
 
     public PackageService(
         IPackageRepository packageRepository,
         IUserRepository userRepository,
         IListingRepository listingRepository,
-        IPaymentService paymentService)
+        IPaymentService paymentService,
+        IHubContext<DashboardHub, IDashboardClient> dashboardHub)
     {
         _packageRepository = packageRepository;
         _userRepository = userRepository;
         _listingRepository = listingRepository;
         _paymentService = paymentService;
+        _dashboardHub = dashboardHub;
     }
 
     // Package management
@@ -489,6 +494,9 @@ public class PackageService : IPackageService
             await _packageRepository.UpdateUserPackageAsync(userPackage);
         }
 
+        // Notify public listing pages in real-time
+        await NotifyListingBoostedAsync(listing);
+
         return ServiceResult<ListingBoost>.SuccessResult(created, "Listing boosted successfully");
     }
 
@@ -533,6 +541,46 @@ public class PackageService : IPackageService
     {
         var boost = await _packageRepository.GetActiveBoostByListingIdAsync(listingId);
         return ServiceResult<bool>.SuccessResult(boost != null);
+    }
+
+    // SignalR notification helper
+    private async Task NotifyListingBoostedAsync(Listing listing)
+    {
+        try
+        {
+            var imageUrl = listing.ListingMedia?
+                .OrderBy(m => m.SortOrder ?? int.MaxValue)
+                .ThenBy(m => m.Id)
+                .Select(m => m.Url)
+                .FirstOrDefault() ?? "";
+
+            var payload = new
+            {
+                listingId = listing.Id,
+                timestamp = DateTime.UtcNow,
+                id = listing.Id,
+                title = listing.Title,
+                price = listing.Price,
+                transactionType = listing.TransactionType ?? "",
+                propertyType = listing.PropertyType ?? "",
+                address = $"{listing.HouseNumber}, {listing.StreetName}, {listing.Ward}, {listing.District}, {listing.City}",
+                district = listing.District ?? "",
+                city = listing.City ?? "",
+                area = listing.Area ?? "0",
+                bedrooms = listing.Bedrooms,
+                bathrooms = listing.Bathrooms,
+                floors = listing.Floors,
+                imageUrl = imageUrl,
+                isBoosted = true
+            };
+
+            await _dashboardHub.Clients.Group(DashboardHub.PublicListingsGroup)
+                .ReceiveDashboardUpdate("ListingBoosted", payload);
+        }
+        catch (Exception)
+        {
+            // SignalR failure shouldn't break business logic
+        }
     }
 
     // Helper methods

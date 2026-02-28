@@ -34,17 +34,25 @@ namespace RealEstateListingPlatform.Pages.Payment
                     return RedirectToPage("/Package/Index");
                 }
 
-                if (code == "00" && status != "CANCELLED")
+                var transaction = transactionResult.Data;
+
+                // If the webhook already completed the transaction, go straight to success
+                if (string.Equals(transaction.Status, "Completed", StringComparison.OrdinalIgnoreCase))
+                {
+                    return RedirectToPage("/Payment/Success", new { transactionId = transaction.Id });
+                }
+
+                if (code == "00" && !string.Equals(status, "CANCELLED", StringComparison.OrdinalIgnoreCase))
                 {
                     var paymentInfo = await _payOSService.GetPaymentInfoAsync(orderCode);
 
-                    if (paymentInfo != null && paymentInfo.Status == "PAID")
+                    if (paymentInfo != null && string.Equals(paymentInfo.Status, "PAID", StringComparison.OrdinalIgnoreCase))
                     {
-                        return RedirectToPage("/Payment/Success", new { transactionId = transactionResult.Data.Id });
+                        return RedirectToPage("/Payment/Success", new { transactionId = transaction.Id });
                     }
                 }
 
-                return RedirectToPage("/Payment/Failed", new { transactionId = transactionResult.Data.Id });
+                return RedirectToPage("/Payment/Failed", new { transactionId = transaction.Id });
             }
             catch (Exception ex)
             {

@@ -116,6 +116,36 @@ namespace RealEstateListingPlatform.Pages.Lister
             return RedirectToPage("/Lister/Listings");
         }
 
+        public async Task<IActionResult> OnGetViewStatsAsync(Guid id)
+        {
+            var userId = GetCurrentUserId();
+
+            if (!await _listingService.CanUserModifyListingAsync(id, userId))
+            {
+                return new JsonResult(new { success = false });
+            }
+
+            var result = await _listingService.GetListingViewStatsAsync(id, 30);
+            if (!result.Success || result.Data == null)
+            {
+                return new JsonResult(new { success = false });
+            }
+
+            var stats = result.Data;
+            return new JsonResult(new
+            {
+                success = true,
+                data = new
+                {
+                    totalViews = stats.TotalViews,
+                    viewsToday = stats.ViewsToday,
+                    viewsThisWeek = stats.ViewsThisWeek,
+                    viewsThisMonth = stats.ViewsThisMonth,
+                    dailyStats = stats.DailyStats.Select(s => new { date = s.Date, views = s.Views })
+                }
+            });
+        }
+
         private Guid GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

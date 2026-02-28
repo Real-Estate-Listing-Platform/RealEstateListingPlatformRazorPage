@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace RealEstateListingPlatform.Pages.Admin
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Lister,Seeker")]
     public class IndexModel : PageModel
     {
         public IActionResult OnGet()

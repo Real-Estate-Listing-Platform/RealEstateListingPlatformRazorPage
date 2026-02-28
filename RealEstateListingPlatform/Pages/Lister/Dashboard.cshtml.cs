@@ -25,18 +25,60 @@ namespace RealEstateListingPlatform.Pages.Lister
 
         public async Task<IActionResult> OnGetAsync()
         {
+            Stats = await GetStatsForCurrentUserAsync();
+            return Page();
+        }
+
+        public async Task<IActionResult> OnGetStatsAsync()
+        {
+            var stats = await GetStatsForCurrentUserAsync();
+
+            return new JsonResult(new
+            {
+                success = true,
+                data = new
+                {
+                    totalListings = stats.TotalListings,
+                    activeListings = stats.ActiveListings,
+                    pendingReview = stats.PendingReview,
+                    draftListings = stats.DraftListings,
+                    expiredListings = stats.ExpiredListings,
+                    rejectedListings = stats.RejectedListings,
+                    publishSuccessRate = stats.PublishSuccessRate,
+                    totalLeads = stats.TotalLeads,
+                    newLeads = stats.NewLeads,
+                    contactedLeads = stats.ContactedLeads,
+                    closedLeads = stats.ClosedLeads,
+                    conversionRate = stats.ConversionRate,
+                    totalViews = stats.TotalViews,
+                    boostedListings = stats.BoostedListings,
+                    expiringListingsSoon = stats.ExpiringListingsSoon,
+                    lastLeadReceivedAt = stats.LastLeadReceivedAt,
+                    leadsChartData = stats.LeadsChartData.Select(d => new { label = d.Label, value = d.Value }),
+                    conversionChartData = stats.ConversionChartData.Select(d => new { label = d.Label, value = d.Value }),
+                    topPerformingListings = stats.TopPerformingListings.Select(l => new
+                    {
+                        id = l.Id,
+                        title = l.Title,
+                        viewCount = l.ViewCount,
+                        leadCount = l.LeadCount
+                    })
+                }
+            });
+        }
+
+        private async Task<DashboardStatsDto> GetStatsForCurrentUserAsync()
+        {
             var userId = GetCurrentUserId();
-            
-            // Fetch comprehensive dashboard statistics
+
             var statsResult = await _leadService.GetDashboardStatsAsync(userId);
-            
+
             if (!statsResult.Success || statsResult.Data == null)
             {
-                // Fallback to basic stats if service fails
                 var result = await _listingService.GetMyListingsAsync(userId);
                 var listings = result.Data ?? new List<ListingDto>();
 
-                Stats = new DashboardStatsDto
+                return new DashboardStatsDto
                 {
                     TotalListings = listings.Count,
                     ActiveListings = listings.Count(l => l.Status == "Published"),
@@ -57,12 +99,8 @@ namespace RealEstateListingPlatform.Pages.Lister
                     LastLeadReceivedAt = null
                 };
             }
-            else
-            {
-                Stats = statsResult.Data;
-            }
 
-            return Page();
+            return statsResult.Data;
         }
 
         private Guid GetCurrentUserId()

@@ -95,6 +95,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
+                @Html.AntiForgeryToken()
                 <input type="hidden" id="updateLeadId" />
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Status</label>
@@ -338,7 +339,7 @@
         // Load statistics
         async function loadStatistics() {
             try {
-                const response = await fetch('/api/Leads/Statistics');
+                const response = await fetch('/Lister/Customers?handler=Statistics');
                 const result = await response.json();
                 
                 if (result.success && result.data) {
@@ -355,7 +356,7 @@
         // Load leads
         async function loadLeads() {
             try {
-                const response = await fetch('/api/Leads/MyLeadsAsLister');
+                const response = await fetch('/Lister/Customers?handler=MyLeadsAsLister');
                 const result = await response.json();
                 
                 if (result.success && result.data) {
@@ -516,9 +517,12 @@
             const note = document.getElementById('updateNote').value;
             
             try {
-                const response = await fetch('/api/Leads/UpdateStatus', {
+                const response = await fetch('/Lister/Customers?handler=UpdateStatus', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                    },
                     body: JSON.stringify({ leadId, status, listerNote: note || null })
                 });
                 

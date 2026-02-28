@@ -1,0 +1,207 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+<script>
+    (function () {
+        var connection = new signalR.HubConnectionBuilder()
+            .withUrl('/hubs/dashboard')
+            .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
+            .build();
+
+        // Price formatting matching server-side FormattedPrice logic
+        function formatPrice(price) {
+            if (price >= 1000000000) return (price / 1000000000).toFixed(1).replace(/\.0$/, '.0') + ' tỷ';
+            if (price >= 1000000) return Math.round(price / 1000000).toLocaleString('en') + ' triệu';
+            return price.toLocaleString('en') + ' VNĐ';
+        }
+
+        // Build a property card HTML from listing data (matches BrowseListings/AllListings card structure)
+        function buildListingCardHtml(d) {
+            var badgeClass = d.transactionType === 'Sell' ? 'bg-primary' : 'bg-success';
+            var badgeText = d.transactionType === 'Sell' ? 'Sale' : 'Rent';
+            var boostedClass = d.isBoosted ? 'boosted-card' : '';
+            var boostedBadge = d.isBoosted
+                ? '<div class="position-absolute top-0 start-0 m-2"><span class="badge bg-warning text-dark fw-bold"><i class="bi bi-lightning-fill"></i> BOOSTED</span></div>'
+                : '';
+            var imgUrl = d.imageUrl || 'https://tjh.com/wp-content/uploads/2023/06/TJH_HERO_TJH-HOME@2x-1.webp';
+            var floorsVal = d.floors != null ? d.floors : '�';
+            var stairsSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 24 24"><path d="M2 19h4v-4h4v-4h4v-4h4V3H2v4h4v4H2v4h4v4H2z"/></svg>';
+
+            return '<div class="card property-card h-100 border-0 shadow-sm overflow-hidden rounded-4 ' + boostedClass + '">'
+                + '<div class="position-relative">'
+                + '<img src="' + imgUrl + '" class="card-img-top" style="height: 200px; object-fit: cover;">'
+                + boostedBadge
+                + '<span class="badge ' + badgeClass + ' position-absolute bottom-0 start-0 m-3 rounded-pill px-3">' + badgeText + '</span>'
+                + '</div>'
+                + '<div class="card-body">'
+                + '<h6 class="card-title fw-bold text-truncate">' + (d.title || '') + '</h6>'
+                + '<p class="text-muted small"><i class="bi bi-geo-alt"></i> ' + (d.address || '') + '</p>'
+                + '<div class="d-flex justify-content-between align-items-center mt-3">'
+                + '<span class="h5 text-primary fw-bold mb-0">' + formatPrice(d.price) + '</span>'
+                + '<div class="property-icons text-muted small">'
+                + '<span><i class="bi bi-door-open"></i> ' + (d.bedrooms != null ? d.bedrooms : '0') + '</span>'
+                + '<span class="ms-2"><i class="bi bi-droplet"></i> ' + (d.bathrooms != null ? d.bathrooms : '0') + '</span>'
+                + '<span class="ms-2 d-inline-flex align-items-center" title="Floors">' + stairsSvg + ' <span class="ms-1">' + floorsVal + '</span></span>'
+                + '<span class="ms-2"><i class="bi bi-aspect-ratio"></i> ' + (d.area || '0') + 'm²</span>'
+                + '</div></div></div>'
+                + '<div class="card-footer bg-transparent border-top-0 pb-3">'
+                + '<a href="/Listings/PropertyDetail/' + d.id + '" class="btn btn-outline-primary w-100 rounded-pill">Details</a>'
+                + '</div></div>';
+        }
+
+        // Detect which page we are on
+        var isPropertyDetail = window.location.pathname.toLowerCase().indexOf('/listings/propertydetail/') !== -1;
+        var currentListingId = '';
+        if (isPropertyDetail) {
+            var pathParts = window.location.pathname.split('/');
+            currentListingId = pathParts[pathParts.length - 1].toLowerCase();
+        }
+
+        // Find the listing grid container (works for BrowseListings, AllListings, and Index)
+        function getListingGrid() {
+            return document.querySelector('main .row.g-4') || document.querySelector('.row.g-4');
+        }
+
+        // Find a card wrapper by listing id
+        function findCardByListingId(id) {
+            var grid = getListingGrid();
+            if (!grid) return null;
+            var links = grid.querySelectorAll('a[href]');
+            for (var i = 0; i < links.length; i++) {
+                if (links[i].getAttribute('href') && links[i].getAttribute('href').toLowerCase().indexOf(id.toLowerCase()) !== -1) {
+                    // Walk up to the col- wrapper
+                    var el = links[i].closest('[class*="col-"]');
+                    return el;
+                }
+            }
+            return null;
+        }
+
+        connection.on('ReceiveDashboardUpdate', function (eventType, data) {
+            if (eventType === 'ListingRemoved') {
+                var lid = (data.listingId || '').toLowerCase();
+
+                // If on PropertyDetail of the removed listing, redirect away
+                if (isPropertyDetail && currentListingId === lid) {
+                    window.location.href = '/Listings/AllListings';
+                    return;
+                }
+
+                // Remove the card from grid with animation
+                var card = findCardByListingId(lid);
+                if (card) {
+                    card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.9)';
+                    setTimeout(function () { card.remove(); }, 400);
+                }
+            }
+            else if (eventType === 'ListingBoosted') {
+                if (!data.id) return;
+                var lid = data.id.toLowerCase();
+
+                // If on PropertyDetail of this listing, reload to show boost status
+                if (isPropertyDetail && currentListingId === lid) {
+                    window.location.reload();
+                    return;
+                }
+
+                var existing = findCardByListingId(lid);
+                var html = buildListingCardHtml(data);
+                var grid = getListingGrid();
+                if (!grid) return;
+
+                if (existing) {
+                    // Update existing card in place with boosted styling
+                    existing.innerHTML = html;
+
+                    // Animate move to top of grid
+                    existing.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                    existing.style.opacity = '0';
+                    existing.style.transform = 'scale(0.95)';
+                    setTimeout(function () {
+                        grid.insertBefore(existing, grid.firstElementChild);
+                        existing.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                        existing.style.opacity = '1';
+                        existing.style.transform = 'scale(1)';
+                        // Flash golden highlight
+                        existing.style.boxShadow = '0 0 0 3px rgba(255, 193, 7, 0.7)';
+                        setTimeout(function () { existing.style.boxShadow = ''; }, 2000);
+                    }, 300);
+                } else {
+                    // Insert new boosted card at the top
+                    var colClass = grid.querySelector('[class*="col-xl-4"]') ? 'col-md-6 col-xl-4' : 'col-md-4';
+                    var wrapper = document.createElement('div');
+                    wrapper.className = colClass;
+                    wrapper.innerHTML = html;
+                    wrapper.style.opacity = '0';
+                    wrapper.style.transform = 'translateY(20px)';
+                    grid.insertBefore(wrapper, grid.firstElementChild);
+                    requestAnimationFrame(function () {
+                        wrapper.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                        wrapper.style.opacity = '1';
+                        wrapper.style.transform = 'translateY(0)';
+                    });
+                }
+            }
+            else if (eventType === 'ListingPublished' || eventType === 'ListingUpdated') {
+                if (!data.id) return;
+                var lid = data.id.toLowerCase();
+
+                // If on PropertyDetail, reload only if viewing this specific listing (content changed)
+                if (isPropertyDetail) {
+                    if (currentListingId === lid) {
+                        window.location.reload();
+                    }
+                    return;
+                }
+
+                var existing = findCardByListingId(lid);
+                var html = buildListingCardHtml(data);
+
+                if (existing) {
+                    // Update existing card in place
+                    existing.innerHTML = html;
+                    existing.style.transition = 'box-shadow 0.4s ease';
+                    existing.style.boxShadow = '0 0 0 3px rgba(13, 110, 253, 0.5)';
+                    setTimeout(function () { existing.style.boxShadow = ''; }, 1500);
+                } else {
+                    // Insert new card into the grid
+                    var grid = getListingGrid();
+                    if (!grid) return;
+
+                    var colClass = grid.querySelector('[class*="col-xl-4"]') ? 'col-md-6 col-xl-4' : 'col-md-4';
+                    var wrapper = document.createElement('div');
+                    wrapper.className = colClass;
+                    wrapper.innerHTML = html;
+                    wrapper.style.opacity = '0';
+                    wrapper.style.transform = 'translateY(20px)';
+
+                    // Insert boosted cards at the top, others at the end
+                    if (data.isBoosted) {
+                        grid.insertBefore(wrapper, grid.firstElementChild);
+                    } else {
+                        grid.appendChild(wrapper);
+                    }
+
+                    // Animate in
+                    requestAnimationFrame(function () {
+                        wrapper.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                        wrapper.style.opacity = '1';
+                        wrapper.style.transform = 'translateY(0)';
+                    });
+                }
+            }
+        });
+
+        connection.start()
+            .then(function () {
+                connection.invoke('JoinPublicListingsGroup').catch(function () {});
+            })
+            .catch(function (err) {
+                console.error('SignalR connection error:', err);
+            });
+
+        connection.onreconnected(function () {
+            connection.invoke('JoinPublicListingsGroup').catch(function () {});
+        });
+    })();
+</script>

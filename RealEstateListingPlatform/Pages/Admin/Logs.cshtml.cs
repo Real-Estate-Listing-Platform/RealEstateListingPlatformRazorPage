@@ -6,7 +6,7 @@ using RealEstateListingPlatform.Models;
 
 namespace RealEstateListingPlatform.Pages.Admin
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Lister,Seeker")]
     public class LogsModel : PageModel
     {
         private readonly IListingService _listingService;

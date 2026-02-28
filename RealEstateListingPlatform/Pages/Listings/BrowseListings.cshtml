@@ -217,8 +217,9 @@
 }
 
 @section Scripts {
-    <script>
-        (function () {
+<partial name="_PublicListingsSignalR" />
+<script>
+    (function () {
             var input = document.getElementById('maxPriceInput');
             document.querySelectorAll('.price-suggestion').forEach(function (btn) {
                 btn.addEventListener('click', function () {

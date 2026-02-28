@@ -48,7 +48,7 @@ public class PayOSService : IPayOSService
                 Amount = (long)amount,
                 Description = description,
                 CancelUrl = cancelUrl,
-                ReturnUrl = returnUrl + "?transactionId=" + transactionId.ToString()
+                ReturnUrl = returnUrl
             };
 
             var paymentLink = await _payOSClient.PaymentRequests.CreateAsync(paymentRequest);

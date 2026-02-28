@@ -1,7 +1,9 @@
 using BLL.DTOs;
+using BLL.Hubs;
 using BLL.Services;
 using DAL.Models;
 using DAL.Repositories;
+using Microsoft.AspNetCore.SignalR;
 
 namespace BLL.Services.Implementation
 {
@@ -14,6 +16,7 @@ namespace BLL.Services.Implementation
         private readonly INotificationService _notificationService;
         private readonly IListingViewRepository _listingViewRepository;
         private readonly IEmailService _emailService;
+        private readonly IHubContext<DashboardHub, IDashboardClient> _dashboardHub;
 
         public LeadService(
             ILeadRepository leadRepository, 
@@ -21,7 +24,8 @@ namespace BLL.Services.Implementation
             IUserRepository userRepository, 
             INotificationService notificationService,
             IListingViewRepository listingViewRepository,
-            IEmailService emailService)
+            IEmailService emailService,
+            IHubContext<DashboardHub, IDashboardClient> dashboardHub)
         {
             _leadRepository = leadRepository;
             _listingRepository = listingRepository;
@@ -29,6 +33,7 @@ namespace BLL.Services.Implementation
             _notificationService = notificationService;
             _listingViewRepository = listingViewRepository;
             _emailService = emailService;
+            _dashboardHub = dashboardHub;
         }
 
 
@@ -128,6 +133,24 @@ namespace BLL.Services.Implementation
                         // Log email error but don't fail the lead creation
                         Console.WriteLine($"Failed to send email notification: {emailEx.Message}");
                     }
+                }
+
+                // Send real-time dashboard update to lister via SignalR
+                try
+                {
+                    await _dashboardHub.Clients.Group($"lister-{listing.ListerId}")
+                        .ReceiveDashboardUpdate("NewLead", new
+                        {
+                            leadId = createdLead.Id,
+                            seekerName = seeker.DisplayName,
+                            listingTitle = listing.Title,
+                            message = message,
+                            createdAt = createdLead.CreatedAt
+                        });
+                }
+                catch (Exception)
+                {
+                    // SignalR failure shouldn't break lead creation
                 }
 
                 return new ServiceResult<Lead>
@@ -309,6 +332,22 @@ namespace BLL.Services.Implementation
                 }
 
                 await _leadRepository.UpdateLeadAsync(lead);
+
+                // Send real-time dashboard update to lister via SignalR
+                try
+                {
+                    await _dashboardHub.Clients.Group($"lister-{listerId}")
+                        .ReceiveDashboardUpdate("LeadStatusUpdated", new
+                        {
+                            leadId,
+                            newStatus,
+                            listerNote
+                        });
+                }
+                catch (Exception)
+                {
+                    // SignalR failure shouldn't break status update
+                }
 
                 return new ServiceResult<bool>
                 {
@@ -632,7 +671,7 @@ namespace BLL.Services.Implementation
                     <tr>
                         <td style=""background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;"">
                             <h1 style=""color: #ffffff; margin: 0; font-size: 28px; font-weight: 600;"">
-                                ?? New Lead Received!
+                                New Lead Received!
                             </h1>
                         </td>
                     </tr>

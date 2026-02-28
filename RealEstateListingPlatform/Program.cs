@@ -6,6 +6,7 @@ using DAL.Repositories;
 using DAL.Repositories.Implementation;
 using BLL.Services;
 using BLL.Services.Implementation;
+using BLL.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<RealEstateListingPlatformContext>(options =>
@@ -54,12 +55,14 @@ builder.Services.AddSession(options =>
 });
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/Account/Login";
-        options.AccessDeniedPath = "/Account/Login";
-        options.SlidingExpiration = true;
-    });
+.AddCookie(options =>
+{
+    options.LoginPath = "/Account/Login";
+    options.AccessDeniedPath = "/Account/Login";
+    options.SlidingExpiration = true;
+    options.Cookie.SameSite = SameSiteMode.None;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+});
 
 builder.Services.AddAuthorization();
 
@@ -69,7 +72,7 @@ builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(optio
     options.MultipartBodyLengthLimit = 104857600; // 100MB for multiple files
 });
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddSignalR();
 builder.Services.AddRazorPages();
 
 var app = builder.Build();
@@ -206,16 +209,10 @@ app.UseAuthorization();
 
 app.MapStaticAssets();
 
-// Map API controllers with attribute routing
-app.MapControllers();
-
 // Map Razor Pages
 app.MapRazorPages();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
-
+// Map SignalR Hubs
+app.MapHub<DashboardHub>("/hubs/dashboard");
 
 app.Run();

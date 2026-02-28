@@ -1,7 +1,9 @@
 using BLL.DTOs;
+using BLL.Hubs;
 using DAL.Models;
 using DAL.Repositories;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -20,6 +22,7 @@ namespace BLL.Services.Implementation
         private readonly IUserRepository _userRepository;
         private readonly IListingViewRepository _listingViewRepository;
         private readonly IListingSnapshotRepository _listingSnapshotRepository;
+        private readonly IHubContext<DashboardHub, IDashboardClient> _dashboardHub;
 
         public ListingService(
             IListingRepository listingRepository,
@@ -28,7 +31,8 @@ namespace BLL.Services.Implementation
             IPackageService packageService,
             IUserRepository userRepository,
             IListingViewRepository listingViewRepository,
-            IListingSnapshotRepository listingSnapshotRepository)
+            IListingSnapshotRepository listingSnapshotRepository,
+            IHubContext<DashboardHub, IDashboardClient> dashboardHub)
         { 
             _listingRepository = listingRepository;
             _priceHistoryService = priceHistoryService;
@@ -37,6 +41,7 @@ namespace BLL.Services.Implementation
             _userRepository = userRepository;
             _listingViewRepository = listingViewRepository;
             _listingSnapshotRepository = listingSnapshotRepository;
+            _dashboardHub = dashboardHub;
         }
 
         // Existing methods
@@ -108,6 +113,10 @@ namespace BLL.Services.Implementation
             }
             
             await _listingRepository.UpdateAsync(listing);
+
+            // Push real-time notification to public listing pages
+            await NotifyPublicListingChangeAsync("ListingPublished", id);
+
             return true;
         }
 
@@ -178,7 +187,18 @@ namespace BLL.Services.Implementation
             
             // Log rejection audit
             await _auditService.LogAsync("ListingRejected", listing.ListerId, listing.Id, "Listing");
-            
+
+            // If the listing was restored to Published (edit rejection), notify public pages
+            if (wasEdit)
+            {
+                await NotifyPublicListingChangeAsync("ListingUpdated", id);
+            }
+            else
+            {
+                // New listing rejection - notify in case it was briefly visible
+                await NotifyPublicListingChangeAsync("ListingRemoved", id);
+            }
+
             return true;
         }
 
@@ -469,6 +489,8 @@ namespace BLL.Services.Implementation
             if (!isAdmin && !await CanUserModifyListingAsync(id, userId))
                 return ServiceResult<bool>.FailureResult("You are not authorized to delete this listing");
 
+            bool wasPublished = listing.Status == "Published";
+
             // Delete physical media files from storage
             if (listing.ListingMedia != null && listing.ListingMedia.Any())
             {
@@ -485,6 +507,12 @@ namespace BLL.Services.Implementation
             var deleted = await _listingRepository.DeleteAsync(id);
             if (!deleted)
                 return ServiceResult<bool>.FailureResult("Failed to delete listing");
+
+            // Notify public pages if the listing was published
+            if (wasPublished)
+            {
+                await NotifyPublicListingChangeAsync("ListingRemoved", id);
+            }
 
             return ServiceResult<bool>.SuccessResult(true, "Listing deleted successfully");
         }
@@ -676,6 +704,28 @@ namespace BLL.Services.Implementation
 
                 await _listingViewRepository.AddViewAsync(view);
 
+                // Push real-time view update via SignalR
+                try
+                {
+                    var viewUpdate = new
+                    {
+                        listingId,
+                        viewedAt = view.ViewedAt
+                    };
+
+                    // Notify the listing-specific group (Details page)
+                    await _dashboardHub.Clients.Group($"listing-{listingId}")
+                        .ReceiveDashboardUpdate("ViewTracked", viewUpdate);
+
+                    // Notify the lister's group (Dashboard)
+                    await _dashboardHub.Clients.Group($"lister-{listing.ListerId}")
+                        .ReceiveDashboardUpdate("ViewTracked", viewUpdate);
+                }
+                catch (Exception)
+                {
+                    // SignalR failure shouldn't break view tracking
+                }
+
                 return ServiceResult<bool>.SuccessResult(true, "View tracked successfully");
             }
             catch (Exception ex)
@@ -860,6 +910,63 @@ namespace BLL.Services.Implementation
                 Direction = snapshot.Direction,
                 MediaUrls = mediaUrls
             };
+        }
+
+        private async Task NotifyPublicListingChangeAsync(string eventType, Guid listingId)
+        {
+            try
+            {
+                object payload;
+
+                if (eventType == "ListingRemoved")
+                {
+                    payload = new { listingId, timestamp = DateTime.UtcNow };
+                }
+                else
+                {
+                    // For Published/Updated, include full card data so clients can update DOM without reload
+                    var listing = await _listingRepository.GetByIdAsync(listingId);
+                    if (listing == null)
+                    {
+                        payload = new { listingId, timestamp = DateTime.UtcNow };
+                    }
+                    else
+                    {
+                        var imageUrl = listing.ListingMedia?
+                            .OrderBy(m => m.SortOrder ?? int.MaxValue)
+                            .ThenBy(m => m.Id)
+                            .Select(m => m.Url)
+                            .FirstOrDefault() ?? "";
+
+                        payload = new
+                        {
+                            listingId,
+                            timestamp = DateTime.UtcNow,
+                            id = listing.Id,
+                            title = listing.Title,
+                            price = listing.Price,
+                            transactionType = listing.TransactionType ?? "",
+                            propertyType = listing.PropertyType ?? "",
+                            address = $"{listing.HouseNumber}, {listing.StreetName}, {listing.Ward}, {listing.District}, {listing.City}",
+                            district = listing.District ?? "",
+                            city = listing.City ?? "",
+                            area = listing.Area ?? "0",
+                            bedrooms = listing.Bedrooms,
+                            bathrooms = listing.Bathrooms,
+                            floors = listing.Floors,
+                            imageUrl = imageUrl,
+                            isBoosted = listing.IsBoosted
+                        };
+                    }
+                }
+
+                await _dashboardHub.Clients.Group(DashboardHub.PublicListingsGroup)
+                    .ReceiveDashboardUpdate(eventType, payload);
+            }
+            catch (Exception)
+            {
+                // SignalR failure shouldn't break business logic
+            }
         }
 
         private ListingDto MapToDto(Listing listing)
