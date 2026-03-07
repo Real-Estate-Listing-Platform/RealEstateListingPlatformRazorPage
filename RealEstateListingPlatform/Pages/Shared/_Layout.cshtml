@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 @await RenderSectionAsync("Styles", required: false)
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - RealEstateListingPlatform</title>
+    <title>@ViewData["Title"] - Nền Tảng Bất Động Sản</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
@@ -24,16 +24,16 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">                      
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-page="/Listings/BrowseListings" asp-route-type="Sell">For Sale</a>
+                            <a class="nav-link text-dark" asp-page="/Listings/BrowseListings" asp-route-type="Sell">Mua bán</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-page="/Listings/BrowseListings" asp-route-type="Rent">For Rent</a>
+                            <a class="nav-link text-dark" asp-page="/Listings/BrowseListings" asp-route-type="Rent">Cho thuê</a>
                         </li>
                         @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Seeker"))
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-page="/Seeker/InterestedListings">
-                                    My Interests
+                                    Quan tâm của tôi
                                 </a>
                             </li>
                         }
@@ -58,7 +58,7 @@
                         <img src="~/images/logo.png" alt="Estately Logo" height="50" class="d-inline-block" />
                     </a>
                     <p class="text-muted-custom small">
-                        A leading and reputable real estate trading platform, helping you find your dream home with just a few clicks.
+                        Nền tảng giao dịch bất động sản uy tín hàng đầu, giúp bạn tìm được ngôi nhà mơ ước chỉ với vài cú nhấp chuột.
                     </p>
                     <div class="social-links mt-3">
                         <a href="#" class="btn btn-sm btn-outline-light rounded-circle me-2"><i class="bi bi-facebook"></i></a>
@@ -68,20 +68,20 @@
                 </div>
 
                 <div class="col-lg-2 col-md-6">
-                    <h6 class="fw-bold mb-4">Quick Links</h6>
+                    <h6 class="fw-bold mb-4">Liên kết nhanh</h6>
                     <ul class="list-unstyled footer-links">
-                        <li><a asp-page="/Index" class="text-muted-custom">Home</a></li>
-                        <li><a href="#" class="text-muted-custom">All Listings</a></li>
-                        <li><a href="#" class="text-muted-custom">About Us</a></li>
-                        <li><a asp-page="/Privacy" class="text-muted-custom">Privacy Policy</a></li>
+                        <li><a asp-page="/Index" class="text-muted-custom">Trang chủ</a></li>
+                        <li><a href="#" class="text-muted-custom">Tất cả tin đăng</a></li>
+                        <li><a href="#" class="text-muted-custom">Về chúng tôi</a></li>
+                        <li><a asp-page="/Privacy" class="text-muted-custom">Chính sách bảo mật</a></li>
                     </ul>
                 </div>
 
                 <div class="col-lg-3 col-md-6">
-                    <h6 class="fw-bold mb-4">Contact Us</h6>
+                    <h6 class="fw-bold mb-4">Liên hệ</h6>
                     <ul class="list-unstyled footer-contact">
                         <li class="mb-2 text-muted-custom small">
-                            <i class="bi bi-geo-alt text-primary me-2"></i> 123 Dist. 1, Ho Chi Minh City
+                            <i class="bi bi-geo-alt text-primary me-2"></i> 123 Quận 1, TP. Hồ Chí Minh
                         </li>
                         <li class="mb-2 text-muted-custom small">
                             <i class="bi bi-telephone text-primary me-2"></i> +84 123 456 789
@@ -93,11 +93,11 @@
                 </div>
 
                 <div class="col-lg-3 col-md-6">
-                    <h6 class="fw-bold mb-4">Newsletter</h6>
-                    <p class="text-muted-custom small">Sign up to receive the latest updates on projects.</p>
+                    <h6 class="fw-bold mb-4">Bản tin</h6>
+                    <p class="text-muted-custom small">Đăng ký để nhận thông tin mới nhất về các dự án.</p>
                     <div class="input-group mb-3">
-                        <input type="text" class="form-control form-control-sm border-secondary text-dark" placeholder="Email Address">
-                        <button class="btn btn-primary btn-sm" type="button">Join</button>
+                        <input type="text" class="form-control form-control-sm border-secondary text-dark" placeholder="Địa chỉ email">
+                        <button class="btn btn-primary btn-sm" type="button">Đăng ký</button>
                     </div>
                 </div>
             </div>
@@ -106,7 +106,7 @@
 
             <div class="row align-items-center">
                 <div class="col-md-6 text-center text-md-start">
-                    <p class="text-muted-custom small mb-0">&copy; 2026 - Estately. All rights reserved.</p>
+                    <p class="text-muted-custom small mb-0">&copy; 2026 - Estately. Mọi quyền được bảo lưu.</p>
                 </div>
             </div>
         </div>

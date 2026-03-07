@@ -1,3 +1,4 @@
+@using RealEstateListingPlatform.Models
 @model string
 
 @{
@@ -12,4 +13,4 @@
     };
 }
 
-<span class="badge @badgeClass">@status</span>
+<span class="badge @badgeClass">@VietnameseHelper.Status(status)</span>

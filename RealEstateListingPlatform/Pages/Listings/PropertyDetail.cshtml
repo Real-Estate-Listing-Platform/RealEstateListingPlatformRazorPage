@@ -2,7 +2,7 @@
 @model RealEstateListingPlatform.Pages.Listings.PropertyDetailModel
 
 @{
-    ViewData["Title"] = "Property Detail";
+    ViewData["Title"] = "Chi tiết bất động sản";
     Layout = "_Layout";
 }
 
@@ -10,9 +10,9 @@
 <div class="container mt-4 mb-5">
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a asp-page="/Index">Home</a></li>
-            <li class="breadcrumb-item"><a asp-page="/Listings/BrowseListings" asp-route-type="@(Model.Property.TransactionType == "Sell" ? "Sell" : "Rent")">@(Model.Property.TransactionType == "Sell" ? "For Sale" : "For Rent")</a></li>
-            <li class="breadcrumb-item active">Detail</li>
+            <li class="breadcrumb-item"><a asp-page="/Index">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-page="/Listings/BrowseListings" asp-route-type="@(Model.Property.TransactionType == "Sell" ? "Sell" : "Rent")">@(Model.Property.TransactionType == "Sell" ? "Mua bán" : "Cho thuê")</a></li>
+            <li class="breadcrumb-item active">Chi tiết</li>
         </ol>
     </nav>
 
@@ -49,32 +49,32 @@
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <h2 class="fw-bold text-dark">@Model.Property.Title</h2>
                     <span class="badge @(Model.Property.TransactionType == "Sell" ? "bg-primary" : "bg-success") rounded-pill px-3 py-2">
-                        @(Model.Property.TransactionType == "Sell" ? "For Sale" : "For Rent")
+                        @(Model.Property.TransactionType == "Sell" ? "Đang bán" : "Cho thuê")
                     </span>
                 </div>
                 <p class="text-muted"><i class="bi bi-geo-alt-fill text-primary"></i> @Model.Property.Address</p>
                 <hr class="my-4 opacity-25">
 
-                <h5 class="fw-bold mb-3">Overall Information</h5>
+                <h5 class="fw-bold mb-3">Thông tin tổng quan</h5>
                 <div class="row text-center g-3 mb-4">
                     <div class="col-4 col-md-3">
                         <div class="p-3 bg-light rounded-4">
                             <i class="bi bi-aspect-ratio fs-4 text-primary"></i>
-                            <p class="small mb-0 mt-2 text-muted">Area</p>
+                            <p class="small mb-0 mt-2 text-muted">Diện tích</p>
                             <p class="fw-bold mb-0">@Model.Property.Area m²</p>
                         </div>
                     </div>
                     <div class="col-4 col-md-3">
                         <div class="p-3 bg-light rounded-4">
                             <i class="bi bi-door-open fs-4 text-primary"></i>
-                            <p class="small mb-0 mt-2 text-muted">Bedroom</p>
+                            <p class="small mb-0 mt-2 text-muted">Phòng ngủ</p>
                             <p class="fw-bold mb-0">@Model.Property.Bedrooms</p>
                         </div>
                     </div>
                     <div class="col-4 col-md-3">
                         <div class="p-3 bg-light rounded-4">
                             <i class="bi bi-droplet fs-4 text-primary"></i>
-                            <p class="small mb-0 mt-2 text-muted">Bathroom</p>
+                            <p class="small mb-0 mt-2 text-muted">Phòng tắm</p>
                             <p class="fw-bold mb-0">@Model.Property.Bathrooms</p>
                         </div>
                     </div>
@@ -83,13 +83,13 @@
                             <span class="icon-stairs fs-4 text-primary" aria-hidden="true">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 24 24"><path d="M2 19h4v-4h4v-4h4v-4h4V3H2v4h4v4H2v4h4v4H2z"/></svg>
                             </span>
-                            <p class="small mb-0 mt-2 text-muted">Floors</p>
+                            <p class="small mb-0 mt-2 text-muted">Số tầng</p>
                             <p class="fw-bold mb-0">@(Model.Property.Floors?.ToString() ?? "—")</p>
                         </div>
                     </div>
                 </div>
 
-                <h5 class="fw-bold mb-3">Detail Description</h5>
+                <h5 class="fw-bold mb-3">Mô tả chi tiết</h5>
                 <p class="text-muted lh-lg">
                     @Model.Property.Description
                 </p>
@@ -98,20 +98,20 @@
 
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 p-4 sticky-top" style="top: 100px;">
-                <p class="text-muted mb-1">Price</p>
+                <p class="text-muted mb-1">Giá</p>
                 <h3 class="fw-bold text-primary mb-4">@Model.Property.FormattedPrice</h3>
                 
                 <div class="d-grid gap-2">
                     @if (User.Identity?.IsAuthenticated == true)
                     {
                         <button class="btn btn-outline-primary py-3 rounded-pill fw-bold" data-bs-toggle="modal" data-bs-target="#interestedModal">
-                            <i class="bi bi-chat-dots-fill me-2"></i> I'm Interested
+                            <i class="bi bi-chat-dots-fill me-2"></i> Tôi quan tâm
                         </button>
                     }
                     else
                     {
                         <a asp-page="/Account/Login" asp-route-returnUrl="@HttpContext.Request.Path" class="btn btn-outline-primary py-3 rounded-pill fw-bold">
-                            <i class="bi bi-chat-dots-fill me-2"></i> Login to Express Interest
+                            <i class="bi bi-chat-dots-fill me-2"></i> Đăng nhập để bày tỏ quan tâm
                         </a>
                     }
                 </div>
@@ -133,13 +133,13 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-4 border-0 shadow-lg">
             <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold" id="interestedModalLabel">Express Your Interest</h5>
+                <h5 class="modal-title fw-bold" id="interestedModalLabel">Bày tỏ quan tâm</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body pt-2">
                 <div class="alert alert-info border-0 rounded-3 mb-3">
                     <i class="bi bi-info-circle me-2"></i>
-                    <small>Your contact information will be shared with the property owner.</small>
+                    <small>Thông tin liên hệ của bạn sẽ được chia sẻ với chủ sở hữu bất động sản.</small>
                 </div>
                 
                 <form id="leadForm">
@@ -147,10 +147,10 @@
                     <input type="hidden" id="listingId" value="@Model.Property.Id" />
                     
                     <div class="mb-3">
-                        <label for="message" class="form-label fw-semibold">Message (Optional)</label>
+                        <label for="message" class="form-label fw-semibold">Lời nhắn (Tùy chọn)</label>
                         <textarea class="form-control rounded-3" id="message" name="message" rows="4" 
-                                  placeholder="Tell the owner about your interest, questions, or preferred viewing time..."></textarea>
-                        <div class="form-text">Maximum 1000 characters</div>
+                                  placeholder="Hãy cho chủ nhà biết về sự quan tâm, câu hỏi hoặc thời gian xem nhà mong muốn..."></textarea>
+                        <div class="form-text">Tối đa 1000 ký tự</div>
                     </div>
 
                     <div id="leadFormError" class="alert alert-danger d-none rounded-3" role="alert"></div>
@@ -158,9 +158,9 @@
                 </form>
             </div>
             <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
                 <button type="button" class="btn btn-primary rounded-pill px-4" id="submitLeadBtn">
-                    <i class="bi bi-send me-2"></i>Send Interest
+                    <i class="bi bi-send me-2"></i>Gửi
                 </button>
             </div>
         </div>

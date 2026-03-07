@@ -2,7 +2,7 @@
 @model RealEstateListingPlatform.Pages.Lister.CreateModel
 
 @{
-    ViewData["Title"] = "Create Listing";
+    ViewData["Title"] = "Tạo tin đăng";
     Layout = "_ListerLayout";
     var transactionTypes = Model.TransactionTypes;
     var propertyTypes = Model.PropertyTypes;
@@ -17,12 +17,12 @@
     <div class="d-flex justify-content-between align-items-center">
         <div>
             <h1 class="page-title">
-                <i class="bi bi-plus-circle me-2"></i>Create New Listing
+                <i class="bi bi-plus-circle me-2"></i>Tạo tin đăng mới
             </h1>
-            <p class="page-subtitle text-muted">Fill in the details to create a new property listing</p>
+            <p class="page-subtitle text-muted">Nhập thông tin để tạo tin đăng bất động sản mới</p>
         </div>
             <a asp-page="/Lister/Listings" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-2"></i>Back to Listings
+                <i class="bi bi-arrow-left me-2"></i>Quay lại
             </a>
     </div>
 </div>
@@ -32,10 +32,10 @@
     <div class="form-card-header bg-gradient-package">
         <div class="d-flex justify-content-between align-items-center">
             <h4 class="form-card-title mb-0">
-                <i class="bi bi-box-seam me-2"></i>Package Configuration
+                <i class="bi bi-box-seam me-2"></i>Cấu hình gói
             </h4>
             <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#addPackageModal">
-                <i class="bi bi-plus-circle me-1"></i>Configure Packages
+                <i class="bi bi-plus-circle me-1"></i>Cấu hình gói
             </button>
         </div>
     </div>
@@ -47,8 +47,8 @@
                     <div class="package-status-icon text-primary">
                         <i class="bi bi-buildings"></i>
                     </div>
-                    <div class="package-status-label">Listing Slot</div>
-                    <div class="package-status-value" id="listingSlotStatus">Checking...</div>
+                    <div class="package-status-label">Số lượng tin</div>
+                    <div class="package-status-value" id="listingSlotStatus">Đang kiểm tra...</div>
                 </div>
             </div>
             <div class="col-md-4">
@@ -56,8 +56,8 @@
                     <div class="package-status-icon text-success">
                         <i class="bi bi-images"></i>
                     </div>
-                    <div class="package-status-label">Photo Limit</div>
-                    <div class="package-status-value" id="photoLimit">5 photos</div>
+                    <div class="package-status-label">Giới hạn ảnh</div>
+                    <div class="package-status-value" id="photoLimit">5 ảnh</div>
                 </div>
             </div>
             <div class="col-md-4">
@@ -65,8 +65,8 @@
                     <div class="package-status-icon text-info">
                         <i class="bi bi-camera-video"></i>
                     </div>
-                    <div class="package-status-label">Video Upload</div>
-                    <div class="package-status-value" id="videoStatus">Not available</div>
+                    <div class="package-status-label">Tải video</div>
+                    <div class="package-status-value" id="videoStatus">Không khả dụng</div>
                 </div>
             </div>
         </div>
@@ -74,22 +74,22 @@
         <!-- Selected Packages List -->
         <div id="selectedPackagesContainer">
             <h6 class="fw-bold mb-2">
-                <i class="bi bi-check-circle me-1"></i>Selected Packages for This Listing
+                <i class="bi bi-check-circle me-1"></i>Gói đã chọn cho tin đăng này
             </h6>
             <div id="selectedPackagesList" class="list-group mb-3">
                 <div class="list-group-item text-center text-muted py-4">
                     <i class="bi bi-inbox fs-3 d-block mb-2"></i>
-                    No additional packages selected. Using free tier limits.
+                    Chưa chọn gói bổ sung. Đang sử dụng giới hạn miễn phí.
                     <br>
-                    <small>Click "Configure Packages" to enhance this listing.</small>
+                    <small>Nhấn "Cấu hình gói" để nâng cấp tin đăng này.</small>
                 </div>
             </div>
         </div>
 
         <div class="alert alert-info mb-0">
             <i class="bi bi-lightbulb me-2"></i>
-            <strong>Note:</strong> You can select one package of each type (listing, photo, video) to enhance this listing.
-            <a href="@Url.Page("/Package/Index")" class="alert-link">Browse Package Marketplace</a>
+            <strong>Lưu ý:</strong> Bạn có thể chọn một gói cho mỗi loại (tin đăng, ảnh, video) để nâng cấp tin này.
+            <a href="@Url.Page("/Package/Index")" class="alert-link">Xem các gói dịch vụ</a>
         </div>
     </div>
 </div>
@@ -112,33 +112,33 @@
         <div class="form-card mb-4">
             <div class="form-card-header">
                 <h4 class="form-card-title">
-                    <i class="bi bi-info-circle me-2"></i>Basic Information
+                    <i class="bi bi-info-circle me-2"></i>Thông tin cơ bản
                 </h4>
             </div>
             <div class="form-card-body">
                 <div class="row g-3">
                     <div class="col-12">
                         <label asp-for="Input.Title" class="form-label required"></label>
-                        <input asp-for="Input.Title" class="form-control form-control-lg" placeholder="e.g., Luxury 2BR Apartment in District 1" />
+                        <input asp-for="Input.Title" class="form-control form-control-lg" placeholder="VD: Căn hộ 2PN cao cấp tại Quận 1" />
                         <span asp-validation-for="Input.Title" class="text-danger"></span>
                     </div>
                     <div class="col-12">
                         <label asp-for="Input.Description" class="form-label"></label>
-                        <textarea asp-for="Input.Description" class="form-control" rows="5" placeholder="Describe your property in detail..."></textarea>
+                        <textarea asp-for="Input.Description" class="form-control" rows="5" placeholder="Mô tả chi tiết bất động sản của bạn..."></textarea>
                         <span asp-validation-for="Input.Description" class="text-danger"></span>
-                        <div class="form-text">Provide a detailed description to attract potential buyers/renters</div>
+                        <div class="form-text">Cung cấp mô tả chi tiết để thu hút người mua/thuê</div>
                     </div>
                     <div class="col-md-4">
-                        <label asp-for="Input.TransactionType" class="form-label required">Transaction Type</label>
+                        <label asp-for="Input.TransactionType" class="form-label required">Loại giao dịch</label>
                         <select asp-for="Input.TransactionType" asp-items="transactionTypes" class="form-select">
-                            <option value="">-- Select Transaction Type --</option>
+                            <option value="">-- Chọn loại giao dịch --</option>
                         </select>
                         <span asp-validation-for="Input.TransactionType" class="text-danger"></span>
                     </div>
                     <div class="col-md-4">
-                        <label asp-for="Input.PropertyType" class="form-label required">Property Type</label>
+                        <label asp-for="Input.PropertyType" class="form-label required">Loại BĐS</label>
                         <select asp-for="Input.PropertyType" asp-items="propertyTypes" class="form-select">
-                            <option value="">-- Select Property Type --</option>
+                            <option value="">-- Chọn loại BĐS --</option>
                         </select>
                         <span asp-validation-for="Input.PropertyType" class="text-danger"></span>
                     </div>
@@ -158,51 +158,51 @@
         <div class="form-card mb-4">
             <div class="form-card-header">
                 <h4 class="form-card-title">
-                    <i class="bi bi-geo-alt me-2"></i>Location Details
+                    <i class="bi bi-geo-alt me-2"></i>Thông tin vị trí
                 </h4>
             </div>
             <div class="form-card-body">
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label asp-for="Input.City" class="form-label"></label>
-                        <input asp-for="Input.City" class="form-control" placeholder="e.g., Ho Chi Minh City" />
+                        <input asp-for="Input.City" class="form-control" placeholder="VD: TP. Hồ Chí Minh" />
                     </div>
                     <div class="col-md-6">
                         <label asp-for="Input.District" class="form-label"></label>
-                        <input asp-for="Input.District" class="form-control" placeholder="e.g., District 1" />
+                        <input asp-for="Input.District" class="form-control" placeholder="VD: Quận 1" />
                     </div>
                     <div class="col-md-6">
                         <label asp-for="Input.Ward" class="form-label"></label>
-                        <input asp-for="Input.Ward" class="form-control" placeholder="e.g., Ben Nghe Ward" />
+                        <input asp-for="Input.Ward" class="form-control" placeholder="VD: Phường Bến Nghé" />
                     </div>
                     <div class="col-md-6">
-                        <label asp-for="Input.StreetName" class="form-label">Street Name</label>
-                        <input asp-for="Input.StreetName" class="form-control" placeholder="e.g., Nguyen Hue Street" />
+                        <label asp-for="Input.StreetName" class="form-label">Tên đường</label>
+                        <input asp-for="Input.StreetName" class="form-control" placeholder="VD: Đường Nguyễn Huệ" />
                     </div>
                     <div class="col-md-4">
-                        <label asp-for="Input.HouseNumber" class="form-label">House Number</label>
-                        <input asp-for="Input.HouseNumber" class="form-control" placeholder="e.g., 123" />
+                        <label asp-for="Input.HouseNumber" class="form-label">Số nhà</label>
+                        <input asp-for="Input.HouseNumber" class="form-control" placeholder="VD: 123" />
                     </div>
                     <div class="col-md-4">
                         <label asp-for="Input.Area" class="form-label"></label>
-                        <input asp-for="Input.Area" class="form-control" placeholder="e.g., 75m?" />
-                        <div class="form-text">Property area (e.g., 75m?, 100sqm)</div>
+                        <input asp-for="Input.Area" class="form-control" placeholder="VD: 75m²" />
+                        <div class="form-text">Diện tích BĐS (VD: 75m², 100m²)</div>
                     </div>
                     <div class="col-md-4">
                         <label asp-for="Input.Direction" class="form-label"></label>
                         <select asp-for="Input.Direction" asp-items="directions" class="form-select">
-                            <option value="">-- Select Direction --</option>
+                            <option value="">-- Chọn hướng --</option>
                         </select>
                     </div>
                     <div class="col-md-6">
                         <label asp-for="Input.Latitude" class="form-label"></label>
                         <input asp-for="Input.Latitude" class="form-control" type="number" step="0.000001" placeholder="e.g., 10.762622" />
-                        <div class="form-text">GPS coordinates (optional)</div>
+                        <div class="form-text">Tọa độ GPS (tùy chọn)</div>
                     </div>
                     <div class="col-md-6">
                         <label asp-for="Input.Longitude" class="form-label"></label>
                         <input asp-for="Input.Longitude" class="form-control" type="number" step="0.000001" placeholder="e.g., 106.660172" />
-                        <div class="form-text">GPS coordinates (optional)</div>
+                        <div class="form-text">Tọa độ GPS (tùy chọn)</div>
                     </div>
                 </div>
             </div>
@@ -212,7 +212,7 @@
         <div class="form-card mb-4">
             <div class="form-card-header">
                 <h4 class="form-card-title">
-                    <i class="bi bi-house me-2"></i>Property Specifications
+                    <i class="bi bi-house me-2"></i>Thông số BĐS
                 </h4>
             </div>
             <div class="form-card-body">
@@ -233,18 +233,18 @@
                         <span asp-validation-for="Input.Floors" class="text-danger"></span>
                     </div>
                     <div class="col-md-6">
-                        <label asp-for="Input.LegalStatus" class="form-label">Legal Status</label>
+                        <label asp-for="Input.LegalStatus" class="form-label">Pháp lý</label>
                         <select asp-for="Input.LegalStatus" asp-items="legalStatuses" class="form-select">
-                            <option value="">-- Select Legal Status --</option>
+                            <option value="">-- Chọn tình trạng pháp lý --</option>
                         </select>
-                        <div class="form-text">Property ownership documentation status</div>
+                        <div class="form-text">Tình trạng giấy tờ sở hữu</div>
                     </div>
                     <div class="col-md-6">
-                        <label asp-for="Input.FurnitureStatus" class="form-label">Furniture Status</label>
+                        <label asp-for="Input.FurnitureStatus" class="form-label">Nội thất</label>
                         <select asp-for="Input.FurnitureStatus" asp-items="furnitureStatuses" class="form-select">
-                            <option value="">-- Select Furniture Status --</option>
+                            <option value="">-- Chọn tình trạng nội thất --</option>
                         </select>
-                        <div class="form-text">Current furniture condition</div>
+                        <div class="form-text">Tình trạng nội thất hiện tại</div>
                     </div>
                 </div>
             </div>
@@ -254,16 +254,16 @@
         <div class="form-card mb-4">
             <div class="form-card-header">
                 <h4 class="form-card-title">
-                    <i class="bi bi-images me-2"></i>Photos & Videos
+                    <i class="bi bi-images me-2"></i>Ảnh & Video
                 </h4>
             </div>
             <div class="form-card-body">
                 <div class="mb-3">
-                    <label class="form-label">Upload Media Files</label>
+                    <label class="form-label">Tải lên tệp phương tiện</label>
                     <input id="mediaFiles" type="file" name="mediaFiles" multiple accept="image/*,video/*" class="form-control" />
                     <div class="form-text">
                         <i class="bi bi-info-circle me-1"></i>
-                        Accepted formats: JPG, PNG, WEBP, MP4, AVI, MOV. Maximum 10MB per file.
+                        Định dạng chấp nhận: JPG, PNG, WEBP, MP4, AVI, MOV. Tối đa 10MB mỗi tệp.
                     </div>
                 </div>
                 <div id="mediaPreview" class="row g-3"></div>
@@ -273,13 +273,13 @@
         <!-- Form Actions -->
         <div class="form-actions">
             <button type="submit" name="action" value="draft" class="btn btn-secondary btn-lg">
-                <i class="bi bi-save me-2"></i>Save as Draft
+                <i class="bi bi-save me-2"></i>Lưu nháp
             </button>
             <button type="submit" name="action" value="submit" class="btn btn-primary btn-lg">
-                <i class="bi bi-send me-2"></i>Submit for Review
+                <i class="bi bi-send me-2"></i>Gửi duyệt
             </button>
             <a asp-page="/Lister/Listings" class="btn btn-outline-secondary btn-lg">
-                <i class="bi bi-x-circle me-2"></i>Cancel
+                <i class="bi bi-x-circle me-2"></i>Hủy
             </a>
         </div>
     </form>
@@ -291,26 +291,26 @@
         <div class="modal-content">
             <div class="modal-header bg-gradient-package text-white">
                 <h5 class="modal-title">
-                    <i class="bi bi-box-seam me-2"></i>Configure Packages
+                    <i class="bi bi-box-seam me-2"></i>Cấu hình gói
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div class="alert alert-info">
                     <i class="bi bi-info-circle me-2"></i>
-                    <strong>Package Selection Rules:</strong>
+                    <strong>Quy tắc chọn gói:</strong>
                     <ul class="mb-0 mt-2">
-                        <li>You can select <strong>one listing slot package</strong> (e.g., +1 Additional Listing)</li>
-                        <li>You can select <strong>one photo pack</strong> (e.g., +10 or +20 photos)</li>
-                        <li>You can select <strong>one video package</strong> to enable video uploads</li>
-                        <li>Selecting a new package of the same type will replace the current selection</li>
+                        <li>Bạn có thể chọn <strong>một gói tin đăng</strong> (VD: +1 tin đăng bổ sung)</li>
+                        <li>Bạn có thể chọn <strong>một gói ảnh</strong> (VD: +10 hoặc +20 ảnh)</li>
+                        <li>Bạn có thể chọn <strong>một gói video</strong> để bật tải video</li>
+                        <li>Chọn gói mới cùng loại sẽ thay thế gói đã chọn trước đó</li>
                     </ul>
                 </div>
                 
                 <!-- Listing Slot Packages -->
                 <div class="package-category mb-4">
                     <h6 class="fw-bold text-primary mb-3">
-                        <i class="bi bi-buildings me-2"></i>Listing Slot Packages
+                        <i class="bi bi-buildings me-2"></i>Gói tin đăng
                     </h6>
                     <div id="listingSlotPackages" class="row g-3">
                         <div class="col-12 text-center py-3">
@@ -324,7 +324,7 @@
                 <!-- Photo Pack Packages -->
                 <div class="package-category mb-4">
                     <h6 class="fw-bold text-success mb-3">
-                        <i class="bi bi-images me-2"></i>Photo Pack Packages
+                        <i class="bi bi-images me-2"></i>Gói ảnh
                     </h6>
                     <div id="photoPackPackages" class="row g-3">
                         <div class="col-12 text-center py-3">
@@ -338,7 +338,7 @@
                 <!-- Video Upload Packages -->
                 <div class="package-category mb-4">
                     <h6 class="fw-bold text-info mb-3">
-                        <i class="bi bi-camera-video me-2"></i>Video Upload Packages
+                        <i class="bi bi-camera-video me-2"></i>Gói video
                     </h6>
                     <div id="videoUploadPackages" class="row g-3">
                         <div class="col-12 text-center py-3">
@@ -351,13 +351,13 @@
 
                 <div class="alert alert-warning">
                     <i class="bi bi-exclamation-triangle me-2"></i>
-                    <strong>Important:</strong> Packages will be consumed when you create the listing. Make sure to select the right packages before submission.
+                    <strong>Quan trọng:</strong> Gói sẽ được sử dụng khi bạn tạo tin đăng. Hãy chắc chắn chọn đúng gói trước khi gửi.
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
                 <a href="@Url.Page("/Package/Index")" class="btn btn-primary" target="_blank">
-                    <i class="bi bi-cart-plus me-2"></i>Purchase More Packages
+                    <i class="bi bi-cart-plus me-2"></i>Mua thêm gói
                 </a>
             </div>
         </div>

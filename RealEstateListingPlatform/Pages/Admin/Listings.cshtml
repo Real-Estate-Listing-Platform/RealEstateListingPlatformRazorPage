@@ -2,26 +2,26 @@
 @model RealEstateListingPlatform.Pages.Admin.ListingsModel
 
 @{
-    ViewData["Title"] = "Admin - Listings";
+    ViewData["Title"] = "Quản trị - Tin đăng";
 }
 
 <header class="admin-header">
     <div>
-        <h2>Listings</h2>
-        <p class="admin-muted mb-0">Use the existing approval workflow to approve or reject submissions.</p>
+        <h2>Tin đăng</h2>
+        <p class="admin-muted mb-0">Sử dụng quy trình duyệt để phê duyệt hoặc từ chối bài đăng.</p>
     </div>
     <div class="d-flex flex-wrap align-items-center gap-3">
-        <span class="admin-badge warning">@Model.ViewModel.PendingListings.Count Pending</span>
+        <span class="admin-badge warning">@Model.ViewModel.PendingListings.Count Chờ duyệt</span>
     </div>
 </header>
 
 <section class="admin-section">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
         <div>
-            <h3>Pending approvals</h3>
-            <div class="admin-section-subtitle">Review and manage pending submissions</div>
+            <h3>Chờ phê duyệt</h3>
+            <div class="admin-section-subtitle">Xem xét và quản lý các bài đăng chờ duyệt</div>
         </div>
-        <span class="admin-badge warning">@Model.ViewModel.PendingListings.Count Pending</span>
+        <span class="admin-badge warning">@Model.ViewModel.PendingListings.Count Chờ duyệt</span>
     </div>
 
     @await Html.PartialAsync("_ListingApprovalTable", Model.ViewModel.PendingListings)

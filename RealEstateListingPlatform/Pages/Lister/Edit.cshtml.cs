@@ -231,44 +231,44 @@ namespace RealEstateListingPlatform.Pages.Lister
         {
             TransactionTypes = new SelectList(new[]
             {
-                new { Value = "Sell", Text = "For Sale" },
-                new { Value = "Rent", Text = "For Rent" }
+                new { Value = "Sell", Text = "Bán" },
+                new { Value = "Rent", Text = "Cho thuê" }
             }, "Value", "Text");
 
             PropertyTypes = new SelectList(new[]
             {
-                new { Value = "Apartment", Text = "Apartment" },
-                new { Value = "House", Text = "House" },
-                new { Value = "Villa", Text = "Villa" },
-                new { Value = "Land", Text = "Land" },
-                new { Value = "Commercial", Text = "Commercial" }
+                new { Value = "Apartment", Text = "Căn hộ" },
+                new { Value = "House", Text = "Nhà phố" },
+                new { Value = "Villa", Text = "Biệt thự" },
+                new { Value = "Land", Text = "Đất" },
+                new { Value = "Commercial", Text = "Thương mại" }
             }, "Value", "Text");
 
             LegalStatuses = new SelectList(new[]
             {
-                new { Value = "RedBook", Text = "Red Book" },
-                new { Value = "PinkBook", Text = "Pink Book" },
-                new { Value = "SaleContract", Text = "Sale Contract" },
-                new { Value = "Waiting", Text = "Waiting for Certificate" }
+                new { Value = "RedBook", Text = "Sổ đỏ" },
+                new { Value = "PinkBook", Text = "Sổ hồng" },
+                new { Value = "SaleContract", Text = "Hợp đồng mua bán" },
+                new { Value = "Waiting", Text = "Đang chờ cấp sổ" }
             }, "Value", "Text");
 
             FurnitureStatuses = new SelectList(new[]
             {
-                new { Value = "FullyFurnished", Text = "Fully Furnished" },
-                new { Value = "PartiallyFurnished", Text = "Partially Furnished" },
-                new { Value = "Unfurnished", Text = "Unfurnished" }
+                new { Value = "FullyFurnished", Text = "Đầy đủ nội thất" },
+                new { Value = "PartiallyFurnished", Text = "Nội thất cơ bản" },
+                new { Value = "Unfurnished", Text = "Không nội thất" }
             }, "Value", "Text");
 
             Directions = new SelectList(new[]
             {
-                new { Value = "North", Text = "North" },
-                new { Value = "South", Text = "South" },
-                new { Value = "East", Text = "East" },
-                new { Value = "West", Text = "West" },
-                new { Value = "Northeast", Text = "Northeast" },
-                new { Value = "Northwest", Text = "Northwest" },
-                new { Value = "Southeast", Text = "Southeast" },
-                new { Value = "Southwest", Text = "Southwest" }
+                new { Value = "North", Text = "Bắc" },
+                new { Value = "South", Text = "Nam" },
+                new { Value = "East", Text = "Đông" },
+                new { Value = "West", Text = "Tây" },
+                new { Value = "Northeast", Text = "Đông Bắc" },
+                new { Value = "Northwest", Text = "Tây Bắc" },
+                new { Value = "Southeast", Text = "Đông Nam" },
+                new { Value = "Southwest", Text = "Tây Nam" }
             }, "Value", "Text");
         }
 

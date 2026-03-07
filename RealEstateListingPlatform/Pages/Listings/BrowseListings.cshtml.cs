@@ -105,7 +105,7 @@ namespace RealEstateListingPlatform.Pages.Listings
                 IsBoosted = l.IsBoosted
             }).ToList();
 
-            Title = Type.Equals("Sell", StringComparison.OrdinalIgnoreCase) ? "Property for Sale" : "Property for Rent";
+            Title = Type.Equals("Sell", StringComparison.OrdinalIgnoreCase) ? "Bất động sản cho bán" : "Bất động sản cho thuê";
             FilterPropertyTypes = PropertyType ?? new List<string>();
             FilterLocation = Location;
             FilterMaxPrice = maxPriceNum;

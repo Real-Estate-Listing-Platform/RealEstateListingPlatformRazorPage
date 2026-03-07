@@ -18,27 +18,27 @@
                         </svg>
                     </div>
                     
-                    <h2 class="text-success fw-bold mb-3">Payment Successful!</h2>
-                    <p class="text-muted mb-4">Your package has been activated</p>
+                    <h2 class="text-success fw-bold mb-3">Thanh toán thành công!</h2>
+                    <p class="text-muted mb-4">Gói đã được thêm vào danh sách gói của bạn.</p>
 
                     @if (Model.Transaction != null)
                     {
                         <div class="bg-light p-4 rounded mb-4 text-start">
-                            <h6 class="fw-bold mb-3">Transaction Details</h6>
+                            <h6 class="fw-bold mb-3">Chi tiết giao dịch</h6>
                             <div class="row mb-2">
-                                <div class="col-6 text-muted">Transaction ID:</div>
+                                <div class="col-6 text-muted">Mã giao dịch:</div>
                                 <div class="col-6 text-end"><small class="font-monospace">@Model.Transaction.Id.ToString().Substring(0, 13)...</small></div>
                             </div>
                             <div class="row mb-2">
-                                <div class="col-6 text-muted">Amount:</div>
+                                <div class="col-6 text-muted">Giá tiền:</div>
                                 <div class="col-6 text-end fw-bold">@Model.Transaction.Amount.ToString("N0") VND</div>
                             </div>
                             <div class="row mb-2">
-                                <div class="col-6 text-muted">Payment Method:</div>
+                                <div class="col-6 text-muted">Phương thức thanh toán:</div>
                                 <div class="col-6 text-end">@Model.Transaction.PaymentMethod</div>
                             </div>
                             <div class="row">
-                                <div class="col-6 text-muted">Date:</div>
+                                <div class="col-6 text-muted">Ngày:</div>
                                 <div class="col-6 text-end">@Model.Transaction.CreatedAt.ToString("MMM dd, yyyy HH:mm")</div>
                             </div>
                         </div>
@@ -46,13 +46,13 @@
 
                     <div class="d-grid gap-2">
                         <a href="@Url.Page("/Package/MyPackages")" class="btn btn-primary btn-lg">
-                            <i class="bi bi-box-seam"></i> View My Packages
+                            <i class="bi bi-box-seam"></i> Xem danh sách gói
                         </a>
                         <a href="@Url.Page("/Lister/Create")" class="btn btn-success btn-lg">
-                            <i class="bi bi-plus-circle"></i> Create New Listing
+                            <i class="bi bi-plus-circle"></i> Tạo bài đăng mới
                         </a>
                         <a href="@Url.Page("/Lister/Dashboard")" class="btn btn-outline-secondary">
-                            <i class="bi bi-house-door"></i> Go to Dashboard
+                            <i class="bi bi-house-door"></i> Về trang chủ
                         </a>
                     </div>
                 </div>
@@ -60,7 +60,7 @@
 
             <div class="text-center mt-3">
                 <small class="text-muted">
-                    Need help? <a href="#" class="text-primary">Contact Support</a>
+                    Cần hỗ trợ? <a href="#" class="text-primary">Liên hệ hỗ trợ</a>
                 </small>
             </div>
         </div>

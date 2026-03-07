@@ -2,55 +2,55 @@
 @model RealEstateListingPlatform.Pages.Account.RegisterModel
 
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Đăng ký";
     Layout = "_AuthLayout";
 }
 
 <div class="auth-toggle">
-    <a asp-page="./Login" class="js-auth-switch">Login</a>
-    <a href="#" class="active">Sign Up</a>
+    <a asp-page="./Login" class="js-auth-switch">Đăng nhập</a>
+    <a href="#" class="active">Đăng ký</a>
 </div>
 
 <form id="registerForm" method="post" class="auth-form">
     <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
 
     <div class="mb-2">
-        <input asp-for="Input.FullName" class="form-control" autocomplete="name" aria-required="true" placeholder="Full Name" />
+        <input asp-for="Input.FullName" class="form-control" autocomplete="name" aria-required="true" placeholder="Họ và tên" />
         <span asp-validation-for="Input.FullName" class="text-danger"></span>
     </div>
 
     <div class="mb-2">
-        <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="Email Address" />
+        <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="Địa chỉ email" />
         <span asp-validation-for="Input.Email" class="text-danger"></span>
     </div>
     
      <div class="mb-2">
-        <input asp-for="Input.PhoneNumber" class="form-control" autocomplete="tel" aria-required="true" placeholder="Phone Number" />
+        <input asp-for="Input.PhoneNumber" class="form-control" autocomplete="tel" aria-required="true" placeholder="Số điện thoại" />
         <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
     </div>
 
     <div class="mb-2 position-relative">
-        <input asp-for="Input.Password" class="form-control password-input" autocomplete="new-password" aria-required="true" placeholder="Password" />
+        <input asp-for="Input.Password" class="form-control password-input" autocomplete="new-password" aria-required="true" placeholder="Mật khẩu" />
         <span class="password-toggle-icon"><i class="bi bi-eye"></i></span>
         <span asp-validation-for="Input.Password" class="text-danger"></span>
     </div>
 
     <div class="password-requirements mb-2">
-        <p class="requirements-title">Password requirements:</p>
+        <p class="requirements-title">Yêu cầu mật khẩu:</p>
         <ul class="requirements-list">
-            <li id="req-length" class="requirement-item"><span class="bullet">●</span> Min. 8 chars</li>
-            <li id="req-uppercase" class="requirement-item"><span class="bullet">●</span> 1 uppercase (A-Z)</li>
-            <li id="req-number" class="requirement-item"><span class="bullet">●</span> 1 number (0-9)</li>
-            <li id="req-special" class="requirement-item"><span class="bullet">●</span> 1 special character (!@@#$%)</li>
+            <li id="req-length" class="requirement-item"><span class="bullet">●</span> Tối thiểu 8 ký tự</li>
+            <li id="req-uppercase" class="requirement-item"><span class="bullet">●</span> 1 chữ hoa (A-Z)</li>
+            <li id="req-number" class="requirement-item"><span class="bullet">●</span> 1 chữ số (0-9)</li>
+            <li id="req-special" class="requirement-item"><span class="bullet">●</span> 1 ký tự đặc biệt (!@@#$%)</li>
         </ul>
     </div>
     
     <div class="mb-3">
-        <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="Confirm Password" />
+        <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="Xác nhận mật khẩu" />
         <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
     </div>
 
-    <button id="registerSubmit" type="submit" class="btn btn-auth-primary">Create Account</button>
+    <button id="registerSubmit" type="submit" class="btn btn-auth-primary">Tạo tài khoản</button>
 </form>
 
 @section Scripts {

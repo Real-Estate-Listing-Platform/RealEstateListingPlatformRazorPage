@@ -447,8 +447,8 @@ namespace BLL.Services.Implementation
             await _auditService.LogAsync(auditAction, userId, listing.Id, "Listing");
 
             var message = wasPublished 
-                ? "Listing updated and submitted for review. Changes will be visible after admin approval." 
-                : "Listing updated successfully";
+                ? "Bài đăng đã được sửa và gửi cho quản trị viên xem xét. Thay đổi sẽ được thực hiện sau khi được quản trị viên chấp thuận." 
+                : "Bài đăng được cập nhật thành công";
 
             return ServiceResult<ListingDto>.SuccessResult(MapToDto(listing), message);
         }

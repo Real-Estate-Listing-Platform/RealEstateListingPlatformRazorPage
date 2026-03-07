@@ -1,0 +1,183 @@
+@startuml RealEstateListingPlatform_ThreeTierArchitecture_Simple
+
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam roundCorner 10
+skinparam packageBorderColor #444444
+skinparam packageFontSize 16
+skinparam packageFontStyle bold
+
+title Real Estate Listing Platform - Three-Tier Architecture
+
+' ===== PRESENTATION LAYER =====
+package "Presentation Layer\nRealEstateListingPlatform" as PL #E3F2FD {
+
+    package "Razor Pages" as RP {
+        component "Index Page" as PgIndex
+        component "Account Pages\nLogin, Register, Profile,\nForgotPassword, ResetPassword" as PgAccount
+        component "Admin Pages\nDashboard, ManageUsers,\nManageListings, Reports, AuditLogs" as PgAdmin
+        component "Lister Pages\nDashboard, MyListings,\nCreateListing, EditListing" as PgLister
+        component "Listings Pages\nIndex, Details,\nCompare, Search" as PgListings
+        component "Package Pages\nIndex, Details,\nMyPackages, Subscribe" as PgPackage
+        component "Payment Pages\nCheckout, History,\nSuccess, Cancel" as PgPayment
+        component "Seeker Pages\nDashboard, Favorites" as PgSeeker
+    }
+
+    package "Shared" as Shared {
+        component "_Layout.cshtml" as Layout
+        component "_LoginPartial.cshtml" as LoginPartial
+        component "Shared Components" as SharedComp
+    }
+
+    package "Static Assets - wwwroot" as Static {
+        component "CSS / JS / Images" as Assets
+    }
+
+    component "Program.cs\nApp Configuration and\nDependency Injection" as ProgramCs
+}
+
+' ===== BUSINESS LOGIC LAYER =====
+package "Business Logic Layer\nBLL" as BLL #FFF8E1 {
+
+    package "Services - Interfaces" as SvcIntf {
+        component "IAuthService" as IAuth
+        component "IListingService" as IListing
+        component "IPackageService" as IPackage
+        component "IPaymentService" as IPayment
+        component "IPayOSService" as IPayOS
+        component "ILeadService" as ILead
+        component "IUserService" as IUser
+        component "INotificationService" as INotif
+        component "IAuditLogService" as IAudit
+        component "IAdminDashboardService" as IAdminDash
+        component "IEmailService" as IEmail
+        component "IPriceHistoryService" as IPriceHist
+    }
+
+    package "Services - Implementations" as SvcImpl {
+        component "AuthService" as ImplAuth
+        component "ListingService" as ImplListing
+        component "PackageService" as ImplPackage
+        component "PaymentService" as ImplPayment
+        component "PayOSService" as ImplPayOS
+        component "LeadService" as ImplLead
+        component "UserService" as ImplUser
+        component "NotificationService" as ImplNotif
+        component "AuditLogService" as ImplAudit
+        component "AdminDashboardService" as ImplAdminDash
+        component "EmailService" as ImplEmail
+        component "PriceHistoryService" as ImplPriceHist
+    }
+
+    package "DTOs" as DTOs {
+        component "ListingDto / ListingCreateDto\nListingUpdateDto" as DtoListing
+        component "PackageDto / TransactionDto" as DtoPkg
+        component "DashboardStatsDto\nAdminDashboardStatsDto" as DtoStats
+        component "AuditLogDto / ServiceResult\nPaginatedResult" as DtoCommon
+        component "ListingFilterParameters\nPackageFilterParameters" as DtoFilter
+    }
+
+    package "SignalR Hubs" as Hubs {
+        component "DashboardHub" as DashHub
+    }
+
+    package "Background Services" as BgSvc {
+        component "PackageExpirationService" as PkgExpire
+        component "UnverifiedUserCleanupService" as UserCleanup
+    }
+}
+
+' ===== DATA ACCESS LAYER =====
+package "Data Access Layer\nDAL" as DAL #E8F5E9 {
+
+    package "Repositories - Interfaces" as RepoIntf {
+        component "IListingRepository" as IRepoListing
+        component "IUserRepository" as IRepoUser
+        component "IPackageRepository" as IRepoPackage
+        component "ITransactionRepository" as IRepoTxn
+        component "ILeadRepository" as IRepoLead
+        component "IAuditLogRepository" as IRepoAudit
+        component "IListingViewRepository" as IRepoView
+        component "IListingSnapshotRepository" as IRepoSnap
+        component "INotificationRepository" as IRepoNotif
+        component "IReportRepository" as IRepoReport
+    }
+
+    package "Repositories - Implementations" as RepoImpl {
+        component "ListingRepository" as ImplRepoListing
+        component "UserRepository" as ImplRepoUser
+        component "PackageRepository" as ImplRepoPackage
+        component "TransactionRepository" as ImplRepoTxn
+        component "LeadRepository" as ImplRepoLead
+        component "AuditLogRepository" as ImplRepoAudit
+        component "ListingViewRepository" as ImplRepoView
+        component "ListingSnapshotRepository" as ImplRepoSnap
+        component "NotificationRepository" as ImplRepoNotif
+        component "ReportRepository" as ImplRepoReport
+    }
+
+    package "Entity Models" as Models {
+        component "User" as MUser
+        component "Listing" as MListing
+        component "ListingMedia / ListingTour360" as MMedia
+        component "ListingBoost / ListingView\nListingSnapshot / ListingPriceHistory" as MListingExt
+        component "ListingPackage / UserPackage" as MPkg
+        component "Transaction" as MTxn
+        component "Lead / Favorite" as MLead
+        component "Notification / Report" as MNotifReport
+        component "AuditLog" as MAudit
+    }
+
+    package "Database Context" as DbCtx {
+        component "RealEstateListingPlatformContext\nEntity Framework Core" as EFContext
+    }
+
+    package "Migrations" as Mig {
+        component "EF Core Migrations" as Migrations
+    }
+}
+
+' ===== DATABASE =====
+database "SQL Server\nDatabase" as DB #F3E5F5
+
+' ===== EXTERNAL SERVICES =====
+cloud "External Services" as ExtSvc {
+    component "PayOS\nPayment Gateway" as PayOSExt
+    component "Email Service\nSMTP" as EmailExt
+}
+
+' ===== REQUEST / RESPONSE ARROWS BETWEEN LAYERS =====
+
+' Presentation Layer -> BLL (Request)
+PL -[#1565C0,bold]-> BLL : **Request**\nCalls Services via Interfaces\n(IListingService, IAuthService,\nIPackageService, IPaymentService,\nILeadService, IAdminDashboardService...)
+
+' BLL -> Presentation Layer (Response)
+BLL -[#2E7D32,bold]-> PL : **Response**\nReturns DTOs and ServiceResult\n(ListingDto, PackageDto,\nDashboardStatsDto, PaginatedResult...)
+
+' BLL -> DAL (Request)
+BLL -[#1565C0,bold]-> DAL : **Request**\nCalls Repositories via Interfaces\n(IListingRepository, IUserRepository,\nIPackageRepository, ITransactionRepository...)
+
+' DAL -> BLL (Response)
+DAL -[#2E7D32,bold]-> BLL : **Response**\nReturns Entity Models\n(Listing, User, Transaction,\nLead, AuditLog, Notification...)
+
+' DAL -> Database (Request)
+DAL -[#1565C0,bold]-> DB : **Request**\nEF Core Queries\n(LINQ to SQL)
+
+' Database -> DAL (Response)
+DB -[#2E7D32,bold]-> DAL : **Response**\nQuery Results\n(Entity Objects)
+
+' External services
+BLL -[#E65100,bold]-> ExtSvc : **Request**\nPayOS API / SMTP Email
+
+ExtSvc -[#E65100,bold]-> BLL : **Response**\nPayment Status / Email Delivery
+
+' Legend
+legend right
+  |= Arrow Color |= Meaning |
+  | <color:#1565C0><b>Blue</b></color> | Request - downstream call |
+  | <color:#2E7D32><b>Green</b></color> | Response - data returned |
+  | <color:#E65100><b>Orange</b></color> | External Service communication |
+endlegend
+
+@enduml

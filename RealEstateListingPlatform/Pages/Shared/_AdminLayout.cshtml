@@ -3,7 +3,7 @@
     var pendingCount = ViewData["PendingCount"] is int count ? count : 0;
 }
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -27,29 +27,29 @@
                     <div class="admin-brand-icon">EA</div>
                     <div>
                         <h4>Estately</h4>
-                        <div class="admin-pill">Admin Portal</div>
+                        <div class="admin-pill">Quản trị viên</div>
                     </div>
                 </div>
 
                 <nav class="admin-nav">
                     <a class="admin-nav-link @((string.IsNullOrWhiteSpace(section) || section == "dashboard") ? "active" : string.Empty)" asp-page="/Admin/Dashboard">
-                        <i class="bi bi-speedometer2"></i> Dashboard
+                        <i class="bi bi-speedometer2"></i> Bảng điều khiển
                     </a>
                     <a class="admin-nav-link @(section == "listings" ? "active" : string.Empty)" asp-page="/Admin/Listings">
-                        <i class="bi bi-house-check"></i> Listings
+                        <i class="bi bi-house-check"></i> Tin đăng
                     </a>
                     <a class="admin-nav-link @(section == "logs" ? "active" : string.Empty)" asp-page="/Admin/Logs">
-                        <i class="bi bi-journal-text"></i> Logs
+                        <i class="bi bi-journal-text"></i> Nhật ký
                     </a>
                     <a class="admin-nav-link @(section == "users" ? "active" : string.Empty)" asp-page="/Admin/Users">
-                        <i class="bi bi-people"></i> Users
+                        <i class="bi bi-people"></i> Người dùng
                     </a>
                 </nav>
 
                 <div class="admin-sidecard">
-                    <div class="fw-semibold">Pending approvals</div>
+                    <div class="fw-semibold">Chờ duyệt</div>
                     <div class="display-6 fw-bold">@pendingCount</div>
-                    <div class="small text-light">Updated @DateTime.Now.ToString("MMM dd, HH:mm")</div>
+                    <div class="small text-light">Cập nhật @DateTime.Now.ToString("dd/MM, HH:mm")</div>
                 </div>
             </aside>
 

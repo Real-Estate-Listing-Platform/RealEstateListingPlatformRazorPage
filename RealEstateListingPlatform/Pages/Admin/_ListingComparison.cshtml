@@ -8,7 +8,7 @@
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-light border-0">
                     <h6 class="fw-bold mb-0 text-muted">
-                        <i class="bi bi-clock-history me-2"></i>Original Version
+                        <i class="bi bi-clock-history me-2"></i>Bản gốc
                     </h6>
                 </div>
                 <div class="card-body">
@@ -25,7 +25,7 @@
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-primary text-white border-0">
                     <h6 class="fw-bold mb-0">
-                        <i class="bi bi-pencil-square me-2"></i>Modified Version
+                        <i class="bi bi-pencil-square me-2"></i>Bản chỉnh sửa
                     </h6>
                 </div>
                 <div class="card-body">
@@ -45,7 +45,7 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-success text-white border-0">
                     <h6 class="fw-bold mb-0">
-                        <i class="bi bi-plus-circle me-2"></i>New Listing Submission
+                        <i class="bi bi-plus-circle me-2"></i>Bài đăng mới
                     </h6>
                 </div>
                 <div class="card-body">
@@ -60,9 +60,9 @@
     var changedCount = 0;
     if (Model.IsUpdate && Model.Original != null)
     {
-        var fields = new[] { "Title", "Description", "TransactionType", "PropertyType", "Price", 
-                           "Address", "Area", "Bedrooms", "Bathrooms", "Floors", 
-                           "LegalStatus", "FurnitureStatus", "Direction", "Media" };
+        var fields = new[] { "Tên bài đăng", "Mô tả", "Loại giao dịch", "Loại bất động sản", "Giá", 
+                           "Địa chỉ", "Diện tích", "Số phòng ngủ", "Số phòng tắm", "Số tầng", 
+                           "Trạng thái pháp lý", "Tình trạng nội thất", "Hướng", "Ảnh" };
         changedCount = fields.Count(f => Model.HasChanged(f));
     }
 }
@@ -71,6 +71,6 @@
 {
     <div class="alert alert-info mt-3 border-0">
         <i class="bi bi-info-circle me-2"></i>
-        <strong>@changedCount field(s) modified</strong> in this update. Changed fields are highlighted in the modified version.
+        <strong>@changedCount mục đã được chỉnh sửa</strong> trong bản cập nhật này. Các mục thay đổi đã được đánh dấu ở trên.
     </div>
 }

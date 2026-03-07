@@ -2,15 +2,15 @@
 @model RealEstateListingPlatform.Pages.Package.IndexModel
 
 @{
-    ViewData["Title"] = "Package Marketplace";
+    ViewData["Title"] = "Gói dịch vụ";
     Layout = "_ListerLayout";
 }
 
 <div class="container py-5">
 <div class="row mb-4">
     <div class="col-12 text-center">
-        <h1 class="fw-bold mb-2">Choose Your Package</h1>
-        <p class="text-muted">Enhance your listings with our premium packages</p>
+        <h1 class="fw-bold mb-2">Chọn gói dịch vụ</h1>
+        <p class="text-muted">Nâng cấp tin đăng với các gói cao cấp</p>
     </div>
 </div>
 
@@ -36,19 +36,19 @@
         <div class="col-12">
             <div class="btn-group d-flex flex-wrap justify-content-center gap-2" role="group">
                 <a href="@Url.Page("/Package/Index")" class="btn @(string.IsNullOrEmpty(Model.PackageType) ? "btn-primary" : "btn-outline-primary")">
-                    All Packages
+                    Tất cả gói
                 </a>
                 <a href="@Url.Page("/Package/Index", new { type = "ADDITIONAL_LISTING" })" class="btn @(Model.PackageType == "ADDITIONAL_LISTING" ? "btn-primary" : "btn-outline-primary")">
-                    <i class="bi bi-plus-circle"></i> Additional Listings
+                    <i class="bi bi-plus-circle"></i> Tin bổ sung
                 </a>
                 <a href="@Url.Page("/Package/Index", new { type = "PHOTO_PACK" })" class="btn @(Model.PackageType == "PHOTO_PACK" ? "btn-primary" : "btn-outline-primary")">
-                    <i class="bi bi-images"></i> Photo Packs
+                    <i class="bi bi-images"></i> Gói ảnh
                 </a>
                 <a href="@Url.Page("/Package/Index", new { type = "VIDEO_UPLOAD" })" class="btn @(Model.PackageType == "VIDEO_UPLOAD" ? "btn-primary" : "btn-outline-primary")">
-                    <i class="bi bi-camera-video"></i> Video Upload
+                    <i class="bi bi-camera-video"></i> Tải video
                 </a>
                 <a href="@Url.Page("/Package/Index", new { type = "BOOST_LISTING" })" class="btn @(Model.PackageType == "BOOST_LISTING" ? "btn-primary" : "btn-outline-primary")">
-                    <i class="bi bi-rocket"></i> Boost Listing
+                    <i class="bi bi-rocket"></i> Đẩy tin
                 </a>
             </div>
         </div>
@@ -59,8 +59,8 @@
         <div class="row">
             <div class="col-12 text-center py-5">
                 <i class="bi bi-inbox display-1 text-muted"></i>
-                <p class="text-muted mt-3">No packages available at the moment</p>
-                <a href="@Url.Page("/Package/Index")" class="btn btn-primary">View All Packages</a>
+                <p class="text-muted mt-3">Hiện không có gói nào</p>
+                <a href="@Url.Page("/Package/Index")" class="btn btn-primary">Xem tất cả gói</a>
             </div>
         </div>
     }
@@ -74,7 +74,7 @@
                         @if (package.PackageType == "BOOST_LISTING")
                         {
                             <div class="card-header bg-warning text-white text-center py-2">
-                                <i class="bi bi-star-fill"></i> Featured
+                                <i class="bi bi-star-fill"></i> Nổi bật
                             </div>
                         }
                         <div class="card-body d-flex flex-column">
@@ -113,35 +113,35 @@
                                 {
                                     <li class="mb-2">
                                         <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                        @package.ListingCount additional listing@(package.ListingCount > 1 ? "s" : "")
+                                        @package.ListingCount tin đăng bổ sung
                                     </li>
                                 }
                                 @if (package.PhotoLimit.HasValue && package.PhotoLimit > 0)
                                 {
                                     <li class="mb-2">
                                         <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                        +@package.PhotoLimit photos
+                                        +@package.PhotoLimit ảnh
                                     </li>
                                 }
                                 @if (package.AllowVideo)
                                 {
                                     <li class="mb-2">
                                         <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                        Video upload enabled
+                                        Đã bật tải video
                                     </li>
                                 }
                                 @if (package.BoostDays.HasValue && package.BoostDays > 0)
                                 {
                                     <li class="mb-2">
                                         <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                        Boost for @package.BoostDays days
+                                        Đẩy tin trong @package.BoostDays ngày
                                     </li>
                                 }
                                 @if (package.DurationDays.HasValue && package.DurationDays > 0)
                                 {
                                     <li class="mb-2">
                                         <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                        Valid for @package.DurationDays days
+                                        Hiệu lực @package.DurationDays ngày
                                     </li>
                                 }
                             </ul>
@@ -149,7 +149,7 @@
                             <div class="mt-auto">
                                 <a href="@Url.Page("/Package/Purchase", new { id = package.Id })" 
                                    class="btn @(package.PackageType == "BOOST_LISTING" ? "btn-warning" : "btn-primary") w-100 py-2">
-                                    <i class="bi bi-cart-plus"></i> Purchase Now
+                                    <i class="bi bi-cart-plus"></i> Mua ngay
                                 </a>
                             </div>
                         </div>
@@ -162,7 +162,7 @@
     <div class="row mt-5">
         <div class="col-12 text-center">
             <a href="@Url.Page("/Package/MyPackages")" class="btn btn-outline-primary">
-                <i class="bi bi-box-seam"></i> View My Packages
+                <i class="bi bi-box-seam"></i> Xem gói của tôi
             </a>
         </div>
     </div>

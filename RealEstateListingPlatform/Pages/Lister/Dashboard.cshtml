@@ -3,7 +3,7 @@
 @using BLL.DTOs
 
 @{
-    ViewData["Title"] = "Dashboard";
+    ViewData["Title"] = "Tổng quan";
     Layout = "_ListerLayout";
     var stats = Model.Stats ?? new DashboardStatsDto();
 }
@@ -14,13 +14,13 @@
         <div class="d-flex justify-content-between align-items-center">
             <div>
                 <h1 class="page-title">
-                    <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                    <i class="bi bi-speedometer2 me-2"></i>Tổng quan
                 </h1>
-                <p class="page-subtitle text-muted">Welcome back! Here's what's happening with your listings today.</p>
+                <p class="page-subtitle text-muted">Chào mừng trở lại! Dưới đây là tình hình các tin đăng của bạn hôm nay.</p>
             </div>
             <div id="signalr-status" class="d-flex align-items-center gap-2">
                 <span class="badge bg-secondary" id="connection-badge">
-                    <i class="bi bi-wifi-off"></i> Connecting...
+                    <i class="bi bi-wifi-off"></i> Đang kết nối...
                 </span>
             </div>
         </div>
@@ -36,8 +36,8 @@
                 </div>
                 <div class="stat-content">
                     <h3 class="stat-number" id="stat-totalListings">@stats.TotalListings</h3>
-                    <p class="stat-label">Total Listings</p>
-                    <small class="text-muted">Success Rate: <span id="stat-publishSuccessRate">@stats.PublishSuccessRate</span>%</small>
+                    <p class="stat-label">Tổng tin đăng</p>
+                    <small class="text-muted">Tỷ lệ duyệt: <span id="stat-publishSuccessRate">@stats.PublishSuccessRate</span>%</small>
                 </div>
             </div>
         </div>
@@ -49,8 +49,8 @@
                 </div>
                 <div class="stat-content">
                     <h3 class="stat-number" id="stat-activeListings">@stats.ActiveListings</h3>
-                    <p class="stat-label">Active Listings</p>
-                    <small class="text-success"><i class="bi bi-arrow-up"></i> Published</small>
+                    <p class="stat-label">Tin đang hiển</p>
+                    <small class="text-success"><i class="bi bi-arrow-up"></i> Đãxuất bản</small>
                 </div>
             </div>
         </div>
@@ -62,8 +62,8 @@
                 </div>
                 <div class="stat-content">
                     <h3 class="stat-number" id="stat-pendingReview">@stats.PendingReview</h3>
-                    <p class="stat-label">Pending Review</p>
-                    <small class="text-warning">Awaiting approval</small>
+                    <p class="stat-label">Chờ duyệt</p>
+                    <small class="text-warning">Đang chờ phê duyệt</small>
                 </div>
             </div>
         </div>
@@ -75,8 +75,8 @@
                 </div>
                 <div class="stat-content">
                     <h3 class="stat-number" id="stat-totalLeads">@stats.TotalLeads</h3>
-                    <p class="stat-label">Total Leads</p>
-                    <span class="badge bg-danger" id="stat-newLeadsBadge">@stats.NewLeads New</span>
+                    <p class="stat-label">Tổng khách hàng</p>
+                    <span class="badge bg-danger" id="stat-newLeadsBadge">@stats.NewLeads Mới</span>
                 </div>
             </div>
         </div>
@@ -89,8 +89,8 @@
                 </div>
                 <div class="stat-content">
                     <h3 class="stat-number" id="stat-draftListings">@stats.DraftListings</h3>
-                    <p class="stat-label">Draft Listings</p>
-                    <small class="text-muted">Not yet submitted</small>
+                    <p class="stat-label">Tin nháp</p>
+                    <small class="text-muted">Chưa gửi duyệt</small>
                 </div>
             </div>
         </div>
@@ -102,14 +102,14 @@
                 </div>
                 <div class="stat-content">
                     <h3 class="stat-number" id="stat-expiredListings">@stats.ExpiredListings</h3>
-                    <p class="stat-label">Expired Listings</p>
+                    <p class="stat-label">Tin hết hạn</p>
                     @if (stats.ExpiringListingsSoon > 0)
                     {
-                        <small class="text-danger"><span id="stat-expiringListingsSoon">@stats.ExpiringListingsSoon</span> expiring soon</small>
+                        <small class="text-danger"><span id="stat-expiringListingsSoon">@stats.ExpiringListingsSoon</span> sắp hết hạn</small>
                     }
                     else
                     {
-                        <small class="text-muted">None expiring soon</small>
+                        <small class="text-muted">Không có tin sắp hết hạn</small>
                     }
                 </div>
             </div>
@@ -122,8 +122,8 @@
                 </div>
                 <div class="stat-content">
                     <h3 class="stat-number" id="stat-boostedListings">@stats.BoostedListings</h3>
-                    <p class="stat-label">Boosted Listings</p>
-                    <small class="text-warning"><i class="bi bi-star-fill"></i> Featured</small>
+                    <p class="stat-label">Tin được đẩy</p>
+                    <small class="text-warning"><i class="bi bi-star-fill"></i> Nổi bật</small>
                 </div>
             </div>
         </div>
@@ -135,8 +135,8 @@
                 </div>
                 <div class="stat-content">
                     <h3 class="stat-number" id="stat-conversionRate">@stats.ConversionRate%</h3>
-                    <p class="stat-label">Conversion Rate</p>
-                    <small class="text-muted"><span id="stat-closedLeads">@stats.ClosedLeads</span> closed leads</small>
+                    <p class="stat-label">Tỷ lệ chuyển đổi</p>
+                    <small class="text-muted"><span id="stat-closedLeads">@stats.ClosedLeads</span> KH đã chốt</small>
                 </div>
             </div>
         </div>
@@ -148,9 +148,9 @@
             <div class="dashboard-card">
                 <div class="card-header">
                     <h5 class="card-title">
-                        <i class="bi bi-bar-chart me-2"></i>Performance Overview
+                        <i class="bi bi-bar-chart me-2"></i>Tổng quan hiệu suất
                     </h5>
-                    <small class="text-muted">Last 7 days</small>
+                    <small class="text-muted">7 ngày gần nhất</small>
                 </div>
                 <div class="card-body">
                     <canvas id="performanceChart" height="80"></canvas>
@@ -162,12 +162,12 @@
             <div class="dashboard-card">
                 <div class="card-header">
                     <h5 class="card-title">
-                        <i class="bi bi-people-fill me-2"></i>Lead Statistics
+                        <i class="bi bi-people-fill me-2"></i>Thống kê khách hàng
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="revenue-item mb-4">
-                        <p class="text-muted mb-1">Total Leads</p>
+                        <p class="text-muted mb-1">Tổng khách hàng</p>
                         <h3 class="text-primary mb-2" id="panel-totalLeads">@stats.TotalLeads</h3>
                         <div class="progress mb-2" style="height: 8px;">
                             <div class="progress-bar bg-success" id="progress-new" style="width: @(stats.TotalLeads > 0 ? (stats.NewLeads * 100.0 / stats.TotalLeads) : 0)%"></div>
@@ -175,16 +175,16 @@
                             <div class="progress-bar bg-secondary" id="progress-closed" style="width: @(stats.TotalLeads > 0 ? (stats.ClosedLeads * 100.0 / stats.TotalLeads) : 0)%"></div>
                         </div>
                         <div class="d-flex justify-content-between small">
-                            <span class="text-success"><i class="bi bi-circle-fill"></i> New: <span id="panel-newLeads">@stats.NewLeads</span></span>
-                            <span class="text-info"><i class="bi bi-circle-fill"></i> Contacted: <span id="panel-contactedLeads">@stats.ContactedLeads</span></span>
-                            <span class="text-secondary"><i class="bi bi-circle-fill"></i> Closed: <span id="panel-closedLeads">@stats.ClosedLeads</span></span>
+                            <span class="text-success"><i class="bi bi-circle-fill"></i> Mới: <span id="panel-newLeads">@stats.NewLeads</span></span>
+                            <span class="text-info"><i class="bi bi-circle-fill"></i> Đã liên hệ: <span id="panel-contactedLeads">@stats.ContactedLeads</span></span>
+                            <span class="text-secondary"><i class="bi bi-circle-fill"></i> Đã chốt: <span id="panel-closedLeads">@stats.ClosedLeads</span></span>
                         </div>
                     </div>
                     <div class="revenue-item">
-                        <p class="text-muted mb-1">Conversion Rate</p>
+                        <p class="text-muted mb-1">Tỷ lệ chuyển đổi</p>
                         <h4 class="text-success mb-0" id="panel-conversionRate">@stats.ConversionRate%</h4>
                         <small class="text-muted">
-                            <span id="panel-closedCount">@stats.ClosedLeads</span> out of <span id="panel-totalCount">@stats.TotalLeads</span> leads
+                            <span id="panel-closedCount">@stats.ClosedLeads</span> trên <span id="panel-totalCount">@stats.TotalLeads</span> khách hàng
                         </small>
                     </div>
                     @if (stats.LastLeadReceivedAt.HasValue)

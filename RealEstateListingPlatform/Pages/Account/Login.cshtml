@@ -2,32 +2,32 @@
 @model RealEstateListingPlatform.Pages.Account.LoginModel
 
 @{
-    ViewData["Title"] = "Log in";
+    ViewData["Title"] = "Đăng nhập";
     Layout = "_AuthLayout";
 }
 
 <div class="auth-toggle">
-    <a href="#" class="active">Login</a>
-    <a asp-page="./Register" class="js-auth-switch">Sign Up</a>
+    <a href="#" class="active">Đăng nhập</a>
+    <a asp-page="./Register" class="js-auth-switch">Đăng ký</a>
 </div>
 
 <form id="account" method="post" class="auth-form">
     <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
 
     <div class="mb-2">
-        <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="Email Address" />
+        <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="Địa chỉ email" />
         <span asp-validation-for="Input.Email" class="text-danger"></span>
     </div>
 
     <div class="mb-2 position-relative">
-        <input asp-for="Input.Password" class="form-control password-input" autocomplete="current-password" aria-required="true" placeholder="Password" />
+        <input asp-for="Input.Password" class="form-control password-input" autocomplete="current-password" aria-required="true" placeholder="Mật khẩu" />
         <span class="password-toggle-icon"><i class="bi bi-eye"></i></span>
         <span asp-validation-for="Input.Password" class="text-danger"></span>
     </div>
 
-    <a asp-page="./ForgotPassword" class="forgot-password">Forgot Password?</a>
+    <a asp-page="./ForgotPassword" class="forgot-password">Quên mật khẩu?</a>
 
-    <button id="login-submit" type="submit" class="btn btn-auth-primary">Log In</button>
+    <button id="login-submit" type="submit" class="btn btn-auth-primary">Đăng nhập</button>
 </form>
 
 @section Scripts {

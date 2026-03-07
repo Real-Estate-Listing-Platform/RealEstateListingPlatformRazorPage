@@ -3,24 +3,24 @@
 @using BLL.DTOs
 
 @{
-    ViewData["Title"] = "Admin - Dashboard";
+    ViewData["Title"] = "Quản trị - Bảng điều khiển";
     var stats = Model.DashboardStats;
 }
 
 <header class="admin-header">
     <div>
-        <h2>Admin Command Center</h2>
-        <p class="admin-muted mb-0">Monitor activity, approve listings, and keep the marketplace trusted.</p>
+        <h2>Trung tâm điều hành</h2>
+        <p class="admin-muted mb-0">Giám sát hoạt động, duyệt tin đăng và quản lý nền tảng.</p>
     </div>
 </header>
 
 <section class="admin-section">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
         <div>
-            <h3>Overview</h3>
-            <div class="admin-section-subtitle">Performance snapshot across the last 7 days</div>
+            <h3>Tổng quan</h3>
+            <div class="admin-section-subtitle">Thống kê hiệu suất trong 7 ngày qua</div>
         </div>
-        <div class="admin-badge primary">Live</div>
+        <div class="admin-badge primary">Trực tiếp</div>
     </div>
 
     <div class="row g-3 admin-stats">
@@ -30,16 +30,16 @@
                 <div class="admin-stat-card">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <div class="stat-title">Listings Pending</div>
+                            <div class="stat-title">Tin chờ duyệt</div>
                             <div class="admin-stat-value">@stats.PendingListingsCount</div>
                             <div class="admin-stat-delta">
                                 @if (stats.NewUsersThisWeek > 0)
                                 {
-                                    <text>+@((stats.PendingListingsCount * 100 / Math.Max(stats.TotalListings, 1)).ToString("F0"))% of total</text>
+                                    <text>+@((stats.PendingListingsCount * 100 / Math.Max(stats.TotalListings, 1)).ToString("F0"))% tổng số</text>
                                 }
                                 else
                                 {
-                                    <text>@stats.TotalListings total listings</text>
+                                    <text>@stats.TotalListings tổng tin đăng</text>
                                 }
                             </div>
                         </div>
@@ -53,9 +53,9 @@
                 <div class="admin-stat-card">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <div class="stat-title">New Users</div>
+                            <div class="stat-title">Người dùng mới</div>
                             <div class="admin-stat-value">@stats.TotalUsers</div>
-                            <div class="admin-stat-delta">+@stats.NewUsersToday today, +@stats.NewUsersThisWeek this week</div>
+                            <div class="admin-stat-delta">+@stats.NewUsersToday hôm nay, +@stats.NewUsersThisWeek tuần này</div>
                         </div>
                         <div class="admin-stat-icon success">
                             <i class="bi bi-people"></i>
@@ -67,9 +67,9 @@
                 <div class="admin-stat-card">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <div class="stat-title">Total Leads</div>
+                            <div class="stat-title">Tổng khách hàng</div>
                             <div class="admin-stat-value">@stats.TotalLeads</div>
-                            <div class="admin-stat-delta">@stats.LeadConversionRate.ToString("F1")% conversion rate</div>
+                            <div class="admin-stat-delta">@stats.LeadConversionRate.ToString("F1")% tỷ lệ chuyển đổi</div>
                         </div>
                         <div class="admin-stat-icon primary">
                             <i class="bi bi-graph-up"></i>
@@ -81,9 +81,9 @@
                 <div class="admin-stat-card">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <div class="stat-title">Total Views</div>
+                            <div class="stat-title">Tổng lượt xem</div>
                             <div class="admin-stat-value">@stats.TotalViews.ToString("N0")</div>
-                            <div class="admin-stat-delta">@stats.ViewsToday today, @stats.ViewsThisWeek this week</div>
+                            <div class="admin-stat-delta">@stats.ViewsToday hôm nay, @stats.ViewsThisWeek tuần này</div>
                         </div>
                         <div class="admin-stat-icon info">
                             <i class="bi bi-eye"></i>
@@ -117,30 +117,30 @@
     <div class="row g-3 mt-2">
         <div class="col-12 col-lg-7">
             <div class="p-4 border rounded-4 bg-light h-100">
-                <h5 class="fw-bold">Platform Insights</h5>
-                <p class="admin-muted small mb-4">Key metrics from your real estate platform.</p>
+                <h5 class="fw-bold">Thông tin nền tảng</h5>
+                <p class="admin-muted small mb-4">Các chỉ số quan trọng từ nền tảng bất động sản.</p>
                 @if (stats != null)
                 {
                     <div class="d-flex flex-wrap gap-3">
                         <div>
                             <div class="fw-bold">@stats.PublishedListingsCount</div>
-                            <div class="admin-muted small">Published Listings</div>
+                            <div class="admin-muted small">Tin đã đăng</div>
                         </div>
                         <div>
                             <div class="fw-bold">@stats.ActiveListers</div>
-                            <div class="admin-muted small">Active Listers</div>
+                            <div class="admin-muted small">Người đăng</div>
                         </div>
                         <div>
                             <div class="fw-bold">@stats.ActiveSeekers</div>
-                            <div class="admin-muted small">Active Seekers</div>
+                            <div class="admin-muted small">Người tìm</div>
                         </div>
                         <div>
                             <div class="fw-bold">@stats.BoostedListingsCount</div>
-                            <div class="admin-muted small">Boosted Listings</div>
+                            <div class="admin-muted small">Tin được đẩy</div>
                         </div>
                         <div>
                             <div class="fw-bold">@stats.AverageListingPrice.ToString("N0") VND</div>
-                            <div class="admin-muted small">Avg. Listing Price</div>
+                            <div class="admin-muted small">Giá TB</div>
                         </div>
                     </div>
                 }
@@ -149,15 +149,15 @@
                     <div class="d-flex flex-wrap gap-3">
                         <div>
                             <div class="fw-bold">74%</div>
-                            <div class="admin-muted small">Auto-verified listings</div>
+                            <div class="admin-muted small">Tự động xác minh</div>
                         </div>
                         <div>
                             <div class="fw-bold">31</div>
-                            <div class="admin-muted small">Open disputes</div>
+                            <div class="admin-muted small">Tranh chấp mở</div>
                         </div>
                         <div>
                             <div class="fw-bold">2.4h</div>
-                            <div class="admin-muted small">Avg. response time</div>
+                            <div class="admin-muted small">TG phản hồi TB</div>
                         </div>
                     </div>
                 }
@@ -165,22 +165,22 @@
         </div>
         <div class="col-12 col-lg-5">
             <div class="p-4 border rounded-4 bg-light h-100">
-                <h5 class="fw-bold">User Statistics</h5>
+                <h5 class="fw-bold">Thống kê người dùng</h5>
                 @if (stats != null)
                 {
                     <ul class="list-unstyled mb-0 admin-muted small">
-                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>@stats.VerifiedUsers verified users (@((stats.VerifiedUsers * 100.0 / Math.Max(stats.TotalUsers, 1)).ToString("F0"))%)</li>
-                        <li class="mb-2"><i class="bi bi-clock text-warning me-2"></i>@stats.UnverifiedUsers unverified users</li>
-                        <li class="mb-2"><i class="bi bi-calendar-check text-info me-2"></i>@stats.UsersRegisteredLast30Days registered in last 30 days</li>
-                        <li><i class="bi bi-graph-up-arrow text-primary me-2"></i>@stats.NewUsersThisMonth new users this month</li>
+                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>@stats.VerifiedUsers người dùng đã xác minh (@((stats.VerifiedUsers * 100.0 / Math.Max(stats.TotalUsers, 1)).ToString("F0"))%)</li>
+                        <li class="mb-2"><i class="bi bi-clock text-warning me-2"></i>@stats.UnverifiedUsers chưa xác minh</li>
+                        <li class="mb-2"><i class="bi bi-calendar-check text-info me-2"></i>@stats.UsersRegisteredLast30Days đăng ký trong 30 ngày qua</li>
+                        <li><i class="bi bi-graph-up-arrow text-primary me-2"></i>@stats.NewUsersThisMonth người dùng mới tháng này</li>
                     </ul>
                 }
                 else
                 {
                     <ul class="list-unstyled mb-0 admin-muted small">
-                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Prioritize high-value listing reviews</li>
-                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Audit top-performing agents weekly</li>
-                        <li><i class="bi bi-check-circle text-success me-2"></i>Resolve escalations within 2 hours</li>
+                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Ưu tiên duyệt tin giá trị cao</li>
+                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Kiểm tra đại lý hàng đầu hàng tuần</li>
+                        <li><i class="bi bi-check-circle text-success me-2"></i>Giải quyết khiếu nại trong 2 giờ</li>
                     </ul>
                 }
             </div>
@@ -191,17 +191,17 @@
 <section class="admin-section">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
         <div>
-            <h3>Dashboard</h3>
-            <div class="admin-section-subtitle">Live operational KPIs and approval pipeline health</div>
+            <h3>Bảng điều khiển</h3>
+            <div class="admin-section-subtitle">KPI vận hành trực tiếp và tình trạng quy trình duyệt</div>
         </div>
-        <span class="admin-badge warning">@Model.ViewModel.PendingListings.Count Pending approvals</span>
+        <span class="admin-badge warning">@Model.ViewModel.PendingListings.Count Chờ duyệt</span>
     </div>
 
     <div class="row g-3 mt-2">
         <div class="col-12 col-lg-6">
             <div class="p-4 border rounded-4 bg-light h-100">
-                <h5 class="fw-bold">Listing Distribution</h5>
-                <p class="admin-muted small">Distribution of listings by status.</p>
+                <h5 class="fw-bold">Phân bố tin đăng</h5>
+                <p class="admin-muted small">Phân bố tin đăng theo trạng thái.</p>
                 @if (stats != null)
                 {
                     var totalListings = Math.Max(stats.TotalListings, 1);
@@ -212,7 +212,7 @@
                     
                     <div class="mb-3">
                         <div class="d-flex justify-content-between small fw-semibold">
-                            <span>Published</span>
+                            <span>Đã đăng</span>
                             <span>@publishedPercent.ToString("F0")% (@stats.PublishedListingsCount)</span>
                         </div>
                         <div class="progress" style="height: 8px;">
@@ -221,7 +221,7 @@
                     </div>
                     <div class="mb-3">
                         <div class="d-flex justify-content-between small fw-semibold">
-                            <span>Pending Review</span>
+                            <span>Chờ duyệt</span>
                             <span>@pendingPercent.ToString("F0")% (@stats.PendingListingsCount)</span>
                         </div>
                         <div class="progress" style="height: 8px;">
@@ -230,7 +230,7 @@
                     </div>
                     <div class="mb-3">
                         <div class="d-flex justify-content-between small fw-semibold">
-                            <span>Draft</span>
+                            <span>Nháp</span>
                             <span>@draftPercent.ToString("F0")% (@stats.DraftListingsCount)</span>
                         </div>
                         <div class="progress" style="height: 8px;">
@@ -239,7 +239,7 @@
                     </div>
                     <div>
                         <div class="d-flex justify-content-between small fw-semibold">
-                            <span>Rejected</span>
+                            <span>Từ chối</span>
                             <span>@rejectedPercent.ToString("F0")% (@stats.RejectedListingsCount)</span>
                         </div>
                         <div class="progress" style="height: 8px;">
@@ -251,7 +251,7 @@
                 {
                     <div class="mb-3">
                         <div class="d-flex justify-content-between small fw-semibold">
-                            <span>Initial review</span>
+                            <span>Duyệt ban đầu</span>
                             <span>42%</span>
                         </div>
                         <div class="progress" style="height: 8px;">
@@ -260,7 +260,7 @@
                     </div>
                     <div class="mb-3">
                         <div class="d-flex justify-content-between small fw-semibold">
-                            <span>Verification</span>
+                            <span>Xác minh</span>
                             <span>28%</span>
                         </div>
                         <div class="progress" style="height: 8px;">
@@ -269,7 +269,7 @@
                     </div>
                     <div>
                         <div class="d-flex justify-content-between small fw-semibold">
-                            <span>Final sign-off</span>
+                            <span>Ký duyệt cuối</span>
                             <span>30%</span>
                         </div>
                         <div class="progress" style="height: 8px;">
@@ -281,31 +281,31 @@
         </div>
         <div class="col-12 col-lg-6">
             <div class="p-4 border rounded-4 bg-light h-100">
-                <h5 class="fw-bold">Lead & Activity Stats</h5>
-                <p class="admin-muted small">Critical metrics from your platform.</p>
+                <h5 class="fw-bold">Thống kê KH & Hoạt động</h5>
+                <p class="admin-muted small">Các chỉ số quan trọng từ nền tảng.</p>
                 @if (stats != null)
                 {
                     <div class="d-flex flex-column gap-3">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <div class="fw-semibold">New Leads</div>
-                                <div class="admin-muted small">@stats.LeadsNew new, @stats.LeadsContacted contacted, @stats.LeadsClosed closed</div>
+                                <div class="fw-semibold">KH mới</div>
+                                <div class="admin-muted small">@stats.LeadsNew mới, @stats.LeadsContacted đã liên hệ, @stats.LeadsClosed đã chốt</div>
                             </div>
-                            <span class="admin-badge primary">@stats.NewLeadsToday today</span>
+                            <span class="admin-badge primary">@stats.NewLeadsToday hôm nay</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <div class="fw-semibold">Platform Views</div>
-                                <div class="admin-muted small">@stats.ViewsThisWeek views this week, @stats.ViewsThisMonth this month</div>
+                                <div class="fw-semibold">Lượt xem</div>
+                                <div class="admin-muted small">@stats.ViewsThisWeek lượt xem tuần này, @stats.ViewsThisMonth tháng này</div>
                             </div>
-                            <span class="admin-badge success">Growing</span>
+                            <span class="admin-badge success">Tăng trưởng</span>
                         </div>
                         @if (stats.TotalRevenue > 0)
                         {
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <div class="fw-semibold">Revenue</div>
-                                    <div class="admin-muted small">@stats.TotalPackagesPurchased packages sold</div>
+                                    <div class="fw-semibold">Doanh thu</div>
+                                    <div class="admin-muted small">@stats.TotalPackagesPurchased gói đã bán</div>
                                 </div>
                                 <span class="admin-badge info">@stats.TotalRevenue.ToString("N0") VND</span>
                             </div>
@@ -314,16 +314,16 @@
                         {
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <div class="fw-semibold">Reports</div>
-                                    <div class="admin-muted small">@stats.PendingReports pending, @stats.ResolvedReports resolved</div>
+                                    <div class="fw-semibold">Báo cáo</div>
+                                    <div class="admin-muted small">@stats.PendingReports chờ xử lý, @stats.ResolvedReports đã giải quyết</div>
                                 </div>
                                 @if (stats.UrgentReports > 0)
                                 {
-                                    <span class="admin-badge danger">@stats.UrgentReports urgent</span>
+                                    <span class="admin-badge danger">@stats.UrgentReports khẩn cấp</span>
                                 }
                                 else
                                 {
-                                    <span class="admin-badge success">On track</span>
+                                    <span class="admin-badge success">Đúng tiến độ</span>
                                 }
                             </div>
                         }
@@ -334,24 +334,24 @@
                     <div class="d-flex flex-column gap-3">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <div class="fw-semibold">Price anomalies</div>
-                                <div class="admin-muted small">12 listings require manual audit.</div>
+                                <div class="fw-semibold">Bất thường giá</div>
+                                <div class="admin-muted small">12 tin cần kiểm tra thủ công.</div>
                             </div>
-                            <span class="admin-badge warning">High</span>
+                            <span class="admin-badge warning">Cao</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <div class="fw-semibold">Inactive agents</div>
-                                <div class="admin-muted small">5 agencies have 0 responses in 48h.</div>
+                                <div class="fw-semibold">Đại lý không hoạt động</div>
+                                <div class="admin-muted small">5 đại lý không phản hồi trong 48h.</div>
                             </div>
-                            <span class="admin-badge danger">Urgent</span>
+                            <span class="admin-badge danger">Khẩn cấp</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <div class="fw-semibold">Boost inventory</div>
-                                <div class="admin-muted small">Boost packages are 82% utilized.</div>
+                                <div class="fw-semibold">Gói đẩy tin</div>
+                                <div class="admin-muted small">Gói đẩy tin đã sử dụng 82%.</div>
                             </div>
-                            <span class="admin-badge primary">On track</span>
+                            <span class="admin-badge primary">Đúng tiến độ</span>
                         </div>
                     </div>
                 }
@@ -365,8 +365,8 @@
     <section class="admin-section">
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
             <div>
-                <h3>Performance Insights</h3>
-                <div class="admin-section-subtitle">Top performing and most viewed listings</div>
+                <h3>Phân tích hiệu suất</h3>
+                <div class="admin-section-subtitle">Tin đăng hiệu quất nhất và nhiều lượt xem nhất</div>
             </div>
         </div>
 
@@ -375,13 +375,13 @@
             {
                 <div class="col-12 col-lg-6">
                     <div class="p-4 border rounded-4 bg-light h-100">
-                        <h5 class="fw-bold mb-3">Top Performing Listings (by Leads)</h5>
+                        <h5 class="fw-bold mb-3">Tin hiệu quả nhất (theo KH)</h5>
                         <div class="table-responsive">
                             <table class="table table-sm">
                                 <thead>
                                     <tr>
-                                        <th>Title</th>
-                                        <th>Leads</th>
+                                        <th>Tiêu đề</th>
+                                        <th>KH</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -403,13 +403,13 @@
             {
                 <div class="col-12 col-lg-6">
                     <div class="p-4 border rounded-4 bg-light h-100">
-                        <h5 class="fw-bold mb-3">Most Viewed Listings</h5>
+                        <h5 class="fw-bold mb-3">Tin nhiều lượt xem nhất</h5>
                         <div class="table-responsive">
                             <table class="table table-sm">
                                 <thead>
                                     <tr>
-                                        <th>Title</th>
-                                        <th>Views</th>
+                                        <th>Tiêu đề</th>
+                                        <th>Lượt xem</th>
                                     </tr>
                                 </thead>
                                 <tbody>

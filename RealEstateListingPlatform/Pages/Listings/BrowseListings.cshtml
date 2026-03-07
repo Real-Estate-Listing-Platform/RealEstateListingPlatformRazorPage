@@ -42,15 +42,15 @@
     <div class="row">
         <aside class="col-lg-3">
             <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 sticky-top" style="top: 100px;">
-                <h5 class="fw-bold mb-3">Search filters</h5>
+                <h5 class="fw-bold mb-3">Bộ lọc tìm kiếm</h5>
                 <form method="get" action="@formAction" id="searchFiltersForm">
                     <div class="mb-3">
-                        <label class="form-label small fw-bold">Area</label>
+                        <label class="form-label small fw-bold">Khu vực</label>
                         <input type="text" name="location" class="form-control form-control-sm border-light bg-light" placeholder="Quận, phường, đường, thành phố..." value="@Model.FilterLocation" />
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label small fw-bold">Price</label>
+                        <label class="form-label small fw-bold">Giá</label>
                         <input type="text" name="maxPrice" id="maxPriceInput" class="form-control form-control-sm border-light bg-light" placeholder="VD: 5 tỷ, 5B, 5000000000" value="@Model.FilterMaxPriceRaw" />
                         <p class="small text-muted mt-1 mb-0">Mức giá gợi ý:</p>
                         <div class="d-flex flex-wrap gap-1 mt-1">
@@ -64,19 +64,19 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label small fw-bold">Property Type</label>
+                        <label class="form-label small fw-bold">Loại bất động sản</label>
                         <div class="d-flex flex-column gap-1">
-                            @if (Model.FilterPropertyTypes.Contains("Apartment", StringComparer.OrdinalIgnoreCase)) { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Apartment" checked /> Apartment</label> } else { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Apartment" /> Apartment</label> }
-                            @if (Model.FilterPropertyTypes.Contains("Land", StringComparer.OrdinalIgnoreCase)) { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Land" checked /> Land</label> } else { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Land" /> Land</label> }
-                            @if (Model.FilterPropertyTypes.Contains("Villa", StringComparer.OrdinalIgnoreCase)) { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Villa" checked /> Villa</label> } else { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Villa" /> Villa</label> }
-                            @if (Model.FilterPropertyTypes.Contains("Office", StringComparer.OrdinalIgnoreCase)) { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Office" checked /> Office</label> } else { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Office" /> Office</label> }
-                            @if (Model.FilterPropertyTypes.Contains("Townhouse", StringComparer.OrdinalIgnoreCase)) { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Townhouse" checked /> Townhouse</label> } else { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Townhouse" /> Townhouse</label> }
-                            @if (Model.FilterPropertyTypes.Contains("Room", StringComparer.OrdinalIgnoreCase)) { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Room" checked /> Room</label> } else { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Room" /> Room</label> }
+                            @if (Model.FilterPropertyTypes.Contains("Apartment", StringComparer.OrdinalIgnoreCase)) { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Apartment" checked /> Căn hộ</label> } else { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Apartment" /> Căn hộ</label> }
+                            @if (Model.FilterPropertyTypes.Contains("Land", StringComparer.OrdinalIgnoreCase)) { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Land" checked /> Đất</label> } else { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Land" /> Đất</label> }
+                            @if (Model.FilterPropertyTypes.Contains("Villa", StringComparer.OrdinalIgnoreCase)) { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Villa" checked /> Biệt thự</label> } else { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Villa" /> Biệt thự</label> }
+                            @if (Model.FilterPropertyTypes.Contains("Office", StringComparer.OrdinalIgnoreCase)) { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Office" checked /> Văn phòng</label> } else { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Office" /> Văn phòng</label> }
+                            @if (Model.FilterPropertyTypes.Contains("Townhouse", StringComparer.OrdinalIgnoreCase)) { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Townhouse" checked /> Nhà phố</label> } else { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Townhouse" /> Nhà phố</label> }
+                            @if (Model.FilterPropertyTypes.Contains("Room", StringComparer.OrdinalIgnoreCase)) { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Room" checked /> Phòng trọ</label> } else { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Room" /> Phòng trọ</label> }
                             @if (Model.FilterPropertyTypes.Contains("Penthouse", StringComparer.OrdinalIgnoreCase)) { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Penthouse" checked /> Penthouse</label> } else { <label class="form-check small"><input class="form-check-input" type="checkbox" name="propertyType" value="Penthouse" /> Penthouse</label> }
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-auth-primary w-100 rounded-pill btn-sm mt-2">Apply</button>
+                    <button type="submit" class="btn btn-auth-primary w-100 rounded-pill btn-sm mt-2">Áp dụng</button>
                 </form>
             </div>
         </aside>
@@ -84,7 +84,7 @@
         <main class="col-lg-9">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h3 class="fw-bold mb-0">@ViewData["Title"]</h3>
-                <span class="text-muted small">Showing <b>@((Model.CurrentPage - 1) * Model.PageSize + 1)</b>-<b>@Math.Min(Model.CurrentPage * Model.PageSize, Model.TotalCount)</b> of <b>@Model.TotalCount</b> results</span>
+                <span class="text-muted small">Hiển thị <b>@((Model.CurrentPage - 1) * Model.PageSize + 1)</b>-<b>@Math.Min(Model.CurrentPage * Model.PageSize, Model.TotalCount)</b> trên <b>@Model.TotalCount</b> kết quả</span>
             </div>
 
             <div class="row g-4">
@@ -98,12 +98,12 @@
                                 {
                                     <div class="position-absolute top-0 start-0 m-2">
                                         <span class="badge bg-warning text-dark fw-bold">
-                                            <i class="bi bi-lightning-fill"></i> BOOSTED
+                                            <i class="bi bi-lightning-fill"></i> NỔI BẬT
                                         </span>
                                     </div>
                                 }
                                 <span class="badge @(item.TransactionType == "Sell" ? "bg-primary" : "bg-success") position-absolute bottom-0 start-0 m-3 rounded-pill px-3">
-                                    @(item.TransactionType == "Sell" ? "Sale" : "Rent")
+                                    @(item.TransactionType == "Sell" ? "Bán" : "Cho thuê")
                                 </span>
                             </div>
                             <div class="card-body">
@@ -120,7 +120,7 @@
                                 </div>
                             </div>
                             <div class="card-footer bg-transparent border-top-0 pb-3">
-                                <a asp-page="/Listings/PropertyDetail" asp-route-id="@item.Id" class="btn btn-outline-primary w-100 rounded-pill">Details</a>
+                                <a asp-page="/Listings/PropertyDetail" asp-route-id="@item.Id" class="btn btn-outline-primary w-100 rounded-pill">Chi tiết</a>
                             </div>
                         </div>
                     </div>

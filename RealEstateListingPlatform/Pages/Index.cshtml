@@ -1,7 +1,7 @@
 @page
 @model RealEstateListingPlatform.Pages.IndexModel
 @{
-    ViewData["Title"] = "Find Your Dream Home"; 
+    ViewData["Title"] = "Tìm Ngôi Nhà Mơ Ước"; 
     Layout = "_Layout";
 }
 
@@ -10,30 +10,30 @@
         <div class="row justify-content-center">
             <div class="col-lg-8">
                 <h1 class="display-3 fw-bold mb-3 animate__animated animate__fadeInDown">
-                    Find Your Dream Home
+                    Tìm Ngôi Nhà Mơ Ước
                 </h1>
                 <p class="fs-5 mb-5 opacity-75">
-                    A place that connects genuine real estate values.
+                    Nơi kết nối những giá trị bất động sản đích thực.
                 </p>
                 <div class="search-box-container shadow-lg search-wrapper p-2 bg-white">
                     <form class="row g-0 align-items-center" method="get" action="/Listings/AllListings">
                         <div class="col-md-4 px-3 border-end">
                             <div class="d-flex align-items-center">
                                 <i class="bi bi-geo-alt text-primary me-2"></i>
-                                <input type="text" name="location" class="form-control border-0" placeholder="Where are you looking?" value="">
+                                <input type="text" name="location" class="form-control border-0" placeholder="Bạn muốn tìm ở đâu?" value="">
                             </div>
                         </div>
                         <div class="col-md-3 px-3 border-end">
                             <div class="d-flex align-items-center">
                                 <i class="bi bi-house text-primary me-2"></i>
                                 <select class="form-select border-0" name="propertyType">
-                                    <option value="">Type</option>
-                                    <option value="Apartment">Apartment</option>
-                                    <option value="Land">Land</option>
-                                    <option value="Villa">Villa</option>
-                                    <option value="Office">Office</option>
-                                    <option value="Townhouse">Townhouse</option>
-                                    <option value="Room">Room</option>
+                                    <option value="">Loại BDS</option>
+                                    <option value="Apartment">Căn hộ</option>
+                                    <option value="Land">Đất</option>
+                                    <option value="Villa">Biệt thự</option>
+                                    <option value="Office">Văn phòng</option>
+                                    <option value="Townhouse">Nhà phố</option>
+                                    <option value="Room">Phòng trọ</option>
                                     <option value="Penthouse">Penthouse</option>
                                 </select>
                             </div>
@@ -41,7 +41,7 @@
                         <div class="col-md-3 px-3">
                             <div class="d-flex align-items-center">
                                 <i class="bi bi-cash-stack text-primary me-2"></i>
-                                <input type="text" name="maxPrice" class="form-control border-0" placeholder="Max Price" value="">
+                                <input type="text" name="maxPrice" class="form-control border-0" placeholder="Giá tối đa" value="">
                             </div>
                         </div>
                         <div class="col-md-2 p-1">
@@ -59,10 +59,10 @@
 <section class="container py-5">
     <div class="d-flex justify-content-between align-items-end mb-4">
         <div>
-            <h2 class="fw-bold">Featured Listings</h2>
-            <p class="text-muted">Handpicked properties just for you.</p>
+            <h2 class="fw-bold">Tin Đăng Nổi Bật</h2>
+            <p class="text-muted">Những bất động sản được chọn lọc dành riêng cho bạn.</p>
         </div>
-        <a asp-page="/Listings/AllListings" class="btn btn-outline-secondary btn-sm rounded-pill px-4">View All</a>
+        <a asp-page="/Listings/AllListings" class="btn btn-outline-secondary btn-sm rounded-pill px-4">Xem tất cả</a>
     </div>
 
     <div class="row g-4">
@@ -72,7 +72,7 @@
                 <div class="card property-card h-100 border-0 shadow-sm">
                     <div class="position-relative">
                         <img src="@item.ImageUrl" class="card-img-top rounded-top-4" alt="@item.Title" style="height: 220px; object-fit: cover;">
-                        <span class="badge bg-auth-primary position-absolute top-0 start-0 m-3">@item.TransactionType</span>
+                        <span class="badge bg-auth-primary position-absolute top-0 start-0 m-3">@RealEstateListingPlatform.Models.VietnameseHelper.TransactionType(item.TransactionType)</span>
                     </div>
                     <div class="card-body">
                         <h5 class="card-title fw-bold text-truncate">@item.Title</h5>
@@ -88,7 +88,7 @@
                         </div>
                     </div>
                     <div class="card-footer bg-transparent border-top-0 pb-3">
-                        <a asp-page="/Listings/PropertyDetail" asp-route-id="@item.Id" class="btn btn-outline-primary w-100 rounded-pill">Details</a>
+                        <a asp-page="/Listings/PropertyDetail" asp-route-id="@item.Id" class="btn btn-outline-primary w-100 rounded-pill">Chi tiết</a>
                     </div>
                 </div>
             </div>

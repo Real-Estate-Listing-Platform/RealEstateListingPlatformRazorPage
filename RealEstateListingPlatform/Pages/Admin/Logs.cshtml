@@ -2,59 +2,59 @@
 @model RealEstateListingPlatform.Pages.Admin.LogsModel
 
 @{
-    ViewData["Title"] = "Admin - Logs";
+    ViewData["Title"] = "Quản trị - Nhật ký";
 }
 
 <header class="admin-header">
     <div>
-        <h2>Logs</h2>
-        <p class="admin-muted mb-0">Recent operational updates and automated alerts.</p>
+        <h2>Nhật ký</h2>
+        <p class="admin-muted mb-0">Cập nhật vận hành và cảnh báo tự động gần đây.</p>
     </div>
     <div class="d-flex flex-wrap align-items-center gap-3">
-        <span class="admin-badge primary">Last 24 hours</span>
+        <span class="admin-badge primary">24 giờ qua</span>
     </div>
 </header>
 
 <section class="admin-section">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
         <div>
-            <h3>Activity feed</h3>
-            <div class="admin-section-subtitle">Operational updates and automated alerts</div>
+            <h3>Nguồn cấp hoạt động</h3>
+            <div class="admin-section-subtitle">Cập nhật vận hành và cảnh báo tự động</div>
         </div>
         <div class="d-flex align-items-center gap-3">
-            <span class="admin-badge primary">@Model.ViewModel.TotalLogs Total Entries</span>
+            <span class="admin-badge primary">@Model.ViewModel.TotalLogs Tổng mục</span>
             <select class="form-select form-select-sm" style="width: auto;" id="pageSizeSelector" onchange="changePageSize(this.value)">
                 @if (Model.ViewModel.PageSize == 10)
                 {
-                    <option value="10" selected>10 per page</option>
+                    <option value="10" selected>10 mục/trang</option>
                 }
                 else
                 {
-                    <option value="10">10 per page</option>
+                    <option value="10">10 mục/trang</option>
                 }
                 @if (Model.ViewModel.PageSize == 20)
                 {
-                    <option value="20" selected>20 per page</option>
+                    <option value="20" selected>20 mục/trang</option>
                 }
                 else
                 {
-                    <option value="20">20 per page</option>
+                    <option value="20">20 mục/trang</option>
                 }
                 @if (Model.ViewModel.PageSize == 50)
                 {
-                    <option value="50" selected>50 per page</option>
+                    <option value="50" selected>50 mục/trang</option>
                 }
                 else
                 {
-                    <option value="50">50 per page</option>
+                    <option value="50">50 mục/trang</option>
                 }
                 @if (Model.ViewModel.PageSize == 100)
                 {
-                    <option value="100" selected>100 per page</option>
+                    <option value="100" selected>100 mục/trang</option>
                 }
                 else
                 {
-                    <option value="100">100 per page</option>
+                    <option value="100">100 mục/trang</option>
                 }
             </select>
         </div>
@@ -64,10 +64,10 @@
         <table class="table table-hover align-middle mb-0 admin-table">
             <thead class="bg-light">
                 <tr>
-                    <th class="text-uppercase small text-muted">Event</th>
-                    <th class="text-uppercase small text-muted">Category</th>
-                    <th class="text-uppercase small text-muted">Status</th>
-                    <th class="text-uppercase small text-muted">Time</th>
+                    <th class="text-uppercase small text-muted">Sự kiện</th>
+                    <th class="text-uppercase small text-muted">Danh mục</th>
+                    <th class="text-uppercase small text-muted">Trạng thái</th>
+                    <th class="text-uppercase small text-muted">Thời gian</th>
                 </tr>
             </thead>
             <tbody>
@@ -96,7 +96,7 @@
                     <tr>
                         <td colspan="4" class="text-center py-5 admin-muted">
                             <i class="bi bi-inbox display-4 d-block mb-3"></i>
-                            <p>No audit logs available yet.</p>
+                            <p>Chưa có nhật ký kiểm toán.</p>
                         </td>
                     </tr>
                 }
@@ -108,7 +108,7 @@
     {
         <div class="d-flex justify-content-between align-items-center mt-4">
             <div class="admin-muted small">
-                Showing @((Model.ViewModel.CurrentPage - 1) * Model.ViewModel.PageSize + 1) to @Math.Min(Model.ViewModel.CurrentPage * Model.ViewModel.PageSize, Model.ViewModel.TotalLogs) of @Model.ViewModel.TotalLogs entries
+                Hiển thị @((Model.ViewModel.CurrentPage - 1) * Model.ViewModel.PageSize + 1) đến @Math.Min(Model.ViewModel.CurrentPage * Model.ViewModel.PageSize, Model.ViewModel.TotalLogs) trong tổng @Model.ViewModel.TotalLogs mục
             </div>
             <nav aria-label="Log pagination">
                 <ul class="pagination pagination-sm mb-0">

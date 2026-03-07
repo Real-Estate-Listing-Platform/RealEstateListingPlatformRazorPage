@@ -2,19 +2,19 @@
 @model RealEstateListingPlatform.Pages.Package.MyPackagesModel
 
 @{
-    ViewData["Title"] = "My Packages";
+    ViewData["Title"] = "Gói của tôi";
     Layout = "_ListerLayout";
 }
 
 <div class="container py-5">
 <div class="row mb-4">
     <div class="col-md-8">
-        <h1 class="fw-bold mb-2">My Packages</h1>
-        <p class="text-muted">Manage your purchased packages and track usage</p>
+        <h1 class="fw-bold mb-2">Gói của tôi</h1>
+        <p class="text-muted">Quản lý gói đã mua và theo dõi sử dụng</p>
     </div>
     <div class="col-md-4 text-md-end">
         <a href="@Url.Page("/Package/Index")" class="btn btn-primary">
-            <i class="bi bi-cart-plus"></i> Buy More Packages
+            <i class="bi bi-cart-plus"></i> Mua thêm gói
         </a>
     </div>
 </div>
@@ -27,19 +27,19 @@
     {
         <div class="alert alert-warning alert-dismissible fade show" role="alert">
             <h6 class="alert-heading">
-                <i class="bi bi-exclamation-triangle-fill"></i> Payment Required
+                <i class="bi bi-exclamation-triangle-fill"></i> Cần thanh toán
             </h6>
             <p class="mb-2">
-                You have @pendingPackages.Count package@(pendingPackages.Count > 1 ? "s" : "") waiting for payment completion.
-                Complete your payment to activate your packages.
+                Bạn có @pendingPackages.Count gói đang chờ thanh toán.
+                Hoàn tất thanh toán để kích hoạt gói.
             </p>
             <hr>
             <div class="d-flex gap-2">
                 <a href="@Url.Page("/Payment/MyTransactions")" class="btn btn-sm btn-warning">
-                    <i class="bi bi-credit-card-fill"></i> View Pending Transactions
+                    <i class="bi bi-credit-card-fill"></i> Xem giao dịch chờ
                 </a>
                 <a href="@Url.Page("/Package/Index")" class="btn btn-sm btn-outline-warning">
-                    <i class="bi bi-cart-plus"></i> Buy New Package
+                    <i class="bi bi-cart-plus"></i> Mua gói mới
                 </a>
             </div>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -51,7 +51,7 @@
     {
         <div class="row mb-4">
             <div class="col-12">
-                <h5 class="fw-bold mb-3"><i class="bi bi-check-circle-fill text-success"></i> Active Packages</h5>
+                <h5 class="fw-bold mb-3"><i class="bi bi-check-circle-fill text-success"></i> Gói đang hoạt động</h5>
             </div>
             @foreach (var userPackage in Model.ActivePackages)
             {
@@ -60,7 +60,7 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <h6 class="card-title fw-bold mb-0">@userPackage.Package.Name</h6>
-                                <span class="badge bg-success">Active</span>
+                                <span class="badge bg-success">Hoạt động</span>
                             </div>
                             <p class="text-muted small mb-3">@userPackage.Package.Description</p>
 
@@ -68,28 +68,28 @@
                                 @if (userPackage.RemainingListings.HasValue)
                                 {
                                     <div class="d-flex justify-content-between mb-1">
-                                        <small class="text-muted">Remaining Listings:</small>
+                                        <small class="text-muted">Tin còn lại:</small>
                                         <strong>@userPackage.RemainingListings</strong>
                                     </div>
                                 }
                                 @if (userPackage.RemainingPhotos.HasValue && userPackage.RemainingPhotos > 0)
                                 {
                                     <div class="d-flex justify-content-between mb-1">
-                                        <small class="text-muted">Extra Photos:</small>
+                                        <small class="text-muted">Ảnh bổ sung:</small>
                                         <strong>@userPackage.RemainingPhotos</strong>
                                     </div>
                                 }
                                 @if (userPackage.VideoAvailable)
                                 {
                                     <div class="d-flex justify-content-between mb-1">
-                                        <small class="text-muted">Video Upload:</small>
-                                        <strong class="text-success">Enabled</strong>
+                                        <small class="text-muted">Tải video:</small>
+                                        <strong class="text-success">Đã bật</strong>
                                     </div>
                                 }
                                 @if (userPackage.RemainingBoosts.HasValue && userPackage.RemainingBoosts > 0)
                                 {
                                     <div class="d-flex justify-content-between mb-1">
-                                        <small class="text-muted">Boost Credits:</small>
+                                        <small class="text-muted">Lượt đẩy tin:</small>
                                         <strong>@userPackage.RemainingBoosts</strong>
                                     </div>
                                 }
@@ -100,7 +100,7 @@
                                 var daysLeft = (userPackage.ExpiresAt.Value - DateTime.UtcNow).Days;
                                 <div class="mt-2 pt-2 border-top">
                                     <small class="text-muted">
-                                        <i class="bi bi-clock"></i> Expires in @daysLeft day@(daysLeft != 1 ? "s" : "")
+                                        <i class="bi bi-clock"></i> Còn @daysLeft ngày
                                     </small>
                                 </div>
                             }
@@ -113,8 +113,8 @@
     else
     {
         <div class="alert alert-info mb-4">
-            <i class="bi bi-info-circle"></i> You don't have any active packages. 
-            <a href="@Url.Page("/Package/Index")" class="alert-link">Browse packages</a> to enhance your listings.
+            <i class="bi bi-info-circle"></i> Bạn chưa có gói nào đang hoạt động. 
+            <a href="@Url.Page("/Package/Index")" class="alert-link">Xem gói dịch vụ</a> để nâng cấp tin đăng.
         </div>
     }
 
@@ -127,36 +127,36 @@
                         <span class="input-group-text">
                             <i class="bi bi-search"></i>
                         </span>
-                        <input type="text" name="searchTerm" class="form-control" placeholder="Search packages..." 
+                        <input type="text" name="searchTerm" class="form-control" placeholder="Tìm gói..." 
                                value="@Model.SearchTerm">
                     </div>
                 </div>
                 <div class="col-md-2">
                     <select name="status" class="form-select">
-                        <option value="">All Status</option>
-                        <option value="Active" selected="@(Model.Status == "Active")">Active</option>
-                        <option value="Pending" selected="@(Model.Status == "Pending")">Pending</option>
-                        <option value="Expired" selected="@(Model.Status == "Expired")">Expired</option>
-                        <option value="Used" selected="@(Model.Status == "Used")">Used</option>
-                        <option value="Cancelled" selected="@(Model.Status == "Cancelled")">Cancelled</option>
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="Active" selected="@(Model.Status == "Active")">Hoạt động</option>
+                        <option value="Pending" selected="@(Model.Status == "Pending")">Đang chờ</option>
+                        <option value="Expired" selected="@(Model.Status == "Expired")">Hết hạn</option>
+                        <option value="Used" selected="@(Model.Status == "Used")">Đã dùng</option>
+                        <option value="Cancelled" selected="@(Model.Status == "Cancelled")">Đã hủy</option>
                     </select>
                 </div>
                 <div class="col-md-3">
                     <select name="packageType" class="form-select">
-                        <option value="">All Package Types</option>
-                        <option value="ADDITIONAL_LISTING" selected="@(Model.PackageType == "ADDITIONAL_LISTING")">Additional Listing</option>
-                        <option value="PHOTO_PACK" selected="@(Model.PackageType == "PHOTO_PACK")">Photo Pack</option>
-                        <option value="VIDEO_UPLOAD" selected="@(Model.PackageType == "VIDEO_UPLOAD")">Video Upload</option>
-                        <option value="BOOST_LISTING" selected="@(Model.PackageType == "BOOST_LISTING")">Boost Listing</option>
+                        <option value="">Tất cả loại gói</option>
+                        <option value="ADDITIONAL_LISTING" selected="@(Model.PackageType == "ADDITIONAL_LISTING")">Tin bổ sung</option>
+                        <option value="PHOTO_PACK" selected="@(Model.PackageType == "PHOTO_PACK")">Gói ảnh</option>
+                        <option value="VIDEO_UPLOAD" selected="@(Model.PackageType == "VIDEO_UPLOAD")">Tải video</option>
+                        <option value="BOOST_LISTING" selected="@(Model.PackageType == "BOOST_LISTING")">Đẩy tin</option>
                     </select>
                 </div>
                 <div class="col-md-3">
                     <select name="sortBy" class="form-select">
-                        <option value="PurchasedAt" selected="@(Model.SortBy == "PurchasedAt")">Purchase Date</option>
-                        <option value="ExpiresAt" selected="@(Model.SortBy == "ExpiresAt")">Expiration Date</option>
-                        <option value="Price" selected="@(Model.SortBy == "Price")">Price</option>
-                        <option value="Name" selected="@(Model.SortBy == "Name")">Package Name</option>
-                        <option value="Status" selected="@(Model.SortBy == "Status")">Status</option>
+                        <option value="PurchasedAt" selected="@(Model.SortBy == "PurchasedAt")">Ngày mua</option>
+                        <option value="ExpiresAt" selected="@(Model.SortBy == "ExpiresAt")">Ngày hết hạn</option>
+                        <option value="Price" selected="@(Model.SortBy == "Price")">Giá</option>
+                        <option value="Name" selected="@(Model.SortBy == "Name")">Tên gói</option>
+                        <option value="Status" selected="@(Model.SortBy == "Status")">Trạng thái</option>
                     </select>
                     <input type="hidden" name="sortOrder" value="@Model.SortOrder" />
                 </div>
@@ -171,17 +171,17 @@
                            value="@Model.PurchasedBefore?.ToString("yyyy-MM-dd")">
                 </div>
                 <div class="col-md-2">
-                    <input type="number" name="pageSize" class="form-control" placeholder="Per Page" 
+                    <input type="number" name="pageSize" class="form-control" placeholder="Số/trang" 
                            value="@Model.PageSize" min="5" max="50">
                 </div>
                 <div class="col-md-2">
                     <button type="submit" class="btn btn-primary w-100">
-                        <i class="bi bi-funnel me-2"></i>Apply Filters
+                        <i class="bi bi-funnel me-2"></i>Lọc
                     </button>
                 </div>
                 <div class="col-md-2">
                     <a asp-page="/Package/MyPackages" class="btn btn-outline-secondary w-100">
-                        <i class="bi bi-x-circle me-2"></i>Reset
+                        <i class="bi bi-x-circle me-2"></i>Đặt lại
                     </a>
                 </div>
             </div>
@@ -191,7 +191,7 @@
     <!-- All Packages History -->
     <div class="row">
         <div class="col-12">
-            <h5 class="fw-bold mb-3"><i class="bi bi-clock-history"></i> Package History (@Model.Packages.TotalCount total)</h5>
+            <h5 class="fw-bold mb-3"><i class="bi bi-clock-history"></i> Lịch sử gói (@Model.Packages.TotalCount tổng)</h5>
         </div>
     </div>
 
@@ -200,8 +200,8 @@
         <div class="row">
             <div class="col-12 text-center py-5">
                 <i class="bi bi-inbox display-1 text-muted"></i>
-                <p class="text-muted mt-3">No package history</p>
-                <a href="@Url.Page("/Package/Index")" class="btn btn-primary">Browse Packages</a>
+                <p class="text-muted mt-3">Chưa có lịch sử gói</p>
+                <a href="@Url.Page("/Package/Index")" class="btn btn-primary">Xem gói dịch vụ</a>
             </div>
         </div>
     }
@@ -214,35 +214,35 @@
                         <thead class="table-light">
                             <tr>
                                 <th data-sort="Name" style="cursor: pointer;">
-                                    Package 
+                                    Gói 
                                     @if (Model.SortBy == "Name")
                                     {
                                         <i class="bi bi-@(Model.SortOrder == "asc" ? "sort-up" : "sort-down")"></i>
                                     }
                                 </th>
-                                <th>Type</th>
+                                <th>Loại</th>
                                 <th data-sort="Price" style="cursor: pointer;">
-                                    Price 
+                                    Giá 
                                     @if (Model.SortBy == "Price")
                                     {
                                         <i class="bi bi-@(Model.SortOrder == "asc" ? "sort-up" : "sort-down")"></i>
                                     }
                                 </th>
                                 <th data-sort="PurchasedAt" style="cursor: pointer;">
-                                    Purchased 
+                                    Ngày mua 
                                     @if (Model.SortBy == "PurchasedAt")
                                     {
                                         <i class="bi bi-@(Model.SortOrder == "asc" ? "sort-up" : "sort-down")"></i>
                                     }
                                 </th>
                                 <th data-sort="Status" style="cursor: pointer;">
-                                    Status 
+                                    Trạng thái 
                                     @if (Model.SortBy == "Status")
                                     {
                                         <i class="bi bi-@(Model.SortOrder == "asc" ? "sort-up" : "sort-down")"></i>
                                     }
                                 </th>
-                                <th>Details</th>
+                                <th>Chi tiết</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -257,33 +257,33 @@
                                         <span class="badge bg-secondary">@userPackage.Package.PackageType.Replace("_", " ")</span>
                                     </td>
                                     <td class="fw-bold">@userPackage.Package.Price.ToString("N0") VND</td>
-                                    <td>@userPackage.PurchasedAt.ToString("MMM dd, yyyy")</td>
+                                    <td>@userPackage.PurchasedAt.ToString("dd/MM/yyyy")</td>
                                     <td>
                                         @switch (userPackage.Status)
                                         {
                                             case "Active":
                                                 <span class="badge bg-success">
-                                                    <i class="bi bi-check-circle-fill"></i> Active
+                                                    <i class="bi bi-check-circle-fill"></i> Hoạt động
                                                 </span>
                                                 break;
                                             case "Pending":
                                                 <span class="badge bg-warning">
-                                                    <i class="bi bi-hourglass-split"></i> Pending Payment
+                                                    <i class="bi bi-hourglass-split"></i> Chờ thanh toán
                                                 </span>
                                                 break;
                                             case "Expired":
                                                 <span class="badge bg-secondary">
-                                                    <i class="bi bi-clock-history"></i> Expired
+                                                    <i class="bi bi-clock-history"></i> Hết hạn
                                                 </span>
                                                 break;
                                             case "Used":
                                                 <span class="badge bg-info">
-                                                    <i class="bi bi-check-all"></i> Used
+                                                    <i class="bi bi-check-all"></i> Đã dùng
                                                 </span>
                                                 break;
                                             case "Cancelled":
                                                 <span class="badge bg-danger">
-                                                    <i class="bi bi-x-circle-fill"></i> Cancelled
+                                                    <i class="bi bi-x-circle-fill"></i> Đã hủy
                                                 </span>
                                                 break;
                                             default:
@@ -295,18 +295,18 @@
                                         @if (userPackage.Status == "Pending")
                                         {
                                             <a href="@Url.Page("/Payment/MyTransactions")" class="btn btn-sm btn-warning">
-                                                <i class="bi bi-credit-card"></i> Complete Payment
+                                                <i class="bi bi-credit-card"></i> Hoàn tất thanh toán
                                             </a>
                                         }
                                         else if (userPackage.Status == "Active")
                                         {
                                             if (userPackage.RemainingListings.HasValue)
                                             {
-                                                <span class="badge bg-light text-dark me-1">@userPackage.RemainingListings Listings</span>
+                                                <span class="badge bg-light text-dark me-1">@userPackage.RemainingListings tin</span>
                                             }
                                             if (userPackage.RemainingPhotos.HasValue && userPackage.RemainingPhotos > 0)
                                             {
-                                                <span class="badge bg-light text-dark me-1">@userPackage.RemainingPhotos Photos</span>
+                                                <span class="badge bg-light text-dark me-1">@userPackage.RemainingPhotos ảnh</span>
                                             }
                                             if (userPackage.VideoAvailable)
                                             {
@@ -316,13 +316,13 @@
                                             }
                                             if (userPackage.RemainingBoosts.HasValue && userPackage.RemainingBoosts > 0)
                                             {
-                                                <span class="badge bg-light text-dark me-1">@userPackage.RemainingBoosts Boosts</span>
+                                                <span class="badge bg-light text-dark me-1">@userPackage.RemainingBoosts lượt đẩy</span>
                                             }
                                         }
                                         else if (userPackage.ExpiresAt.HasValue)
                                         {
                                             <small class="text-muted">
-                                                Expired @userPackage.ExpiresAt.Value.ToString("MMM dd, yyyy")
+                                                Hết hạn @userPackage.ExpiresAt.Value.ToString("dd/MM/yyyy")
                                             </small>
                                         }
                                     </td>
@@ -339,11 +339,11 @@
                         <div class="pagination-info text-muted">
                             @if (Model.Packages.TotalCount > 0)
                             {
-                                <text>Showing @Model.Packages.StartIndex to @Model.Packages.EndIndex of @Model.Packages.TotalCount entries</text>
+                                <text>Hiển thị @Model.Packages.StartIndex đến @Model.Packages.EndIndex trong tổng @Model.Packages.TotalCount mục</text>
                             }
                             else
                             {
-                                <text>No entries found</text>
+                                <text>Không tìm thấy mục nào</text>
                             }
                         </div>
                         <nav>
@@ -361,7 +361,7 @@
                                            pageNumber = Model.PageNumber - 1, 
                                            pageSize = Model.PageSize 
                                        })"
-                                       tabindex="-1">Previous</a>
+                                       tabindex="-1">Trước</a>
                                 </li>
 
                                 @{
@@ -443,7 +443,7 @@
                                            sortOrder = Model.SortOrder,
                                            pageNumber = Model.PageNumber + 1, 
                                            pageSize = Model.PageSize 
-                                       })">Next</a>
+                                       })">Tiếp</a>
                                 </li>
                             </ul>
                         </nav>

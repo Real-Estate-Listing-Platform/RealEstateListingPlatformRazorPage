@@ -2,16 +2,16 @@
 @model RealEstateListingPlatform.Pages.Account.VerifyEmailModel
 
 @{
-    ViewData["Title"] = "Verify Email";
+    ViewData["Title"] = "Xác thực email";
     Layout = "_AuthLayout";
 }
 
 <div class="auth-toggle">
-    <span class="active" style="width: 100%; display: block; text-align: center;">Verify Email</span>
+    <span class="active" style="width: 100%; display: block; text-align: center;">Xác thực email</span>
 </div>
 
 <div class="text-center mb-4">
-    <p>Please enter the 6-digit code sent to <strong>@Model.Input.Email</strong></p>
+    <p>Vui lòng nhập mã 6 chữ số đã gửi đến <strong>@Model.Input.Email</strong></p>
 </div>
 
 <form method="post" class="auth-form">
@@ -23,15 +23,15 @@
         <span asp-validation-for="Input.OtpCode" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-auth-primary">Verify</button>
+    <button type="submit" class="btn btn-auth-primary">Xác thực</button>
 </form>
 
 <div class="mt-3 text-center">
     <form asp-page-handler="ResendOtp" method="post" class="d-inline" id="resendForm">
         <input type="hidden" name="email" value="@Model.Input.Email" />
-        <button type="submit" class="btn btn-link text-decoration-none text-muted small p-0 border-0" id="resendBtn">Resend Code? (Request new OTP)</button>
+        <button type="submit" class="btn btn-link text-decoration-none text-muted small p-0 border-0" id="resendBtn">Gửi lại mã? (Yêu cầu OTP mới)</button>
     </form>
-    <span id="countdown" class="text-muted small" style="display: none;">Resend available in <span id="timer">60</span>s</span>
+    <span id="countdown" class="text-muted small" style="display: none;">Gửi lại sau <span id="timer">60</span> giây</span>
 </div>
 
 <style>
