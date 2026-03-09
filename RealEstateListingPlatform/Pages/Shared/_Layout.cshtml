@@ -10,7 +10,34 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/RealEstateListingPlatform.styles.css" asp-append-version="true" />
 </head>
+
+
 <body>
+
+    <!-- Chatbot -->
+    <button class="chatbot-toggler" id="chatbot-toggler">
+        <i class="bi bi-chat-dots-fill"></i>
+        <i class="bi bi-x-lg"></i>
+    </button>
+
+    <div class="chatbot-window" id="chatbot-window">
+        <header>
+            <h2>Tư vấn Bất Động Sản</h2>
+            <span class="close-btn" id="close-chatbot"><i class="bi bi-x"></i></span>
+        </header>
+        <ul class="chatbox" id="chatbox">
+            <li class="chat incoming">
+                <span class="material-icons"><i class="bi bi-robot"></i></span>
+                <p>Xin chào! Mình là trợ lý ảo. Bạn đang quan tâm đến khu vực hoặc phân khúc nhà đất nào?</p>
+            </li>
+        </ul>
+        <div class="chat-input-wrapper">
+            <textarea id="chat-input" placeholder="Nhập tin nhắn..." required></textarea>
+            <button id="send-btn" class="btn"><i class="bi bi-send-fill"></i></button>
+        </div>
+    </div>
+
+    <!-- Header -->
     <header>
         <nav class="navbar fixed-top navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow">
             <div class="container-fluid">
@@ -179,3 +206,85 @@
             font-size: 0.9rem;
         }
 </style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const chatbotToggler = document.querySelector("#chatbot-toggler");
+        const closeBtn = document.querySelector("#close-chatbot");
+        const chatbox = document.querySelector("#chatbox");
+        const chatInput = document.querySelector("#chat-input");
+        const sendChatBtn = document.querySelector("#send-btn");
+
+        // Thay đổi trạng thái mở/đóng chatbot
+        chatbotToggler.addEventListener("click", () => document.body.classList.toggle("show-chatbot"));
+        closeBtn.addEventListener("click", () => document.body.classList.remove("show-chatbot"));
+
+        const createChatLi = (message, className) => {
+            // Tạo thẻ <li> chứa tin nhắn
+            const chatLi = document.createElement("li");
+            chatLi.classList.add("chat", className);
+            
+            // Nếu là tin nhắn nhận về (incoming), thêm icon robot
+            let chatContent = className === "outgoing" 
+                ? `<p></p>` 
+                : `<span class="material-icons"><i class="bi bi-robot"></i></span><p></p>`;
+                
+            chatLi.innerHTML = chatContent;
+            chatLi.querySelector("p").textContent = message;
+            return chatLi;
+        }
+
+        const handleChat = () => {
+            const userMessage = chatInput.value.trim();
+            if (!userMessage) return;
+
+            // Xóa nội dung input và reset chiều cao textarea (nếu có auto-resize)
+            chatInput.value = "";
+
+            // 1. Hiển thị tin nhắn của người dùng
+            chatbox.appendChild(createChatLi(userMessage, "outgoing"));
+            chatbox.scrollTo(0, chatbox.scrollHeight);
+
+            // 2. Hiển thị tin nhắn đang chờ (typing...)
+            setTimeout(() => {
+                const incomingChatLi = createChatLi("Đang nhập...", "incoming");
+                chatbox.appendChild(incomingChatLi);
+                chatbox.scrollTo(0, chatbox.scrollHeight);
+
+                // 3. Ở BƯỚC NÀY: Dành cho việc gọi API backend (ví dụ: SignalR, OpenAI API, hoặc ChatGPT)
+                generateResponse(incomingChatLi); 
+            }, 600);
+        }
+
+        // Xử lý phản hồi ảo (Mô phỏng hệ thống tự động trả lời)
+        const generateResponse = (chatElement) => {
+            const messageElement = chatElement.querySelector("p");
+            
+            // Đoạn này dùng setTimeout để mô phỏng độ trễ khi gọi mạng
+            setTimeout(() => {
+                messageElement.textContent = "Cảm ơn bạn đã liên hệ! Hiện tại trợ lý đang bận xử lý dữ liệu. Xin vui lòng để lại số điện thoại hoặc email liên hệ để chuyên viên tư vấn trực tiếp cho bạn.";
+                chatbox.scrollTo(0, chatbox.scrollHeight);
+            }, 1500);
+            
+            // === Ví dụ nếu gọi API thật (Sử dụng $.ajax hoặc fetch) ===
+            // fetch('/api/Chatbot/SendMessage', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({ message: userMessage })
+            // }).then(res => res.json()).then(data => {
+            //     messageElement.textContent = data.reply;
+            // }).catch(() => {
+            //     messageElement.textContent = "Đã xảy ra lỗi, vui lòng thử lại.";
+            // });
+        };
+
+        // Cho phép gửi tin nhắn khi bấm nút "Send" hoặc phím Enter
+        sendChatBtn.addEventListener("click", handleChat);
+        chatInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" && !e.shiftKey && window.innerWidth > 800) {
+                e.preventDefault();
+                handleChat();
+            }
+        });
+    });
+</script>
