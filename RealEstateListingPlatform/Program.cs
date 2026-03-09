@@ -74,6 +74,7 @@ builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(optio
 
 builder.Services.AddSignalR();
 builder.Services.AddRazorPages();
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
@@ -214,5 +215,8 @@ app.MapRazorPages();
 
 // Map SignalR Hubs
 app.MapHub<DashboardHub>("/hubs/dashboard");
+
+// Map Controllers API
+app.MapControllers();
 
 app.Run();

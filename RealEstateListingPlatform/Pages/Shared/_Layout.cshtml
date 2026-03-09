@@ -215,16 +215,16 @@
         const chatInput = document.querySelector("#chat-input");
         const sendChatBtn = document.querySelector("#send-btn");
 
-        // Thay đổi trạng thái mở/đóng chatbot
+        
         chatbotToggler.addEventListener("click", () => document.body.classList.toggle("show-chatbot"));
         closeBtn.addEventListener("click", () => document.body.classList.remove("show-chatbot"));
 
         const createChatLi = (message, className) => {
-            // Tạo thẻ <li> chứa tin nhắn
+           
             const chatLi = document.createElement("li");
             chatLi.classList.add("chat", className);
             
-            // Nếu là tin nhắn nhận về (incoming), thêm icon robot
+ 
             let chatContent = className === "outgoing" 
                 ? `<p></p>` 
                 : `<span class="material-icons"><i class="bi bi-robot"></i></span><p></p>`;
@@ -237,48 +237,54 @@
         const handleChat = () => {
             const userMessage = chatInput.value.trim();
             if (!userMessage) return;
-
-            // Xóa nội dung input và reset chiều cao textarea (nếu có auto-resize)
-            chatInput.value = "";
-
-            // 1. Hiển thị tin nhắn của người dùng
+            chatInput.value = "";           
             chatbox.appendChild(createChatLi(userMessage, "outgoing"));
             chatbox.scrollTo(0, chatbox.scrollHeight);
-
-            // 2. Hiển thị tin nhắn đang chờ (typing...)
             setTimeout(() => {
                 const incomingChatLi = createChatLi("Đang nhập...", "incoming");
                 chatbox.appendChild(incomingChatLi);
                 chatbox.scrollTo(0, chatbox.scrollHeight);
-
-                // 3. Ở BƯỚC NÀY: Dành cho việc gọi API backend (ví dụ: SignalR, OpenAI API, hoặc ChatGPT)
-                generateResponse(incomingChatLi); 
+                generateResponse(incomingChatLi, userMessage);
             }, 600);
         }
 
-        // Xử lý phản hồi ảo (Mô phỏng hệ thống tự động trả lời)
-        const generateResponse = (chatElement) => {
-            const messageElement = chatElement.querySelector("p");
-            
-            // Đoạn này dùng setTimeout để mô phỏng độ trễ khi gọi mạng
-            setTimeout(() => {
-                messageElement.textContent = "Cảm ơn bạn đã liên hệ! Hiện tại trợ lý đang bận xử lý dữ liệu. Xin vui lòng để lại số điện thoại hoặc email liên hệ để chuyên viên tư vấn trực tiếp cho bạn.";
-                chatbox.scrollTo(0, chatbox.scrollHeight);
-            }, 1500);
-            
-            // === Ví dụ nếu gọi API thật (Sử dụng $.ajax hoặc fetch) ===
-            // fetch('/api/Chatbot/SendMessage', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify({ message: userMessage })
-            // }).then(res => res.json()).then(data => {
-            //     messageElement.textContent = data.reply;
-            // }).catch(() => {
-            //     messageElement.textContent = "Đã xảy ra lỗi, vui lòng thử lại.";
-            // });
+        // generateResponse
+        const generateResponse = (chatElement, userMessage) => {
+        const messageElement = chatElement.querySelector("p");
+        const API_URL = "/api/Chatbot/SendMessage";
+
+        const requestOptions = {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: userMessage })
         };
 
-        // Cho phép gửi tin nhắn khi bấm nút "Send" hoặc phím Enter
+        fetch(API_URL, requestOptions)
+            .then(res => {
+                console.log("Status Code:", res.status); 
+                return res.json();
+            })
+            .then(data => {
+                console.log("Dữ liệu nhận được:", data);                
+                const aiReply = data.reply || data.Reply;
+
+                if (aiReply) {
+                    messageElement.textContent = aiReply;
+                } else {
+                    messageElement.textContent = "AI đã trả lời nhưng nội dung trống";
+                }
+            })
+            .catch((error) => {
+                console.error("Lỗi Fetch:", error);
+                messageElement.textContent = "Lỗi kết nối Server.";
+                messageElement.style.color = "#ff0000";
+            })
+            .finally(() => {
+                chatbox.scrollTo(0, chatbox.scrollHeight);
+            });
+    };
+
+        
         sendChatBtn.addEventListener("click", handleChat);
         chatInput.addEventListener("keydown", (e) => {
             if (e.key === "Enter" && !e.shiftKey && window.innerWidth > 800) {
