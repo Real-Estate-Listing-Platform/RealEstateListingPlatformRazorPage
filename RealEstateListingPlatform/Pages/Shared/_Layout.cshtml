@@ -322,6 +322,7 @@
 
         async function sendWidgetMessage() {
             const input = document.getElementById('widgetInput');
+            const sendBtn = input.nextElementSibling;
             const msg = input.value.trim();
             if (!msg || widgetLoading) return;
 
@@ -331,23 +332,28 @@
 
             const typingEl = appendWidgetTyping();
             widgetLoading = true;
+            input.disabled = true;
+            if (sendBtn) sendBtn.disabled = true;
 
             try {
                 const res = await fetch('/api/Chatbot/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: msg, history: widgetHistory.slice(-6) })
+                    body: JSON.stringify({ message: msg })
                 });
                 const data = await res.json();
                 typingEl.remove();
-                const reply = data.success ? data.message : 'Xin lỗi, đã có lỗi xảy ra.';
+                const reply = data.message || (data.success ? '' : 'Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại.');
                 appendWidgetMessage('bot', reply);
-                widgetHistory.push({ role: 'model', content: reply });
+                if (data.success) widgetHistory.push({ role: 'model', content: reply });
             } catch {
                 typingEl.remove();
                 appendWidgetMessage('bot', 'Không thể kết nối. Vui lòng thử lại.');
             } finally {
                 widgetLoading = false;
+                input.disabled = false;
+                if (sendBtn) sendBtn.disabled = false;
+                input.focus();
             }
         }
 

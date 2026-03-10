@@ -10,18 +10,21 @@
         <div class="chatbot-header-icon">
             <i class="bi bi-robot"></i>
         </div>
-        <div>
+        <div class="flex-grow-1">
             <h2 class="mb-0">AI Property Assistant</h2>
             <p class="mb-0 text-muted small">Powered by Gemini AI • Tìm kiếm bất động sản thông minh</p>
         </div>
+        <button class="btn btn-outline-secondary btn-sm" id="clearHistoryBtn" onclick="clearHistory()" title="Xóa lịch sử chat" style="display:none">
+            <i class="bi bi-trash me-1"></i>Xóa lịch sử
+        </button>
     </div>
 
     <div class="chatbot-layout">
         <!-- Chat panel -->
         <div class="chat-panel">
             <div class="chat-messages" id="chatMessages">
-                <!-- Welcome message -->
-                <div class="message-wrapper bot-wrapper">
+                <!-- Welcome message (hidden if history exists) -->
+                <div class="message-wrapper bot-wrapper" id="welcomeMessage">
                     <div class="message-avatar bot-avatar">
                         <i class="bi bi-robot"></i>
                     </div>
@@ -418,8 +421,10 @@
 
 @section Scripts {
 <script>
-    let chatHistory = [];
     let isLoading = false;
+
+    // Load chat history from server on page open
+    document.addEventListener('DOMContentLoaded', () => loadHistory());
 
     function handleKeyDown(e) {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -439,30 +444,63 @@
         sendMessage();
     }
 
+    async function loadHistory() {
+        try {
+            const res = await fetch('/api/Chatbot/history');
+            const data = await res.json();
+            if (!data.success || !data.history || data.history.length === 0) return;
+
+            // Hide welcome message and suggestions if history exists
+            document.getElementById('welcomeMessage').style.display = 'none';
+            document.getElementById('quickSuggestions').style.display = 'none';
+            document.getElementById('clearHistoryBtn').style.display = '';
+
+            // Render each message
+            data.history.forEach(msg => {
+                appendMessage(msg.role === 'user' ? 'user' : 'bot', msg.content, msg.timestamp);
+            });
+        } catch (err) {
+            // Silently fail — not critical
+        }
+    }
+
+    async function clearHistory() {
+        if (!confirm('Bạn có muốn xóa toàn bộ lịch sử chat không?')) return;
+        try {
+            await fetch('/api/Chatbot/history', { method: 'DELETE' });
+            // Reload page to reset UI
+            location.reload();
+        } catch (err) {
+            alert('Không thể xóa lịch sử. Vui lòng thử lại.');
+        }
+    }
+
     async function sendMessage() {
         const input = document.getElementById('userInput');
         const message = input.value.trim();
         if (!message || isLoading) return;
 
-        // Add user message to UI
         appendMessage('user', message);
-        chatHistory.push({ role: 'user', content: message });
         input.value = '';
         input.style.height = 'auto';
 
-        // Show typing indicator
+        // Hide welcome & suggestions after first message
+        document.getElementById('welcomeMessage').style.display = 'none';
+        document.getElementById('quickSuggestions').style.display = 'none';
+        document.getElementById('clearHistoryBtn').style.display = '';
+
         const typingId = showTyping();
         isLoading = true;
-        document.getElementById('sendBtn').disabled = true;
+        const sendBtn = document.getElementById('sendBtn');
+        const userInput = document.getElementById('userInput');
+        sendBtn.disabled = true;
+        userInput.disabled = true;
 
         try {
             const response = await fetch('/api/Chatbot/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    message: message,
-                    history: chatHistory.slice(-8)
-                })
+                body: JSON.stringify({ message: message })
             });
 
             const data = await response.json();
@@ -470,8 +508,6 @@
 
             if (data.success) {
                 appendMessage('bot', data.message);
-                chatHistory.push({ role: 'model', content: data.message });
-
                 if (data.suggestedListings && data.suggestedListings.length > 0) {
                     updateListingsPanel(data.suggestedListings);
                 }
@@ -483,11 +519,13 @@
             appendMessage('bot', 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối và thử lại.');
         } finally {
             isLoading = false;
-            document.getElementById('sendBtn').disabled = false;
+            sendBtn.disabled = false;
+            userInput.disabled = false;
+            userInput.focus();
         }
     }
 
-    function appendMessage(role, text) {
+    function appendMessage(role, text, timestamp) {
         const container = document.getElementById('chatMessages');
         const isBot = role === 'bot';
 
@@ -498,12 +536,25 @@
         avatar.className = `message-avatar ${isBot ? 'bot-avatar' : 'user-avatar'}`;
         avatar.innerHTML = isBot ? '<i class="bi bi-robot"></i>' : '<i class="bi bi-person-fill"></i>';
 
+        const msgCol = document.createElement('div');
+        msgCol.style.maxWidth = '80%';
+
         const msg = document.createElement('div');
         msg.className = `message ${isBot ? 'bot-message' : 'user-message'}`;
         msg.innerHTML = formatMessage(text);
+        msgCol.appendChild(msg);
+
+        if (timestamp) {
+            const time = document.createElement('div');
+            time.className = 'text-muted';
+            time.style.cssText = `font-size:0.7rem; margin-top:3px; ${isBot ? 'text-align:left' : 'text-align:right'}`;
+            const d = new Date(timestamp);
+            time.textContent = d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+            msgCol.appendChild(time);
+        }
 
         wrapper.appendChild(avatar);
-        wrapper.appendChild(msg);
+        wrapper.appendChild(msgCol);
         container.appendChild(wrapper);
         container.scrollTop = container.scrollHeight;
     }

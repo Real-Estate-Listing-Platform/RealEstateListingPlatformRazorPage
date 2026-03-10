@@ -96,17 +96,32 @@ Khi giới thiệu listing, đừng liệt kê chi tiết mà để hệ thống
 
                 var client = _httpClientFactory.CreateClient();
                 var json = JsonSerializer.Serialize(requestBody);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var response = await client.PostAsync(_geminiApiUrl, content);
-                var responseBody = await response.Content.ReadAsStringAsync();
+                // Retry up to 3 times on 429 (rate limit) with increasing delays
+                System.Net.Http.HttpResponseMessage response;
+                string responseBody;
+                int attempt = 0;
+                int[] retryDelays = { 0, 5000, 10000 };
+                do
+                {
+                    if (attempt > 0) await Task.Delay(retryDelays[attempt]);
+                    var content = new StringContent(json, Encoding.UTF8, "application/json");
+                    response = await client.PostAsync(_geminiApiUrl, content);
+                    responseBody = await response.Content.ReadAsStringAsync();
+                    attempt++;
+                } while ((int)response.StatusCode == 429 && attempt < 3);
 
                 if (!response.IsSuccessStatusCode)
                 {
+                    var errorMessage = (int)response.StatusCode == 429
+                        ? "⏳ API đang bận (giới hạn tốc độ). Vui lòng chờ vài giây rồi thử lại."
+                        : (int)response.StatusCode == 401 || (int)response.StatusCode == 403
+                            ? "🔑 API key không hợp lệ. Vui lòng kiểm tra cấu hình Gemini:ApiKey trong appsettings.json."
+                            : "Xin lỗi, tôi đang gặp sự cố kết nối. Vui lòng thử lại sau.";
                     return new ChatbotResponseDto
                     {
                         Success = false,
-                        Message = "Xin lỗi, tôi đang gặp sự cố kết nối. Vui lòng thử lại sau.",
+                        Message = errorMessage,
                         Error = responseBody
                     };
                 }
