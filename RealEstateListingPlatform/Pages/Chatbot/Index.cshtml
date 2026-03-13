@@ -1,0 +1,640 @@
+@page
+@model RealEstateListingPlatform.Pages.Chatbot.IndexModel
+@{
+    ViewData["Title"] = "AI Property Assistant";
+    Layout = "_Layout";
+}
+
+<div class="chatbot-page-container">
+    <div class="chatbot-header">
+        <div class="chatbot-header-icon">
+            <i class="bi bi-robot"></i>
+        </div>
+        <div class="flex-grow-1">
+            <h2 class="mb-0">AI Property Assistant</h2>
+            <p class="mb-0 text-muted small">Powered by Gemini AI • Tìm kiếm bất động sản thông minh</p>
+        </div>
+        <button class="btn btn-outline-secondary btn-sm" id="clearHistoryBtn" onclick="clearHistory()" title="Xóa lịch sử chat" style="display:none">
+            <i class="bi bi-trash me-1"></i>Xóa lịch sử
+        </button>
+    </div>
+
+    <div class="chatbot-layout">
+        <!-- Chat panel -->
+        <div class="chat-panel">
+            <div class="chat-messages" id="chatMessages">
+                <!-- Welcome message (hidden if history exists) -->
+                <div class="message-wrapper bot-wrapper" id="welcomeMessage">
+                    <div class="message-avatar bot-avatar">
+                        <i class="bi bi-robot"></i>
+                    </div>
+                    <div class="message bot-message">
+                        <p class="mb-1">Xin chào! Tôi là trợ lý AI của Estately. 👋</p>
+                        <p class="mb-1">Tôi có thể giúp bạn:</p>
+                        <ul class="mb-0 ps-3">
+                            <li>🏠 Tìm kiếm bất động sản phù hợp</li>
+                            <li>💰 Tư vấn giá cả thị trường</li>
+                            <li>📋 Giải thích pháp lý (Sổ đỏ, Sổ hồng)</li>
+                            <li>📍 Gợi ý theo khu vực & ngân sách</li>
+                        </ul>
+                        <p class="mt-2 mb-0">Bạn đang tìm kiếm loại bất động sản nào?</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Suggested questions -->
+            <div class="quick-suggestions" id="quickSuggestions">
+                <span class="suggestion-chip" onclick="sendSuggestion(this)">🏢 Căn hộ cho thuê dưới 10 triệu</span>
+                <span class="suggestion-chip" onclick="sendSuggestion(this)">🏡 Nhà mua quận 7 dưới 5 tỷ</span>
+                <span class="suggestion-chip" onclick="sendSuggestion(this)">🏞️ Đất nền giá tốt</span>
+                <span class="suggestion-chip" onclick="sendSuggestion(this)">💎 Biệt thự cao cấp</span>
+            </div>
+
+            <!-- Input area -->
+            <div class="chat-input-area">
+                <div class="chat-input-wrapper">
+                    <textarea
+                        id="userInput"
+                        class="chat-input"
+                        placeholder="Nhập câu hỏi về bất động sản..."
+                        rows="1"
+                        onkeydown="handleKeyDown(event)"
+                        oninput="autoResize(this)"></textarea>
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                        <i class="bi bi-send-fill"></i>
+                    </button>
+                </div>
+                <p class="chat-disclaimer">AI có thể mắc lỗi. Hãy xác minh thông tin quan trọng trước khi quyết định.</p>
+            </div>
+        </div>
+
+        <!-- Listings panel -->
+        <div class="listings-panel" id="listingsPanel">
+            <div class="listings-panel-header">
+                <i class="bi bi-house-heart me-2"></i>
+                <span>Bất động sản gợi ý</span>
+            </div>
+            <div id="suggestedListings" class="listings-panel-body">
+                <div class="listings-empty">
+                    <i class="bi bi-search fs-1 text-muted"></i>
+                    <p class="text-muted mt-2">Hỏi AI để nhận gợi ý bất động sản phù hợp</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .chatbot-page-container {
+        max-width: 1200px;
+        margin: 80px auto 40px;
+        padding: 0 20px;
+    }
+
+    .chatbot-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 24px 0 20px;
+        border-bottom: 1px solid #e9ecef;
+        margin-bottom: 24px;
+    }
+
+    .chatbot-header-icon {
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        color: white;
+        flex-shrink: 0;
+    }
+
+    .chatbot-layout {
+        display: grid;
+        grid-template-columns: 1fr 360px;
+        gap: 24px;
+        height: calc(100vh - 260px);
+        min-height: 500px;
+    }
+
+    /* Chat panel */
+    .chat-panel {
+        display: flex;
+        flex-direction: column;
+        background: white;
+        border-radius: 16px;
+        border: 1px solid #e9ecef;
+        overflow: hidden;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .message-wrapper {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    .bot-wrapper { flex-direction: row; }
+    .user-wrapper { flex-direction: row-reverse; }
+
+    .message-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .bot-avatar {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .user-avatar {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+    }
+
+    .message {
+        max-width: 72%;
+        padding: 12px 16px;
+        border-radius: 16px;
+        font-size: 0.92rem;
+        line-height: 1.55;
+    }
+
+    .bot-message {
+        background: #f3f4f6;
+        color: #1f2937;
+        border-top-left-radius: 4px;
+    }
+
+    .user-message {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-top-right-radius: 4px;
+    }
+
+    .typing-indicator {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 12px 16px;
+        background: #f3f4f6;
+        border-radius: 16px;
+        border-top-left-radius: 4px;
+        width: fit-content;
+    }
+
+    .typing-dot {
+        width: 8px;
+        height: 8px;
+        background: #9ca3af;
+        border-radius: 50%;
+        animation: typing 1.2s infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @@keyframes typing {
+        0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+        40% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Quick suggestions */
+    .quick-suggestions {
+        padding: 12px 24px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        border-top: 1px solid #f3f4f6;
+    }
+
+    .suggestion-chip {
+        padding: 6px 14px;
+        background: #f3f4f6;
+        border-radius: 20px;
+        font-size: 0.82rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+        white-space: nowrap;
+    }
+
+    .suggestion-chip:hover {
+        background: #ede9fe;
+        border-color: #7c3aed;
+        color: #7c3aed;
+    }
+
+    /* Input area */
+    .chat-input-area {
+        padding: 16px 20px;
+        border-top: 1px solid #e9ecef;
+        background: #fafafa;
+    }
+
+    .chat-input-wrapper {
+        display: flex;
+        gap: 10px;
+        align-items: flex-end;
+        background: white;
+        border: 1.5px solid #e9ecef;
+        border-radius: 12px;
+        padding: 8px 12px;
+        transition: border-color 0.2s;
+    }
+
+    .chat-input-wrapper:focus-within {
+        border-color: #7c3aed;
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    }
+
+    .chat-input {
+        flex: 1;
+        border: none;
+        outline: none;
+        resize: none;
+        font-size: 0.93rem;
+        line-height: 1.5;
+        max-height: 120px;
+        background: transparent;
+        font-family: inherit;
+    }
+
+    .send-btn {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: opacity 0.2s;
+        flex-shrink: 0;
+    }
+
+    .send-btn:hover { opacity: 0.85; }
+    .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .chat-disclaimer {
+        font-size: 0.75rem;
+        color: #9ca3af;
+        text-align: center;
+        margin: 8px 0 0;
+    }
+
+    /* Listings panel */
+    .listings-panel {
+        background: white;
+        border-radius: 16px;
+        border: 1px solid #e9ecef;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .listings-panel-header {
+        padding: 16px 20px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        border-bottom: 1px solid #e9ecef;
+        background: #fafafa;
+        color: #374151;
+    }
+
+    .listings-panel-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .listings-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        text-align: center;
+        padding: 40px 20px;
+    }
+
+    .listing-card-mini {
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: box-shadow 0.2s, transform 0.2s;
+        cursor: pointer;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .listing-card-mini:hover {
+        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .listing-card-mini-img {
+        width: 100%;
+        height: 140px;
+        object-fit: cover;
+        background: #f3f4f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #9ca3af;
+        font-size: 2rem;
+    }
+
+    .listing-card-mini-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .listing-card-mini-body {
+        padding: 12px;
+    }
+
+    .listing-card-mini-title {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 4px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .listing-card-mini-price {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #7c3aed;
+        margin-bottom: 4px;
+    }
+
+    .listing-card-mini-meta {
+        font-size: 0.78rem;
+        color: #6b7280;
+    }
+
+    @@media (max-width: 900px) {
+        .chatbot-layout {
+            grid-template-columns: 1fr;
+            height: auto;
+        }
+        .chat-panel {
+            height: 70vh;
+        }
+        .listings-panel {
+            height: 400px;
+        }
+    }
+</style>
+
+@section Scripts {
+<script>
+    let isLoading = false;
+
+    // Load chat history from server on page open
+    document.addEventListener('DOMContentLoaded', () => loadHistory());
+
+    function handleKeyDown(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    }
+
+    function autoResize(el) {
+        el.style.height = 'auto';
+        el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+    }
+
+    function sendSuggestion(el) {
+        document.getElementById('userInput').value = el.textContent.trim().replace(/^[^\s]+\s/, '');
+        document.getElementById('quickSuggestions').style.display = 'none';
+        sendMessage();
+    }
+
+    async function loadHistory() {
+        try {
+            const res = await fetch('/api/Chatbot/history');
+            const data = await res.json();
+            if (!data.success || !data.history || data.history.length === 0) return;
+
+            // Hide welcome message and suggestions if history exists
+            document.getElementById('welcomeMessage').style.display = 'none';
+            document.getElementById('quickSuggestions').style.display = 'none';
+            document.getElementById('clearHistoryBtn').style.display = '';
+
+            // Render each message
+            data.history.forEach(msg => {
+                appendMessage(msg.role === 'user' ? 'user' : 'bot', msg.content, msg.timestamp);
+            });
+        } catch (err) {
+            // Silently fail — not critical
+        }
+    }
+
+    async function clearHistory() {
+        if (!confirm('Bạn có muốn xóa toàn bộ lịch sử chat không?')) return;
+        try {
+            await fetch('/api/Chatbot/history', { method: 'DELETE' });
+            // Reload page to reset UI
+            location.reload();
+        } catch (err) {
+            alert('Không thể xóa lịch sử. Vui lòng thử lại.');
+        }
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('userInput');
+        const message = input.value.trim();
+        if (!message || isLoading) return;
+
+        appendMessage('user', message);
+        input.value = '';
+        input.style.height = 'auto';
+
+        // Hide welcome & suggestions after first message
+        document.getElementById('welcomeMessage').style.display = 'none';
+        document.getElementById('quickSuggestions').style.display = 'none';
+        document.getElementById('clearHistoryBtn').style.display = '';
+
+        const typingId = showTyping();
+        isLoading = true;
+        const sendBtn = document.getElementById('sendBtn');
+        const userInput = document.getElementById('userInput');
+        sendBtn.disabled = true;
+        userInput.disabled = true;
+
+        try {
+            const response = await fetch('/api/Chatbot/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message })
+            });
+
+            const data = await response.json();
+            removeTyping(typingId);
+
+            if (data.success) {
+                appendMessage('bot', data.message);
+                if (data.suggestedListings && data.suggestedListings.length > 0) {
+                    updateListingsPanel(data.suggestedListings);
+                }
+            } else {
+                appendMessage('bot', data.message || 'Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại.');
+            }
+        } catch (err) {
+            removeTyping(typingId);
+            appendMessage('bot', 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối và thử lại.');
+        } finally {
+            isLoading = false;
+            sendBtn.disabled = false;
+            userInput.disabled = false;
+            userInput.focus();
+        }
+    }
+
+    function appendMessage(role, text, timestamp) {
+        const container = document.getElementById('chatMessages');
+        const isBot = role === 'bot';
+
+        const wrapper = document.createElement('div');
+        wrapper.className = `message-wrapper ${isBot ? 'bot-wrapper' : 'user-wrapper'}`;
+
+        const avatar = document.createElement('div');
+        avatar.className = `message-avatar ${isBot ? 'bot-avatar' : 'user-avatar'}`;
+        avatar.innerHTML = isBot ? '<i class="bi bi-robot"></i>' : '<i class="bi bi-person-fill"></i>';
+
+        const msgCol = document.createElement('div');
+        msgCol.style.maxWidth = '80%';
+
+        const msg = document.createElement('div');
+        msg.className = `message ${isBot ? 'bot-message' : 'user-message'}`;
+        msg.innerHTML = formatMessage(text);
+        msgCol.appendChild(msg);
+
+        if (timestamp) {
+            const time = document.createElement('div');
+            time.className = 'text-muted';
+            time.style.cssText = `font-size:0.7rem; margin-top:3px; ${isBot ? 'text-align:left' : 'text-align:right'}`;
+            const d = new Date(timestamp);
+            time.textContent = d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+            msgCol.appendChild(time);
+        }
+
+        wrapper.appendChild(avatar);
+        wrapper.appendChild(msgCol);
+        container.appendChild(wrapper);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function formatMessage(text) {
+        return text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/\n/g, '<br>')
+            .replace(/^- (.+)/gm, '<li>$1</li>')
+            .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+    }
+
+    function showTyping() {
+        const id = 'typing-' + Date.now();
+        const container = document.getElementById('chatMessages');
+        const wrapper = document.createElement('div');
+        wrapper.id = id;
+        wrapper.className = 'message-wrapper bot-wrapper';
+        wrapper.innerHTML = `
+            <div class="message-avatar bot-avatar"><i class="bi bi-robot"></i></div>
+            <div class="typing-indicator">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>`;
+        container.appendChild(wrapper);
+        container.scrollTop = container.scrollHeight;
+        return id;
+    }
+
+    function removeTyping(id) {
+        const el = document.getElementById(id);
+        if (el) el.remove();
+    }
+
+    function updateListingsPanel(listings) {
+        const panel = document.getElementById('suggestedListings');
+        panel.innerHTML = '';
+
+        listings.forEach(listing => {
+            const card = document.createElement('a');
+            card.href = `/Listings/PropertyDetail?id=${listing.id}`;
+            card.target = '_blank';
+            card.className = 'listing-card-mini';
+
+            const imgHtml = listing.listingMedia && listing.listingMedia.length > 0
+                ? `<img src="${listing.listingMedia[0].mediaUrl}" alt="${listing.title}" onerror="this.parentElement.innerHTML='<i class=\\'bi bi-house\\' style=\\'font-size:2rem\\'></i>'">`
+                : '<i class="bi bi-house" style="font-size:2rem"></i>';
+
+            const price = formatPrice(listing.price);
+            const transType = listing.transactionType === 'Rent' ? 'Cho thuê' : 'Mua bán';
+            const propType = translatePropertyType(listing.propertyType);
+
+            card.innerHTML = `
+                <div class="listing-card-mini-img">${imgHtml}</div>
+                <div class="listing-card-mini-body">
+                    <div class="listing-card-mini-title">${listing.title}</div>
+                    <div class="listing-card-mini-price">${price}</div>
+                    <div class="listing-card-mini-meta">
+                        <span class="badge bg-light text-dark border me-1">${transType}</span>
+                        <span class="badge bg-light text-dark border">${propType}</span>
+                        <div class="mt-1"><i class="bi bi-geo-alt me-1"></i>${[listing.district, listing.city].filter(Boolean).join(', ')}</div>
+                        ${listing.bedrooms ? `<span class="me-2"><i class="bi bi-door-closed me-1"></i>${listing.bedrooms} PN</span>` : ''}
+                        ${listing.area ? `<span><i class="bi bi-arrows-angle-expand me-1"></i>${listing.area} m²</span>` : ''}
+                    </div>
+                </div>`;
+            panel.appendChild(card);
+        });
+    }
+
+    function formatPrice(price) {
+        if (price >= 1000000000) return (price / 1000000000).toFixed(1) + ' tỷ';
+        if (price >= 1000000) return Math.round(price / 1000000) + ' triệu';
+        return price.toLocaleString('vi-VN') + ' đồng';
+    }
+
+    function translatePropertyType(type) {
+        const map = { 'Apartment': 'Căn hộ', 'House': 'Nhà phố', 'Villa': 'Biệt thự', 'Land': 'Đất nền', 'Commercial': 'Thương mại' };
+        return map[type] || type || 'BĐS';
+    }
+</script>
+}

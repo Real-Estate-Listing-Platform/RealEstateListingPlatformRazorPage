@@ -7,7 +7,6 @@ using DAL.Repositories.Implementation;
 using BLL.Services;
 using BLL.Services.Implementation;
 using BLL.Hubs;
-
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<RealEstateListingPlatformContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("RealEstateListingPlatformContext")));
@@ -41,6 +40,9 @@ builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 
 
 
+// Chatbot Service
+builder.Services.AddScoped<IChatbotService, ChatbotService>();
+
 builder.Services.AddHttpClient();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddMemoryCache(); // For OTP caching
@@ -73,6 +75,7 @@ builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(optio
 });
 
 builder.Services.AddSignalR();
+builder.Services.AddControllers();
 builder.Services.AddRazorPages();
 
 var app = builder.Build();
@@ -211,6 +214,9 @@ app.MapStaticAssets();
 
 // Map Razor Pages
 app.MapRazorPages();
+
+// Map API Controllers
+app.MapControllers();
 
 // Map SignalR Hubs
 app.MapHub<DashboardHub>("/hubs/dashboard");
