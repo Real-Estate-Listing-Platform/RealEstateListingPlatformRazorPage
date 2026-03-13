@@ -104,6 +104,12 @@
                             <span>Phân tích thị trường</span>
                         </a>
                     </li>
+                    <li class="sidebar-item @(currentPage.StartsWith("/Lister/ValuationReport", StringComparison.OrdinalIgnoreCase) || currentPage.Equals("/Lister/CompareReports", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
+                        <a asp-page="/Lister/ValuationReports" class="sidebar-link">
+                            <i class="bi bi-journal-bookmark"></i>
+                            <span>Báo cáo đã lưu</span>
+                        </a>
+                    </li>
                 </ul>
 
                 <div class="sidebar-footer">
