@@ -98,6 +98,12 @@
                             <span>Định giá BĐS</span>
                         </a>
                     </li>
+                    <li class="sidebar-item @(currentPage.Equals("/Lister/MarketAnalytics", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
+                        <a asp-page="/Lister/MarketAnalytics" class="sidebar-link">
+                            <i class="bi bi-bar-chart-line"></i>
+                            <span>Phân tích thị trường</span>
+                        </a>
+                    </li>
                 </ul>
 
                 <div class="sidebar-footer">

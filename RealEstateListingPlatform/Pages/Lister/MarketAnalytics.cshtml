@@ -1,0 +1,360 @@
+@page
+@model RealEstateListingPlatform.Pages.Lister.MarketAnalyticsModel
+
+@{
+    ViewData["Title"] = "Phân tích thị trường";
+    Layout = "_ListerLayout";
+    var r = Model.Result;
+    var hasTrend = r != null && r.PriceTrend.Any();
+    var hasDistrict = r != null && r.DistrictStats.Any();
+    var hasType = r != null && r.TypeDistribution.Any();
+}
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+<div class="analytics-page">
+
+    <!-- Header -->
+    <div class="page-header mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1 class="page-title mb-1">
+                    <i class="bi bi-bar-chart-line me-2"></i>Phân tích thị trường bất động sản
+                </h1>
+                <p class="text-muted mb-0">
+                    Biểu đồ xu hướng giá theo quận/huyện và phân tích thị trường từ dữ liệu tin đăng thực tế.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body py-3">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-sm-6 col-md-3">
+                    <label class="form-label small fw-semibold mb-1">Tỉnh / Thành phố</label>
+                    <input name="City" value="@Model.City" class="form-control" placeholder="TP. Hồ Chí Minh" />
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <label class="form-label small fw-semibold mb-1">Loại bất động sản</label>
+                    <select name="PropertyType" asp-items="Model.PropertyTypes" class="form-select"></select>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <label class="form-label small fw-semibold mb-1">Hình thức</label>
+                    <select name="TransactionType" asp-items="Model.TransactionTypes" class="form-select"></select>
+                </div>
+                <div class="col-sm-6 col-md-2">
+                    <label class="form-label small fw-semibold mb-1">Khoảng thời gian</label>
+                    <select name="Months" asp-items="Model.MonthOptions" class="form-select"></select>
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (r == null || r.Summary.TotalListings == 0)
+    {
+        <div class="alert alert-warning d-flex align-items-center gap-2">
+            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+            <div>Không tìm thấy dữ liệu tin đăng tại <strong>@Model.City</strong> trong @Model.Months tháng gần nhất. Thử thay đổi bộ lọc.</div>
+        </div>
+    }
+    else
+    {
+        var mom = r.Summary.PriceChangePct;
+        var momClass = mom.HasValue ? (mom > 0 ? "text-danger" : mom < 0 ? "text-success" : "text-muted") : "text-muted";
+        var momIcon  = mom.HasValue ? (mom > 0 ? "bi-arrow-up-short" : mom < 0 ? "bi-arrow-down-short" : "bi-dash") : "bi-dash";
+
+        <!-- Summary stat cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-icon text-primary"><i class="bi bi-houses-fill"></i></div>
+                    <div class="stat-label">Tổng tin đăng</div>
+                    <div class="stat-value text-primary">@r.Summary.TotalListings.ToString("N0")</div>
+                    <div class="stat-sub text-muted">trong @r.Months tháng qua</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-icon text-success"><i class="bi bi-currency-exchange"></i></div>
+                    <div class="stat-label">Giá TB / m²</div>
+                    <div class="stat-value text-success">@r.Summary.AvgPricePerSqm.ToString("N0")</div>
+                    <div class="stat-sub text-muted">VNĐ/m²</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-icon text-warning"><i class="bi bi-geo-alt-fill"></i></div>
+                    <div class="stat-label">Quận sôi động nhất</div>
+                    <div class="stat-value text-warning" style="font-size:1rem">@r.Summary.TopDistrict</div>
+                    <div class="stat-sub text-muted">@r.Summary.TopDistrictCount tin đăng</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-icon @momClass"><i class="bi @momIcon"></i></div>
+                    <div class="stat-label">Biến động giá (MoM)</div>
+                    <div class="stat-value @momClass">
+                        @(mom.HasValue ? (mom > 0 ? "+" : "") + mom?.ToString("0.0") + "%" : "–")
+                    </div>
+                    <div class="stat-sub text-muted">so với tháng trước</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 1: Price trend line chart -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">
+                    <i class="bi bi-graph-up me-2 text-primary"></i>
+                    Xu hướng giá / m² theo quận &amp; thời gian
+                    <span class="badge bg-light text-dark border ms-2">Top 5 quận</span>
+                </h6>
+                <span class="text-muted small">@r.City · @(r.Months) tháng</span>
+            </div>
+            <div class="card-body">
+                @if (!hasTrend)
+                {
+                    <p class="text-muted text-center py-4">Chưa đủ dữ liệu để vẽ biểu đồ xu hướng.</p>
+                }
+                else
+                {
+                    <div style="position:relative; height:320px">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Row 2: District bar + Type doughnut -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-7">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">
+                            <i class="bi bi-bar-chart-fill me-2 text-success"></i>
+                            Giá / m² trung bình theo quận (hiện tại)
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        @if (!hasDistrict)
+                        {
+                            <p class="text-muted text-center py-4">Không có dữ liệu.</p>
+                        }
+                        else
+                        {
+                            <div style="position:relative; height:280px">
+                                <canvas id="districtChart"></canvas>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">
+                            <i class="bi bi-pie-chart-fill me-2 text-warning"></i>
+                            Phân bổ theo loại bất động sản
+                        </h6>
+                    </div>
+                    <div class="card-body d-flex align-items-center justify-content-center">
+                        @if (!hasType)
+                        {
+                            <p class="text-muted">Không có dữ liệu.</p>
+                        }
+                        else
+                        {
+                            <div style="position:relative; height:260px; width:100%">
+                                <canvas id="typeChart"></canvas>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- District price table -->
+        @if (hasDistrict)
+        {
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">
+                        <i class="bi bi-table me-2 text-secondary"></i>Chi tiết giá theo quận / huyện
+                    </h6>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Quận / Huyện</th>
+                                <th class="text-end">Giá TB (VNĐ/m²)</th>
+                                <th class="text-end">Thấp nhất</th>
+                                <th class="text-end">Cao nhất</th>
+                                <th class="text-center">Số tin</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < r.DistrictStats.Count; i++)
+                            {
+                                var d = r.DistrictStats[i];
+                                <tr>
+                                    <td class="text-muted">@(i + 1)</td>
+                                    <td class="fw-semibold">@d.District</td>
+                                    <td class="text-end text-primary fw-bold">@d.AvgPricePerSqm.ToString("N0")</td>
+                                    <td class="text-end text-success">@d.MinPricePerSqm.ToString("N0")</td>
+                                    <td class="text-end text-danger">@d.MaxPricePerSqm.ToString("N0")</td>
+                                    <td class="text-center">
+                                        <span class="badge bg-secondary rounded-pill">@d.ListingCount</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    }
+
+</div>
+
+@section Scripts {
+    @if (r != null && r.Summary.TotalListings > 0)
+    {
+        <script>
+            const trendLabels   = @Html.Raw(Model.TrendLabelsJson);
+            const trendDatasets = @Html.Raw(Model.TrendDatasetsJson);
+            const districtLabels = @Html.Raw(Model.DistrictLabelsJson);
+            const districtAvg   = @Html.Raw(Model.DistrictAvgJson);
+            const districtMin   = @Html.Raw(Model.DistrictMinJson);
+            const districtMax   = @Html.Raw(Model.DistrictMaxJson);
+            const typeLabels    = @Html.Raw(Model.TypeLabelsJson);
+            const typeCounts    = @Html.Raw(Model.TypeCountsJson);
+
+            const fmtVnd = v => v == null ? null : new Intl.NumberFormat('vi-VN').format(Math.round(v));
+
+            // ── Trend line chart ─────────────────────────────────────────────
+            const trendCtx = document.getElementById('trendChart');
+            if (trendCtx && trendLabels.length) {
+                new Chart(trendCtx, {
+                    type: 'line',
+                    data: { labels: trendLabels, datasets: trendDatasets },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: { position: 'top' },
+                            tooltip: {
+                                callbacks: {
+                                    label: ctx => ` ${ctx.dataset.label}: ${fmtVnd(ctx.parsed.y)} VNĐ/m²`
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                ticks: { callback: v => fmtVnd(v) },
+                                title: { display: true, text: 'VNĐ / m²' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // ── District bar chart ───────────────────────────────────────────
+            const distCtx = document.getElementById('districtChart');
+            if (distCtx && districtLabels.length) {
+                new Chart(distCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: districtLabels,
+                        datasets: [
+                            {
+                                label: 'Giá TB',
+                                data: districtAvg,
+                                backgroundColor: '#0d6efd99',
+                                borderColor: '#0d6efd',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Thấp nhất',
+                                data: districtMin,
+                                backgroundColor: '#19875466',
+                                borderColor: '#198754',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Cao nhất',
+                                data: districtMax,
+                                backgroundColor: '#dc354566',
+                                borderColor: '#dc3545',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'top' },
+                            tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${fmtVnd(ctx.parsed.y)} VNĐ/m²` } }
+                        },
+                        scales: {
+                            y: { ticks: { callback: v => fmtVnd(v) } }
+                        }
+                    }
+                });
+            }
+
+            // ── Type doughnut ────────────────────────────────────────────────
+            const typeCtx = document.getElementById('typeChart');
+            if (typeCtx && typeLabels.length) {
+                new Chart(typeCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: typeLabels,
+                        datasets: [{
+                            data: typeCounts,
+                            backgroundColor: ['#0d6efd','#dc3545','#198754','#ffc107','#6f42c1','#0dcaf0'],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'right' },
+                            tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed} tin` } }
+                        }
+                    }
+                });
+            }
+        </script>
+    }
+}
+
+<style>
+    .analytics-page { width: 100%; }
+
+    .stat-card {
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: .75rem;
+        padding: 1.2rem 1rem;
+        text-align: center;
+        height: 100%;
+        box-shadow: 0 1px 4px rgba(0,0,0,.05);
+    }
+    .stat-icon { font-size: 1.8rem; margin-bottom: .3rem; }
+    .stat-label { font-size: .72rem; color: #6c757d; margin-bottom: .2rem; text-transform: uppercase; letter-spacing: .04em; }
+    .stat-value { font-size: 1.25rem; font-weight: 700; }
+    .stat-sub { font-size: .75rem; margin-top: .15rem; }
+</style>
