@@ -38,6 +38,7 @@ builder.Services.AddScoped<ILeadService, LeadService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
+builder.Services.AddScoped<IValuationService, ValuationService>();
 
 
 

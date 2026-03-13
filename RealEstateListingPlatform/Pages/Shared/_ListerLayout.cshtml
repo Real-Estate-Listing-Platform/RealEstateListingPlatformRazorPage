@@ -89,6 +89,12 @@
                             <span>Khách hàng</span>
                         </a>
                     </li>
+                    <li class="sidebar-item @(ViewContext.RouteData.Values["page"]?.ToString() == "/Lister/Valuation" ? "active" : "")">
+                        <a asp-page="/Lister/Valuation" class="sidebar-link">
+                            <i class="bi bi-graph-up-arrow"></i>
+                            <span>Định giá</span>
+                        </a>
+                    </li>
                 </ul>
 
                 <div class="sidebar-footer">
