@@ -54,4 +54,47 @@ namespace BLL.DTOs
         public string? TransactionType { get; set; }
         public int Months { get; set; }
     }
+
+    // ── RELP-57: additional aggregation DTOs ─────────────────────────────────
+
+    /// <summary>A district with notable price growth in the period.</summary>
+    public class HotspotDto
+    {
+        public string District { get; set; } = string.Empty;
+        public string City { get; set; } = string.Empty;
+        public decimal CurrentAvgPricePerSqm { get; set; }
+        public decimal PreviousAvgPricePerSqm { get; set; }
+        /// <summary>Period-over-period growth % (positive = rising, negative = falling).</summary>
+        public decimal GrowthPct { get; set; }
+        public int ListingCount { get; set; }
+    }
+
+    /// <summary>One price bracket bucket for the price-range distribution chart.</summary>
+    public class PriceRangeBucketDto
+    {
+        public string Label { get; set; } = string.Empty;
+        public decimal MinPrice { get; set; }
+        public decimal MaxPrice { get; set; }
+        public int Count { get; set; }
+        public decimal Percentage { get; set; }
+    }
+
+    /// <summary>Cross-city comparison of avg price/m².</summary>
+    public class CityComparisonDto
+    {
+        public string City { get; set; } = string.Empty;
+        public decimal AvgPricePerSqm { get; set; }
+        public decimal MedianPrice { get; set; }
+        public int ListingCount { get; set; }
+        public decimal? MomChangePct { get; set; }
+    }
+
+    /// <summary>Generic envelope for all market API responses.</summary>
+    public class MarketApiResponse<T>
+    {
+        public bool Success { get; set; } = true;
+        public T? Data { get; set; }
+        public string? Message { get; set; }
+        public DateTime GeneratedAt { get; set; } = DateTime.UtcNow;
+    }
 }

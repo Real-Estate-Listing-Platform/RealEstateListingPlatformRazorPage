@@ -50,5 +50,8 @@ namespace DAL.Repositories
 
         // Market analytics – returns Published listings for a city within the given month window
         Task<List<Listing>> GetListingsForMarketAnalyticsAsync(string city, string? propertyType, string? transactionType, int months);
+
+        // City comparison – returns Published listings for multiple cities
+        Task<List<Listing>> GetListingsForCityComparisonAsync(IEnumerable<string> cities, string? propertyType, string? transactionType, int months);
     }
 }

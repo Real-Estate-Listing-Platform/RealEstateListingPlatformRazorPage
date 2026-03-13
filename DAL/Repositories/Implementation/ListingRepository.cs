@@ -352,9 +352,28 @@ namespace DAL.Repositories.Implementation
             if (!string.IsNullOrWhiteSpace(transactionType))
                 query = query.Where(l => l.TransactionType == transactionType);
 
-            return await query
-                .OrderBy(l => l.CreatedAt)
-                .ToListAsync();
+            return await query.OrderBy(l => l.CreatedAt).ToListAsync();
+        }
+
+        public async Task<List<Listing>> GetListingsForCityComparisonAsync(
+            IEnumerable<string> cities, string? propertyType, string? transactionType, int months)
+        {
+            var since = DateTime.UtcNow.AddMonths(-months);
+            var cityList = cities.ToList();
+
+            var query = _context.Listings
+                .Where(l => l.Status == "Published"
+                    && l.City != null
+                    && l.CreatedAt >= since
+                    && cityList.Any(c => l.City!.Contains(c)));
+
+            if (!string.IsNullOrWhiteSpace(propertyType))
+                query = query.Where(l => l.PropertyType == propertyType);
+
+            if (!string.IsNullOrWhiteSpace(transactionType))
+                query = query.Where(l => l.TransactionType == transactionType);
+
+            return await query.OrderBy(l => l.City).ToListAsync();
         }
     }
 }
