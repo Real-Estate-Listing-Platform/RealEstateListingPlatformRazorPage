@@ -335,5 +335,26 @@ namespace DAL.Repositories.Implementation
                 .Take(100)
                 .ToListAsync();
         }
+
+        public async Task<List<Listing>> GetListingsForMarketAnalyticsAsync(
+            string city, string? propertyType, string? transactionType, int months)
+        {
+            var since = DateTime.UtcNow.AddMonths(-months);
+
+            var query = _context.Listings
+                .Where(l => l.Status == "Published"
+                    && l.City != null && l.City.Contains(city)
+                    && l.CreatedAt >= since);
+
+            if (!string.IsNullOrWhiteSpace(propertyType))
+                query = query.Where(l => l.PropertyType == propertyType);
+
+            if (!string.IsNullOrWhiteSpace(transactionType))
+                query = query.Where(l => l.TransactionType == transactionType);
+
+            return await query
+                .OrderBy(l => l.CreatedAt)
+                .ToListAsync();
+        }
     }
 }

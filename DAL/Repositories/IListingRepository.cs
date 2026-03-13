@@ -47,5 +47,8 @@ namespace DAL.Repositories
 
         // Valuation estimation – returns Published listings matching type/txType/location
         Task<List<Listing>> GetListingsForValuationAsync(string propertyType, string transactionType, string city, string? district);
+
+        // Market analytics – returns Published listings for a city within the given month window
+        Task<List<Listing>> GetListingsForMarketAnalyticsAsync(string city, string? propertyType, string? transactionType, int months);
     }
 }
