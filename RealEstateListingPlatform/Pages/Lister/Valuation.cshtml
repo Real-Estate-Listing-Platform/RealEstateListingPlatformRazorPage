@@ -8,6 +8,18 @@
 
 <div class="valuation-page">
 
+    @if (Model.SavedSuccessfully)
+    {
+        <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
+            <i class="bi bi-check-circle-fill fs-5"></i>
+            <div>
+                Báo cáo đã được lưu thành công!
+                <a asp-page="/Lister/ValuationReports" class="fw-semibold ms-2">Xem danh sách báo cáo →</a>
+            </div>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
     <!-- Header -->
     <div class="page-header mb-4">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
@@ -97,9 +109,19 @@
                     </div>
                 </div>
 
+                    <!-- Report name (optional, shown before saving) -->
+                    <div class="col-12">
+                        <label asp-for="Input.ReportName" class="form-label"></label>
+                        <input asp-for="Input.ReportName" class="form-control"
+                               placeholder="VD: Căn hộ Quận 7 – tháng 3/2026 (để trống sẽ tự đặt tên)" />
+                    </div>
+
                 <div class="d-flex gap-2 mt-4 flex-wrap">
-                    <button type="submit" class="btn btn-primary px-4">
+                    <button type="submit" asp-page-handler="default" class="btn btn-primary px-4">
                         <i class="bi bi-calculator me-2"></i>Ước tính giá trị
+                    </button>
+                    <button type="submit" asp-page-handler="Save" class="btn btn-success px-4">
+                        <i class="bi bi-floppy me-2"></i>Ước tính &amp; Lưu báo cáo
                     </button>
                     <button type="reset" class="btn btn-outline-secondary px-4">
                         <i class="bi bi-arrow-clockwise me-2"></i>Đặt lại

@@ -1,0 +1,228 @@
+@page
+@model RealEstateListingPlatform.Pages.Lister.CompareReportsModel
+
+@{
+    ViewData["Title"] = "So sánh báo cáo định giá";
+    Layout = "_ListerLayout";
+    var reports = Model.Reports;
+    int n = reports.Count;
+}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+<div style="width:100%; overflow-x:hidden">
+
+    <div class="page-header mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1 class="page-title mb-1">
+                    <i class="bi bi-layout-split me-2"></i>So sánh báo cáo định giá
+                </h1>
+                <p class="text-muted mb-0">So sánh @n báo cáo đã chọn cạnh nhau.</p>
+            </div>
+            <a asp-page="/Lister/ValuationReports" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Quay lại danh sách
+            </a>
+        </div>
+    </div>
+
+    <!-- Comparison table -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-light">
+            <h6 class="mb-0"><i class="bi bi-table me-2 text-primary"></i>Bảng so sánh chi tiết</h6>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle mb-0 compare-table">
+                <thead class="table-dark">
+                    <tr>
+                        <th style="min-width:160px">Tiêu chí</th>
+                        @foreach (var r in reports)
+                        {
+                            <th class="text-center" style="min-width:180px">
+                                <div class="text-truncate" title="@r.DisplayName" style="max-width:180px">
+                                    @r.DisplayName
+                                </div>
+                                <div class="fw-normal small opacity-75">@r.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")</div>
+                            </th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        string Row(string label, Func<ValuationReportDto, string?> fn, string? rowClass = null) {
+                            return "";
+                        }
+                    }
+                    <tr>
+                        <td class="fw-semibold text-muted">Loại BĐS</td>
+                        @foreach (var r in reports) { <td class="text-center">@MapType(r.PropertyType)</td> }
+                    </tr>
+                    <tr>
+                        <td class="fw-semibold text-muted">Hình thức</td>
+                        @foreach (var r in reports) { <td class="text-center">@(r.TransactionType == "Sell" ? "Mua bán" : "Cho thuê")</td> }
+                    </tr>
+                    <tr>
+                        <td class="fw-semibold text-muted">Diện tích</td>
+                        @foreach (var r in reports) { <td class="text-center">@r.AreaSqm.ToString("0.##") m²</td> }
+                    </tr>
+                    <tr>
+                        <td class="fw-semibold text-muted">Thành phố</td>
+                        @foreach (var r in reports) { <td class="text-center">@r.City</td> }
+                    </tr>
+                    <tr>
+                        <td class="fw-semibold text-muted">Quận / Huyện</td>
+                        @foreach (var r in reports) { <td class="text-center">@r.District</td> }
+                    </tr>
+                    <tr class="table-primary">
+                        <td class="fw-bold">Giá ước tính (TB)</td>
+                        @foreach (var r in reports)
+                        {
+                            <td class="text-center fw-bold text-primary fs-6">
+                                @(r.EstimatedAvgPrice.HasValue ? r.EstimatedAvgPrice?.ToString("N0") + " VNĐ" : "–")
+                            </td>
+                        }
+                    </tr>
+                    <tr>
+                        <td class="fw-semibold text-muted">Giá thấp nhất</td>
+                        @foreach (var r in reports)
+                        {
+                            <td class="text-center text-success">
+                                @(r.EstimatedMinPrice.HasValue ? r.EstimatedMinPrice?.ToString("N0") : "–")
+                            </td>
+                        }
+                    </tr>
+                    <tr>
+                        <td class="fw-semibold text-muted">Giá cao nhất</td>
+                        @foreach (var r in reports)
+                        {
+                            <td class="text-center text-danger">
+                                @(r.EstimatedMaxPrice.HasValue ? r.EstimatedMaxPrice?.ToString("N0") : "–")
+                            </td>
+                        }
+                    </tr>
+                    <tr>
+                        <td class="fw-semibold text-muted">Giá TB / m²</td>
+                        @foreach (var r in reports)
+                        {
+                            <td class="text-center">
+                                @(r.AvgPricePerSqm.HasValue ? r.AvgPricePerSqm?.ToString("N0") + " VNĐ/m²" : "–")
+                            </td>
+                        }
+                    </tr>
+                    <tr>
+                        <td class="fw-semibold text-muted">Số mẫu so sánh</td>
+                        @foreach (var r in reports) { <td class="text-center">@r.SampleCount tin</td> }
+                    </tr>
+                    <tr>
+                        <td class="fw-semibold text-muted">Mở rộng toàn TP</td>
+                        @foreach (var r in reports)
+                        {
+                            <td class="text-center">
+                                @if (r.IsFallbackToCity)
+                                {
+                                    <span class="badge bg-warning text-dark">Có</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">Không</span>
+                                }
+                            </td>
+                        }
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Bar chart: estimated avg price -->
+    @if (reports.Any(r => r.EstimatedAvgPrice.HasValue))
+    {
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-light">
+                <h6 class="mb-0"><i class="bi bi-bar-chart-fill me-2 text-success"></i>So sánh giá ước tính (VNĐ)</h6>
+            </div>
+            <div class="card-body">
+                <div style="position:relative; height:300px; overflow:hidden">
+                    <canvas id="compareChart"></canvas>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Insight cards -->
+    <div class="row g-3">
+        @foreach (var r in reports)
+        {
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-light">
+                        <small class="fw-semibold text-truncate d-block">@r.DisplayName</small>
+                    </div>
+                    <div class="card-body">
+                        <p class="small text-muted mb-0">
+                            <i class="bi bi-lightbulb me-1 text-primary"></i>@r.MarketInsight
+                        </p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+</div>
+
+@section Scripts {
+    @{
+        var labels  = reports.Select(r => r.DisplayName.Length > 30 ? r.DisplayName[..30] + "…" : r.DisplayName).ToArray();
+        var avgData = reports.Select(r => r.EstimatedAvgPrice).ToArray();
+        var minData = reports.Select(r => r.EstimatedMinPrice).ToArray();
+        var maxData = reports.Select(r => r.EstimatedMaxPrice).ToArray();
+        var palette = new[] { "#0d6efd", "#dc3545", "#198754", "#ffc107" };
+    }
+    <script>
+        const labels  = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(labels));
+        const avgData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(avgData));
+        const minData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(minData));
+        const maxData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(maxData));
+
+        const fmtVnd = v => v == null ? '' : new Intl.NumberFormat('vi-VN').format(Math.round(v));
+
+        const ctx = document.getElementById('compareChart');
+        if (ctx) {
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [
+                        { label: 'Giá TB', data: avgData, backgroundColor: '#0d6efd99', borderColor: '#0d6efd', borderWidth: 1 },
+                        { label: 'Thấp nhất', data: minData, backgroundColor: '#19875466', borderColor: '#198754', borderWidth: 1 },
+                        { label: 'Cao nhất', data: maxData, backgroundColor: '#dc354566', borderColor: '#dc3545', borderWidth: 1 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${fmtVnd(ctx.parsed.y)} VNĐ` } }
+                    },
+                    scales: { y: { ticks: { callback: v => fmtVnd(v) } } }
+                }
+            });
+        }
+    </script>
+}
+
+@functions {
+    static string MapType(string raw) => raw switch {
+        "Apartment"  => "Căn hộ",
+        "House"      => "Nhà phố",
+        "Villa"      => "Biệt thự",
+        "Land"       => "Đất",
+        "Commercial" => "Thương mại",
+        _            => raw
+    };
+}
+
+<style>
+    .compare-table th, .compare-table td { vertical-align: middle; }
+</style>

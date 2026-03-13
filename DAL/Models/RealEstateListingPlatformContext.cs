@@ -32,6 +32,9 @@ namespace DAL.Models
         // Listing snapshots for approval tracking
         public DbSet<ListingSnapshot> ListingSnapshots { get; set; } = default!;
 
+        // Valuation reports (RELP-58)
+        public DbSet<ValuationReport> ValuationReports { get; set; } = default!;
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

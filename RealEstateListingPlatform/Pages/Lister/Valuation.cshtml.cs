@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using BLL.DTOs;
 using BLL.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -12,10 +13,13 @@ namespace RealEstateListingPlatform.Pages.Lister
     public class ValuationModel : PageModel
     {
         private readonly IValuationService _valuationService;
+        private readonly IValuationReportService _reportService;
 
-        public ValuationModel(IValuationService valuationService)
+        public ValuationModel(IValuationService valuationService,
+                              IValuationReportService reportService)
         {
             _valuationService = valuationService;
+            _reportService    = reportService;
         }
 
         [BindProperty]
@@ -26,6 +30,9 @@ namespace RealEstateListingPlatform.Pages.Lister
 
         /// <summary>Populated after a successful POST with the estimation result.</summary>
         public ValuationResultDto? EstimationResult { get; private set; }
+
+        public bool SavedSuccessfully { get; private set; }
+        public string? SavedReportId { get; private set; }
 
         public IActionResult OnGet()
         {
@@ -46,6 +53,51 @@ namespace RealEstateListingPlatform.Pages.Lister
                 Input.City.Trim(),
                 Input.District.Trim(),
                 Input.TransactionType);
+
+            return Page();
+        }
+
+        public async Task<IActionResult> OnPostSaveAsync()
+        {
+            PopulateDropdowns();
+
+            if (!ModelState.IsValid)
+                return Page();
+
+            EstimationResult = await _valuationService.EstimateAsync(
+                Input.PropertyType,
+                Input.AreaSqm,
+                Input.City.Trim(),
+                Input.District.Trim(),
+                Input.TransactionType);
+
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(userIdStr, out var userId))
+                return Page();
+
+            var dto = new SaveReportDto
+            {
+                ReportName        = Input.ReportName,
+                PropertyType      = Input.PropertyType,
+                TransactionType   = Input.TransactionType,
+                AreaSqm           = Input.AreaSqm,
+                City              = Input.City.Trim(),
+                District          = Input.District.Trim(),
+                Ward              = Input.Ward,
+                AddressLine       = Input.AddressLine,
+                Notes             = Input.Notes,
+                EstimatedMinPrice = EstimationResult?.EstimatedMinPrice,
+                EstimatedAvgPrice = EstimationResult?.EstimatedAvgPrice,
+                EstimatedMaxPrice = EstimationResult?.EstimatedMaxPrice,
+                AvgPricePerSqm    = EstimationResult?.AvgPricePerSqm,
+                SampleCount       = EstimationResult?.SampleCount ?? 0,
+                IsFallbackToCity  = EstimationResult?.IsFallbackToCity ?? false,
+                MarketInsight     = EstimationResult?.MarketInsight ?? string.Empty
+            };
+
+            var saved = await _reportService.SaveAsync(userId, dto);
+            SavedSuccessfully = true;
+            SavedReportId     = saved.Id.ToString();
 
             return Page();
         }
@@ -74,6 +126,10 @@ namespace RealEstateListingPlatform.Pages.Lister
 
         public class ValuationRequestInput
         {
+            [StringLength(200)]
+            [Display(Name = "Tên báo cáo (tuỳ chọn)")]
+            public string? ReportName { get; set; }
+
             [Required(ErrorMessage = "Vui lòng chọn loại bất động sản.")]
             [Display(Name = "Loại bất động sản")]
             public string PropertyType { get; set; } = string.Empty;

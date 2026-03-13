@@ -39,6 +39,8 @@ builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddScoped<IValuationService, ValuationService>();
 builder.Services.AddScoped<IMarketAnalyticsService, MarketAnalyticsService>();
+builder.Services.AddScoped<IValuationReportRepository, ValuationReportRepository>();
+builder.Services.AddScoped<IValuationReportService, ValuationReportService>();
 
 
 
