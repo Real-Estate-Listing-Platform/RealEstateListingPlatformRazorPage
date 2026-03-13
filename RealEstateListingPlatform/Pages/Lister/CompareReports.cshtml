@@ -1,5 +1,6 @@
 @page
 @model RealEstateListingPlatform.Pages.Lister.CompareReportsModel
+@using BLL.DTOs
 
 @{
     ViewData["Title"] = "So sánh báo cáo định giá";
@@ -48,11 +49,6 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @{
-                        string Row(string label, Func<ValuationReportDto, string?> fn, string? rowClass = null) {
-                            return "";
-                        }
-                    }
                     <tr>
                         <td class="fw-semibold text-muted">Loại BĐS</td>
                         @foreach (var r in reports) { <td class="text-center">@MapType(r.PropertyType)</td> }
