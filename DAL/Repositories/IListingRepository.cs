@@ -44,5 +44,8 @@ namespace DAL.Repositories
         Task<Dictionary<string, int>> GetListingsCountByStatusAsync();
         Task<List<(DateTime Date, int Count)>> GetListingsCreatedOverTimeAsync(int days);
         Task<List<(Guid ListingId, string Title, int LeadCount, decimal Price, string ListerName)>> GetTopPerformingListingsAsync(int topCount);
+
+        // Valuation estimation – returns Published listings matching type/txType/location
+        Task<List<Listing>> GetListingsForValuationAsync(string propertyType, string transactionType, string city, string? district);
     }
 }
