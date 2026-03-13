@@ -126,7 +126,7 @@
                 }
                 else
                 {
-                    <div style="position:relative; height:320px">
+                    <div class="chart-wrapper" style="height:320px">
                         <canvas id="trendChart"></canvas>
                     </div>
                 }
@@ -150,7 +150,7 @@
                         }
                         else
                         {
-                            <div style="position:relative; height:280px">
+                            <div class="chart-wrapper" style="height:280px">
                                 <canvas id="districtChart"></canvas>
                             </div>
                         }
@@ -172,7 +172,7 @@
                         }
                         else
                         {
-                            <div style="position:relative; height:260px; width:100%">
+                            <div class="chart-wrapper" style="height:260px">
                                 <canvas id="typeChart"></canvas>
                             </div>
                         }
@@ -342,7 +342,19 @@
 }
 
 <style>
-    .analytics-page { width: 100%; }
+    .analytics-page {
+        width: 100%;
+        min-width: 0;
+        overflow-x: hidden;
+    }
+
+    /* Prevent chart canvases from expanding beyond their card */
+    .chart-wrapper {
+        position: relative;
+        width: 100%;
+        min-width: 0;
+        overflow: hidden;
+    }
 
     .stat-card {
         background: #fff;
