@@ -24,7 +24,7 @@ builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IListingSnapshotRepository, ListingSnapshotRepository>();
 builder.Services.AddScoped<IReportRepository, ReportRepository>();
 builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
-
+builder.Services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
 // Services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -38,7 +38,7 @@ builder.Services.AddScoped<ILeadService, LeadService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
-
+builder.Services.AddScoped<IChatService, ChatService>();
 
 
 builder.Services.AddHttpClient();

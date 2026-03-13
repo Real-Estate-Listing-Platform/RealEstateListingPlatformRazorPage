@@ -32,6 +32,11 @@ namespace DAL.Models
         // Listing snapshots for approval tracking
         public DbSet<ListingSnapshot> ListingSnapshots { get; set; } = default!;
 
+
+        public DbSet<ChatSession> ChatSessions { get; set; } = default!;
+        public DbSet<ChatMessage> ChatMessages { get; set; } = default!;
+        public DbSet<ChatFeedback> ChatFeedbacks { get; set; } = default!;
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

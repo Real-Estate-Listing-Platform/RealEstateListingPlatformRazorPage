@@ -40,5 +40,15 @@ namespace BLL.Hubs
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, PublicListingsGroup);
         }
+
+        public async Task JoinChatSession(string sessionId)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"chat-{sessionId}");
+        }
+
+        public async Task LeaveChatSession(string sessionId)
+        {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"chat-{sessionId}");
+        }
     }
 }
