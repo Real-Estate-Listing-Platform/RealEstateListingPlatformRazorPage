@@ -316,5 +316,64 @@ namespace DAL.Repositories.Implementation
 
             return topListings.Select(x => (x.ListingId, x.Title, x.LeadCount, x.Price, x.ListerName)).ToList();
         }
+
+        public async Task<List<Listing>> GetListingsForValuationAsync(
+            string propertyType, string transactionType, string city, string? district)
+        {
+            var query = _context.Listings
+                .Where(l => l.Status == "Published"
+                    && l.Area != null
+                    && l.PropertyType != null && EF.Functions.Like(l.PropertyType, propertyType)
+                    && l.TransactionType != null && EF.Functions.Like(l.TransactionType, transactionType)
+                    && l.City != null && l.City.Contains(city));
+
+            if (!string.IsNullOrWhiteSpace(district))
+                query = query.Where(l => l.District != null && l.District == district);
+
+            return await query
+                .OrderByDescending(l => l.CreatedAt)
+                .Take(100)
+                .ToListAsync();
+        }
+
+        public async Task<List<Listing>> GetListingsForMarketAnalyticsAsync(
+            string city, string? propertyType, string? transactionType, int months)
+        {
+            var since = DateTime.UtcNow.AddMonths(-months);
+
+            var query = _context.Listings
+                .Where(l => l.Status == "Published"
+                    && l.City != null && l.City.Contains(city)
+                    && l.CreatedAt >= since);
+
+            if (!string.IsNullOrWhiteSpace(propertyType))
+                query = query.Where(l => l.PropertyType == propertyType);
+
+            if (!string.IsNullOrWhiteSpace(transactionType))
+                query = query.Where(l => l.TransactionType == transactionType);
+
+            return await query.OrderBy(l => l.CreatedAt).ToListAsync();
+        }
+
+        public async Task<List<Listing>> GetListingsForCityComparisonAsync(
+            IEnumerable<string> cities, string? propertyType, string? transactionType, int months)
+        {
+            var since = DateTime.UtcNow.AddMonths(-months);
+            var cityList = cities.ToList();
+
+            var query = _context.Listings
+                .Where(l => l.Status == "Published"
+                    && l.City != null
+                    && l.CreatedAt >= since
+                    && cityList.Any(c => l.City!.Contains(c)));
+
+            if (!string.IsNullOrWhiteSpace(propertyType))
+                query = query.Where(l => l.PropertyType == propertyType);
+
+            if (!string.IsNullOrWhiteSpace(transactionType))
+                query = query.Where(l => l.TransactionType == transactionType);
+
+            return await query.OrderBy(l => l.City).ToListAsync();
+        }
     }
 }
