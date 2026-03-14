@@ -32,8 +32,15 @@ namespace DAL.Models
         // Listing snapshots for approval tracking
         public DbSet<ListingSnapshot> ListingSnapshots { get; set; } = default!;
 
+<<<<<<< HEAD
+
+        public DbSet<ChatSession> ChatSessions { get; set; } = default!;
+        public DbSet<ChatMessage> ChatMessages { get; set; } = default!;
+        public DbSet<ChatFeedback> ChatFeedbacks { get; set; } = default!;
+=======
         // Valuation reports (RELP-58)
         public DbSet<ValuationReport> ValuationReports { get; set; } = default!;
+>>>>>>> feature/razor-page
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
