@@ -1,0 +1,179 @@
+@page
+@model RealEstateListingPlatform.Pages.Lister.ValuationReportsModel
+
+@{
+    ViewData["Title"] = "Báo cáo định giá đã lưu";
+    Layout = "_ListerLayout";
+}
+
+<div style="width:100%">
+
+    <div class="page-header mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1 class="page-title mb-1">
+                    <i class="bi bi-journal-bookmark me-2"></i>Báo cáo định giá đã lưu
+                </h1>
+                <p class="text-muted mb-0">Xem lại và so sánh các kết quả ước tính giá bạn đã lưu.</p>
+            </div>
+            <a asp-page="/Lister/Valuation" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-2"></i>Ước tính mới
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["CompareError"] is string err)
+    {
+        <div class="alert alert-warning alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle me-2"></i>@err
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!Model.Reports.Any())
+    {
+        <div class="card border-0 shadow-sm text-center py-5">
+            <div class="text-muted">
+                <i class="bi bi-journal-x" style="font-size:3rem"></i>
+                <p class="mt-3 mb-2 fs-5">Chưa có báo cáo nào được lưu.</p>
+                <a asp-page="/Lister/Valuation" class="btn btn-outline-primary">
+                    <i class="bi bi-calculator me-2"></i>Ước tính ngay
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <form method="post" asp-page-handler="Compare">
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body d-flex align-items-center justify-content-between py-2 px-3">
+                    <span class="text-muted small">
+                        <span id="selectedCount">0</span> báo cáo được chọn
+                        <span class="text-muted">(chọn 2–4 để so sánh)</span>
+                    </span>
+                    <button type="submit" class="btn btn-outline-primary btn-sm" id="compareBtn" disabled>
+                        <i class="bi bi-layout-split me-1"></i>So sánh đã chọn
+                    </button>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                @foreach (var r in Model.Reports)
+                {
+                    <div class="col-12 col-md-6 col-xl-4">
+                        <div class="report-card card border-0 shadow-sm h-100">
+                            <div class="card-header report-card-header d-flex align-items-start gap-2">
+                                <input type="checkbox" name="SelectedIds" value="@r.Id"
+                                       class="form-check-input mt-1 report-checkbox" />
+                                <div class="flex-grow-1 min-w-0">
+                                    <div class="fw-semibold text-truncate" title="@r.DisplayName">@r.DisplayName</div>
+                                    <div class="text-muted small">@r.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <div class="small text-muted">Loại BĐS</div>
+                                        <div class="fw-semibold">@MapType(r.PropertyType)</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="small text-muted">Hình thức</div>
+                                        <div class="fw-semibold">@(r.TransactionType == "Sell" ? "Mua bán" : "Cho thuê")</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="small text-muted">Diện tích</div>
+                                        <div class="fw-semibold">@r.AreaSqm.ToString("0.##") m²</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="small text-muted">Vị trí</div>
+                                        <div class="fw-semibold text-truncate" title="@r.District, @r.City">@r.District</div>
+                                    </div>
+                                </div>
+
+                                @if (r.EstimatedAvgPrice.HasValue)
+                                {
+                                    <div class="price-highlight text-center rounded p-2 mb-2">
+                                        <div class="small text-muted">Giá ước tính (TB)</div>
+                                        <div class="fs-5 fw-bold text-primary">@r.EstimatedAvgPrice?.ToString("N0") VNĐ</div>
+                                    </div>
+                                    <div class="d-flex justify-content-between text-center small">
+                                        <div>
+                                            <div class="text-muted">Thấp nhất</div>
+                                            <div class="text-success fw-semibold">@r.EstimatedMinPrice?.ToString("N0")</div>
+                                        </div>
+                                        <div>
+                                            <div class="text-muted">Giá/m²</div>
+                                            <div class="fw-semibold">@r.AvgPricePerSqm?.ToString("N0")</div>
+                                        </div>
+                                        <div>
+                                            <div class="text-muted">Cao nhất</div>
+                                            <div class="text-danger fw-semibold">@r.EstimatedMaxPrice?.ToString("N0")</div>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <p class="text-muted small text-center">Không có dữ liệu ước tính.</p>
+                                }
+                            </div>
+                            <div class="card-footer bg-transparent border-0 pt-0 pb-3 px-3 d-flex gap-2">
+                                <a asp-page="/Lister/Valuation"
+                                   asp-route-propertyType="@r.PropertyType"
+                                   asp-route-transactionType="@r.TransactionType"
+                                   asp-route-areaSqm="@r.AreaSqm"
+                                   asp-route-city="@r.City"
+                                   asp-route-district="@r.District"
+                                   class="btn btn-outline-secondary btn-sm flex-fill">
+                                    <i class="bi bi-arrow-repeat me-1"></i>Ước tính lại
+                                </a>
+                                <form method="post" asp-page-handler="Delete" class="d-inline">
+                                    <input type="hidden" name="id" value="@r.Id" />
+                                    <button type="submit" class="btn btn-outline-danger btn-sm"
+                                            onclick="return confirm('Xoá báo cáo này?')">
+                                        <i class="bi bi-trash3"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </form>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        const checkboxes = document.querySelectorAll('.report-checkbox');
+        const countLabel = document.getElementById('selectedCount');
+        const compareBtn = document.getElementById('compareBtn');
+
+        function updateCompare() {
+            const n = [...checkboxes].filter(c => c.checked).length;
+            countLabel.textContent = n;
+            compareBtn.disabled = n < 2 || n > 4;
+        }
+
+        checkboxes.forEach(cb => cb.addEventListener('change', updateCompare));
+    </script>
+}
+
+@functions {
+    static string MapType(string raw) => raw switch {
+        "Apartment"  => "Căn hộ",
+        "House"      => "Nhà phố",
+        "Villa"      => "Biệt thự",
+        "Land"       => "Đất",
+        "Commercial" => "Thương mại",
+        _            => raw
+    };
+}
+
+<style>
+    .report-card-header {
+        background: linear-gradient(135deg, #667eea22, #764ba222);
+        border-bottom: 1px solid #e9ecef;
+        padding: .75rem 1rem;
+    }
+    .price-highlight { background: #f0f4ff; }
+</style>
