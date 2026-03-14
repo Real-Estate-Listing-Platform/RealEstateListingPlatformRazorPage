@@ -7,7 +7,6 @@ using DAL.Repositories.Implementation;
 using BLL.Services;
 using BLL.Services.Implementation;
 using BLL.Hubs;
-
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<RealEstateListingPlatformContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("RealEstateListingPlatformContext")));
@@ -38,8 +37,19 @@ builder.Services.AddScoped<ILeadService, LeadService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
+<<<<<<< HEAD
 builder.Services.AddScoped<IChatService, ChatService>();
+=======
+builder.Services.AddScoped<IValuationService, ValuationService>();
+builder.Services.AddScoped<IMarketAnalyticsService, MarketAnalyticsService>();
+builder.Services.AddScoped<IValuationReportRepository, ValuationReportRepository>();
+builder.Services.AddScoped<IValuationReportService, ValuationReportService>();
 
+>>>>>>> feature/razor-page
+
+
+// Chatbot Service
+builder.Services.AddScoped<IChatbotService, ChatbotService>();
 
 builder.Services.AddHttpClient();
 builder.Services.AddDistributedMemoryCache();
@@ -73,6 +83,7 @@ builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(optio
 });
 
 builder.Services.AddSignalR();
+builder.Services.AddControllers();
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 
@@ -212,6 +223,9 @@ app.MapStaticAssets();
 
 // Map Razor Pages
 app.MapRazorPages();
+
+// Map API Controllers
+app.MapControllers();
 
 // Map SignalR Hubs
 app.MapHub<DashboardHub>("/hubs/dashboard");
