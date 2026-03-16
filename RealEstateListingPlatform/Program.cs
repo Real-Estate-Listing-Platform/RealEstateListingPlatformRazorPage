@@ -37,15 +37,13 @@ builder.Services.AddScoped<ILeadService, LeadService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
-<<<<<<< HEAD
 builder.Services.AddScoped<IChatService, ChatService>();
-=======
 builder.Services.AddScoped<IValuationService, ValuationService>();
 builder.Services.AddScoped<IMarketAnalyticsService, MarketAnalyticsService>();
 builder.Services.AddScoped<IValuationReportRepository, ValuationReportRepository>();
 builder.Services.AddScoped<IValuationReportService, ValuationReportService>();
 
->>>>>>> feature/razor-page
+
 
 
 // Chatbot Service

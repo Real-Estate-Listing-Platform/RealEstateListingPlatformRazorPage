@@ -1,6 +1,6 @@
 namespace BLL.DTOs
 {
-    public class ChatMessageDto
+    public class ChatbotMessageDto
     {
         public string Role { get; set; } = "user"; // "user" or "model"
         public string Content { get; set; } = string.Empty;
@@ -10,7 +10,7 @@ namespace BLL.DTOs
     public class ChatbotRequestDto
     {
         public string Message { get; set; } = string.Empty;
-        public List<ChatMessageDto> History { get; set; } = new();
+        public List<ChatbotMessageDto> History { get; set; } = new();
     }
 
     public class ChatbotResponseDto
