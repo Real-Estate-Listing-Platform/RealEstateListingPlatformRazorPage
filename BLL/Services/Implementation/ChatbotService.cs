@@ -43,7 +43,7 @@ Khi giới thiệu listing, đừng liệt kê chi tiết mà để hệ thống
             _listingRepository = listingRepository;
             _httpClientFactory = httpClientFactory;
             _geminiApiKey = configuration["Gemini:ApiKey"] ?? string.Empty;
-            _geminiApiUrl = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={_geminiApiKey}";
+            _geminiApiUrl = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={_geminiApiKey}";
         }
 
         public async Task<ChatbotResponseDto> ChatAsync(string userMessage, List<ChatbotMessageDto> history)

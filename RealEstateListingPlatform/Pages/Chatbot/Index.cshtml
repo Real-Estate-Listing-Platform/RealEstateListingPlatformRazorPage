@@ -597,7 +597,7 @@
 
         listings.forEach(listing => {
             const card = document.createElement('a');
-            card.href = `/Listings/PropertyDetail?id=${listing.id}`;
+            card.href = `/Listings/PropertyDetail/${listing.id}`;
             card.target = '_blank';
             card.className = 'listing-card-mini';
 
