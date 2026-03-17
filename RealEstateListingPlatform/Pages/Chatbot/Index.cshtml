@@ -627,9 +627,14 @@
     }
 
     function formatPrice(price) {
-        if (price >= 1000000000) return (price / 1000000000).toFixed(1) + ' tỷ';
-        if (price >= 1000000) return Math.round(price / 1000000) + ' triệu';
-        return price.toLocaleString('vi-VN') + ' đồng';
+        if (price >= 1000000000) {
+            let value = price / 1000000000;
+            return (value % 1 === 0 ? value : value.toFixed(1)) + ' tỷ';
+        }
+        if (price >= 1000000) {
+            return Math.round(price / 1000000) + ' triệu';
+        }
+        return price.toLocaleString('vi-VN') + ' đ';
     }
 
     function translatePropertyType(type) {

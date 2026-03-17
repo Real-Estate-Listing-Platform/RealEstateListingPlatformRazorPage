@@ -17,23 +17,27 @@ namespace BLL.Services.Implementation
         private readonly string _geminiApiUrl;
 
         private const string SystemPrompt = @"Bạn là trợ lý AI thông minh của nền tảng bất động sản Estately. 
-Nhiệm vụ của bạn là giúp người dùng tìm kiếm, tư vấn và giải đáp thắc mắc về bất động sản tại Việt Nam.
+                                            Nhiệm vụ của bạn là giúp người dùng tìm kiếm, tư vấn và giải đáp thắc mắc về bất động sản tại Việt Nam.
 
-Bạn có thể giúp:
-- Tư vấn tìm kiếm căn hộ, nhà, đất, biệt thự phù hợp với nhu cầu
-- Giải thích về giá cả thị trường, xu hướng bất động sản
-- Tư vấn về pháp lý (Sổ đỏ, Sổ hồng, Hợp đồng mua bán)
-- Giới thiệu các listing phù hợp từ hệ thống
+                                            Bạn có thể giúp:
+                                            - Tư vấn tìm kiếm căn hộ, nhà, đất, biệt thự phù hợp với nhu cầu
+                                            - Giải thích về giá cả thị trường, xu hướng bất động sản
+                                            - Tư vấn về pháp lý (Sổ đỏ, Sổ hồng, Hợp đồng mua bán)
+                                            - Giới thiệu các listing phù hợp từ hệ thống
 
-Khi người dùng muốn tìm BĐS, hãy hỏi thêm về:
-- Mục đích: mua hay thuê
-- Loại BĐS: căn hộ, nhà phố, biệt thự, đất, văn phòng
-- Khu vực (quận/huyện/thành phố)
-- Ngân sách
-- Diện tích, số phòng ngủ
+                                            Khi người dùng muốn tìm BĐS, hãy hỏi thêm về:
+                                            - Mục đích: mua hay thuê
+                                            - Loại BĐS: căn hộ, nhà phố, biệt thự, đất, văn phòng
+                                            - Khu vực (quận/huyện/thành phố)
+                                            - Ngân sách
+                                            - Diện tích, số phòng ngủ
+                                            
+                                            Nếu người dùng đang tìm kiếm BĐS, hãy luôn kèm theo thông tin kỹ thuật ở cuối câu trả lời theo định dạng:
+                                            [SEARCH_DATA: { ""TransactionType"": ""..."", ""PropertyType"": ""..."",""District"": ""..."",""MaxPrice"": ..., ""Bedrooms"": ... }]
+                                         
+                                            Trả lời ngắn gọn, thân thiện và chuyên nghiệp bằng tiếng Việt.
+                                            Khi giới thiệu listing, đừng liệt kê chi tiết mà để hệ thống tự hiển thị thẻ bất động sản."; 
 
-Trả lời ngắn gọn, thân thiện và chuyên nghiệp bằng tiếng Việt.
-Khi giới thiệu listing, đừng liệt kê chi tiết mà để hệ thống tự hiển thị thẻ bất động sản.";
 
         public ChatbotService(
             IListingRepository listingRepository,
@@ -127,12 +131,29 @@ Khi giới thiệu listing, đừng liệt kê chi tiết mà để hệ thống
                 }
 
                 var geminiResponse = JsonSerializer.Deserialize<JsonElement>(responseBody);
-                var aiText = geminiResponse
+                //var aiText = geminiResponse
+                //    .GetProperty("candidates")[0]
+                //    .GetProperty("content")
+                //    .GetProperty("parts")[0]
+                //    .GetProperty("text")
+                //    .GetString() ?? "Xin lỗi, tôi không thể trả lời lúc này.";
+
+                string aiText = geminiResponse
                     .GetProperty("candidates")[0]
                     .GetProperty("content")
                     .GetProperty("parts")[0]
                     .GetProperty("text")
                     .GetString() ?? "Xin lỗi, tôi không thể trả lời lúc này.";
+
+                var match = Regex.Match(aiText, @"\[SEARCH_DATA:\s*({.*?})\]", RegexOptions.Singleline);
+                string cleanMessage = aiText;
+                string jsonSearch = "";
+
+                if (match.Success)
+                {
+                    cleanMessage = aiText.Replace(match.Value, "").Trim(); // Câu trả lời sạch gửi cho User
+                    jsonSearch = match.Groups[1].Value; // JSON để bạn xử lý logic ngầm (nếu cần)
+                }
 
                 return new ChatbotResponseDto
                 {
@@ -186,15 +207,24 @@ Khi giới thiệu listing, đừng liệt kê chi tiết mà để hệ thống
                     "bình thạnh", "gò vấp", "tân bình", "phú nhuận", "bình chánh", "hóc môn", "củ chi",
                     "thủ đức", "q1", "q2", "q3", "q7", "q9", "hà nội", "đà nẵng", "hải phòng" };
 
-                foreach (var district in districts)
+                //foreach (var district in districts)
+                //{
+                //    if (lower.Contains(district))
+                //    {
+                //        filtered = filtered.Where(l =>
+                //            (l.District != null && l.District.ToLower().Contains(district)) ||
+                //            (l.City != null && l.City.ToLower().Contains(district)));
+                //        break;
+                //    } 
+                //}
+
+                var mentionedDistricts = districts.Where(d => lower.Contains(d)).ToList();
+                if (mentionedDistricts.Any())
                 {
-                    if (lower.Contains(district))
-                    {
-                        filtered = filtered.Where(l =>
-                            (l.District != null && l.District.ToLower().Contains(district)) ||
-                            (l.City != null && l.City.ToLower().Contains(district)));
-                        break;
-                    }
+                    filtered = filtered.Where(l =>
+                        mentionedDistricts.Any(d => (l.District?.ToLower().Contains(d) ?? false) ||
+                                                    (l.City?.ToLower().Contains(d) ?? false))
+                    );
                 }
 
                 // Filter by price range
