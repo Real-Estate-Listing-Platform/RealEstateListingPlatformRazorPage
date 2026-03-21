@@ -597,12 +597,12 @@
 
         listings.forEach(listing => {
             const card = document.createElement('a');
-            card.href = `/Listings/PropertyDetail/${listing.id}`;
+            card.href = listing.detailUrl || `/Listings/PropertyDetail/${listing.id}`;
             card.target = '_blank';
             card.className = 'listing-card-mini';
 
             const imgHtml = listing.listingMedia && listing.listingMedia.length > 0
-                ? `<img src="${listing.listingMedia[0].mediaUrl}" alt="${listing.title}" onerror="this.parentElement.innerHTML='<i class=\\'bi bi-house\\' style=\\'font-size:2rem\\'></i>'">`
+                ? `<img src="${listing.listingMedia[0].url}" alt="${listing.title}" onerror="this.parentElement.innerHTML='<i class=\\'bi bi-house\\' style=\\'font-size:2rem\\'></i>'">`
                 : '<i class="bi bi-house" style="font-size:2rem"></i>';
 
             const price = formatPrice(listing.price);

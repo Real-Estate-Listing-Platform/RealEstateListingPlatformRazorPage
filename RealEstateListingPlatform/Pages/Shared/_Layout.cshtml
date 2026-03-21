@@ -294,6 +294,30 @@
             font-size: 0.85rem;
             line-height: 1.5;
         }
+        .widget-recommendations {
+            max-width: 80%;
+            margin-left: 36px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .widget-recommendation-link {
+            display: block;
+            padding: 8px 10px;
+            border-radius: 10px;
+            background: #eef2ff;
+            color: #3730a3;
+            font-size: 0.8rem;
+            text-decoration: none;
+            border: 1px solid #e0e7ff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .widget-recommendation-link:hover {
+            background: #e0e7ff;
+            color: #312e81;
+        }
         .widget-message.bot .widget-bubble { background: #f3f4f6; color: #1f2937; border-top-left-radius: 4px; }
         .widget-message.user .widget-bubble { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-top-right-radius: 4px; }
         .chatbot-widget-input {
@@ -372,6 +396,9 @@
                 typingEl.remove();
                 const reply = data.message || (data.success ? '' : 'Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại.');
                 appendWidgetMessage('bot', reply);
+                if (data.success && Array.isArray(data.suggestedListings) && data.suggestedListings.length > 0) {
+                    appendWidgetRecommendations(data.suggestedListings.slice(0, 3));
+                }
                 if (data.success) widgetHistory.push({ role: 'model', content: reply });
             } catch {
                 typingEl.remove();
@@ -413,6 +440,25 @@
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
             return div;
+        }
+
+        function appendWidgetRecommendations(listings) {
+            const container = document.getElementById('widgetMessages');
+            const block = document.createElement('div');
+            block.className = 'widget-recommendations';
+
+            listings.forEach(listing => {
+                const link = document.createElement('a');
+                link.className = 'widget-recommendation-link';
+                link.href = listing.detailUrl || `/Listings/PropertyDetail/${listing.id}`;
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                link.textContent = `🏠 ${listing.title || 'Xem chi tiết bất động sản'}`;
+                block.appendChild(link);
+            });
+
+            container.appendChild(block);
+            container.scrollTop = container.scrollHeight;
         }
     </script>
 
@@ -529,7 +575,7 @@
         // generateResponse
         const generateResponse = (chatElement, userMessage) => {
         const messageElement = chatElement.querySelector("p");
-        const API_URL = "/api/Chatbot/SendMessage";
+        const API_URL = "/api/Chatbot/chat";
 
         const requestOptions = {
             method: "POST",
@@ -544,12 +590,16 @@
             })
             .then(data => {
                 console.log("Dữ liệu nhận được:", data);                
-                const aiReply = data.reply || data.Reply;
+                const aiReply = data.message || data.Message;
 
                 if (aiReply) {
                     messageElement.textContent = aiReply;
                 } else {
                     messageElement.textContent = "AI đã trả lời nhưng nội dung trống";
+                }
+
+                if (Array.isArray(data.suggestedListings) && data.suggestedListings.length > 0) {
+                    appendLegacyRecommendations(data.suggestedListings.slice(0, 3));
                 }
             })
             .catch((error) => {
@@ -561,6 +611,20 @@
                 chatbox.scrollTo(0, chatbox.scrollHeight);
             });
     };
+
+        const appendLegacyRecommendations = (listings) => {
+            const li = document.createElement("li");
+            li.classList.add("chat", "incoming");
+
+            const links = listings.map(l => {
+                const url = l.detailUrl || `/Listings/PropertyDetail/${l.id}`;
+                const title = l.title || "Xem chi tiết bất động sản";
+                return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="display:block;margin:4px 0;color:#4f46e5;text-decoration:underline;">🏠 ${title}</a>`;
+            }).join("");
+
+            li.innerHTML = `<span class="material-icons"><i class="bi bi-house-heart"></i></span><p style="margin:0">${links}</p>`;
+            chatbox.appendChild(li);
+        };
 
         
         sendChatBtn.addEventListener("click", handleChat);

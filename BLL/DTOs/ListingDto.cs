@@ -42,6 +42,7 @@ namespace BLL.DTOs
         public string? ListerName { get; set; }
         public string? ListerEmail { get; set; }
         public List<ListingMediaDto> ListingMedia { get; set; } = new();
+        public string? DetailUrl { get; set; }
         
         // Tracking fields
         public Guid? PendingSnapshotId { get; set; }
