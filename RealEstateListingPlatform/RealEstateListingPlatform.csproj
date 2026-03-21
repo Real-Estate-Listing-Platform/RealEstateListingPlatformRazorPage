@@ -7,6 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Hubs\**" />
+    <Compile Remove="Services\**" />
+    <Content Remove="Hubs\**" />
+    <Content Remove="Services\**" />
+    <EmbeddedResource Remove="Hubs\**" />
+    <EmbeddedResource Remove="Services\**" />
+    <None Remove="Hubs\**" />
+    <None Remove="Services\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="MailKit" Version="4.14.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.12" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.12">
@@ -19,11 +30,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BLL\BLL.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Hubs\" />
-    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>

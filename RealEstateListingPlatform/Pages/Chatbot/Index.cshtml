@@ -597,12 +597,12 @@
 
         listings.forEach(listing => {
             const card = document.createElement('a');
-            card.href = `/Listings/PropertyDetail?id=${listing.id}`;
+            card.href = listing.detailUrl || `/Listings/PropertyDetail/${listing.id}`;
             card.target = '_blank';
             card.className = 'listing-card-mini';
 
             const imgHtml = listing.listingMedia && listing.listingMedia.length > 0
-                ? `<img src="${listing.listingMedia[0].mediaUrl}" alt="${listing.title}" onerror="this.parentElement.innerHTML='<i class=\\'bi bi-house\\' style=\\'font-size:2rem\\'></i>'">`
+                ? `<img src="${listing.listingMedia[0].url}" alt="${listing.title}" onerror="this.parentElement.innerHTML='<i class=\\'bi bi-house\\' style=\\'font-size:2rem\\'></i>'">`
                 : '<i class="bi bi-house" style="font-size:2rem"></i>';
 
             const price = formatPrice(listing.price);
@@ -627,9 +627,14 @@
     }
 
     function formatPrice(price) {
-        if (price >= 1000000000) return (price / 1000000000).toFixed(1) + ' tỷ';
-        if (price >= 1000000) return Math.round(price / 1000000) + ' triệu';
-        return price.toLocaleString('vi-VN') + ' đồng';
+        if (price >= 1000000000) {
+            let value = price / 1000000000;
+            return (value % 1 === 0 ? value : value.toFixed(1)) + ' tỷ';
+        }
+        if (price >= 1000000) {
+            return Math.round(price / 1000000) + ' triệu';
+        }
+        return price.toLocaleString('vi-VN') + ' đ';
     }
 
     function translatePropertyType(type) {

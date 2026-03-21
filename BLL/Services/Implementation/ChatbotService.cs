@@ -17,23 +17,26 @@ namespace BLL.Services.Implementation
         private readonly string _geminiApiUrl;
 
         private const string SystemPrompt = @"Bạn là trợ lý AI thông minh của nền tảng bất động sản Estately. 
-Nhiệm vụ của bạn là giúp người dùng tìm kiếm, tư vấn và giải đáp thắc mắc về bất động sản tại Việt Nam.
+                                            Nhiệm vụ của bạn là giúp người dùng tìm kiếm, tư vấn và giải đáp thắc mắc về bất động sản tại Việt Nam.
 
-Bạn có thể giúp:
-- Tư vấn tìm kiếm căn hộ, nhà, đất, biệt thự phù hợp với nhu cầu
-- Giải thích về giá cả thị trường, xu hướng bất động sản
-- Tư vấn về pháp lý (Sổ đỏ, Sổ hồng, Hợp đồng mua bán)
-- Giới thiệu các listing phù hợp từ hệ thống
+                                            Bạn có thể giúp:
+                                            - Tư vấn tìm kiếm căn hộ, nhà, đất, biệt thự phù hợp với nhu cầu
+                                            - Giải thích về giá cả thị trường, xu hướng bất động sản
+                                            - Tư vấn về pháp lý (Sổ đỏ, Sổ hồng, Hợp đồng mua bán)
+                                            - Giới thiệu các listing phù hợp từ hệ thống
 
-Khi người dùng muốn tìm BĐS, hãy hỏi thêm về:
-- Mục đích: mua hay thuê
-- Loại BĐS: căn hộ, nhà phố, biệt thự, đất, văn phòng
-- Khu vực (quận/huyện/thành phố)
-- Ngân sách
-- Diện tích, số phòng ngủ
+                                            Khi người dùng muốn tìm BĐS, hãy hỏi thêm về:
+                                            - Mục đích: mua hay thuê
+                                            - Loại BĐS: căn hộ, nhà phố, biệt thự, đất, văn phòng
+                                            - Khu vực (quận/huyện/thành phố)
+                                            - Ngân sách
+                                            - Diện tích, số phòng ngủ
+                                            
+                                            Tuyệt đối không hiển thị dữ liệu kỹ thuật, JSON hoặc payload nội bộ trong câu trả lời.
+                                         
+                                            Trả lời ngắn gọn, thân thiện và chuyên nghiệp bằng tiếng Việt.
+                                            Khi giới thiệu listing, đừng liệt kê chi tiết mà để hệ thống tự hiển thị thẻ bất động sản."; 
 
-Trả lời ngắn gọn, thân thiện và chuyên nghiệp bằng tiếng Việt.
-Khi giới thiệu listing, đừng liệt kê chi tiết mà để hệ thống tự hiển thị thẻ bất động sản.";
 
         public ChatbotService(
             IListingRepository listingRepository,
@@ -43,7 +46,7 @@ Khi giới thiệu listing, đừng liệt kê chi tiết mà để hệ thống
             _listingRepository = listingRepository;
             _httpClientFactory = httpClientFactory;
             _geminiApiKey = configuration["Gemini:ApiKey"] ?? string.Empty;
-            _geminiApiUrl = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={_geminiApiKey}";
+            _geminiApiUrl = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={_geminiApiKey}";
         }
 
         public async Task<ChatbotResponseDto> ChatAsync(string userMessage, List<ChatbotMessageDto> history)
@@ -51,7 +54,9 @@ Khi giới thiệu listing, đừng liệt kê chi tiết mà để hệ thống
             try
             {
                 // Get recommended listings based on user message
-                var suggestedListings = await GetListingRecommendationsAsync(userMessage);
+                var suggestedListings = (await GetListingRecommendationsAsync(userMessage))
+                    .Take(3)
+                    .ToList();
 
                 // Build context with available listings summary
                 var listingContext = BuildListingContext(suggestedListings);
@@ -127,18 +132,32 @@ Khi giới thiệu listing, đừng liệt kê chi tiết mà để hệ thống
                 }
 
                 var geminiResponse = JsonSerializer.Deserialize<JsonElement>(responseBody);
-                var aiText = geminiResponse
+                //var aiText = geminiResponse
+                //    .GetProperty("candidates")[0]
+                //    .GetProperty("content")
+                //    .GetProperty("parts")[0]
+                //    .GetProperty("text")
+                //    .GetString() ?? "Xin lỗi, tôi không thể trả lời lúc này.";
+
+                string aiText = geminiResponse
                     .GetProperty("candidates")[0]
                     .GetProperty("content")
                     .GetProperty("parts")[0]
                     .GetProperty("text")
                     .GetString() ?? "Xin lỗi, tôi không thể trả lời lúc này.";
 
+                string cleanMessage = SanitizeAiMessage(aiText);
+
+                if (string.IsNullOrWhiteSpace(cleanMessage))
+                {
+                    cleanMessage = "Tôi đã tìm thấy một số bất động sản phù hợp cho bạn. Vui lòng xem các gợi ý bên cạnh.";
+                }
+
                 return new ChatbotResponseDto
                 {
                     Success = true,
-                    Message = aiText,
-                    SuggestedListings = suggestedListings.Take(3).ToList()
+                    Message = cleanMessage,
+                    SuggestedListings = suggestedListings
                 };
             }
             catch (Exception ex)
@@ -162,39 +181,78 @@ Khi giới thiệu listing, đừng liệt kê chi tiết mà để hệ thống
                 if (!published.Any()) return new List<ListingDto>();
 
                 var lower = userMessage.ToLower();
+                var hasStrictFilter = false;
+                var hasRecommendationIntent = lower.Contains("tìm") || lower.Contains("tim") ||
+                                              lower.Contains("kiếm") || lower.Contains("kiem") ||
+                                              lower.Contains("gợi ý") || lower.Contains("goi y") ||
+                                              lower.Contains("đề xuất") || lower.Contains("de xuat") ||
+                                              lower.Contains("recommend") || lower.Contains("find");
 
                 // Filter by transaction type
                 var filtered = published.AsEnumerable();
 
                 if (lower.Contains("thuê") || lower.Contains("thue") || lower.Contains("rent"))
+                {
                     filtered = filtered.Where(l => l.TransactionType?.ToLower() == "rent");
+                    hasStrictFilter = true;
+                }
                 else if (lower.Contains("mua") || lower.Contains("bán") || lower.Contains("ban") || lower.Contains("buy") || lower.Contains("sell"))
+                {
                     filtered = filtered.Where(l => l.TransactionType?.ToLower() == "sell");
+                    hasStrictFilter = true;
+                }
 
                 // Filter by property type
                 if (lower.Contains("căn hộ") || lower.Contains("can ho") || lower.Contains("apartment") || lower.Contains("chung cư"))
+                {
                     filtered = filtered.Where(l => l.PropertyType?.ToLower() == "apartment");
+                    hasStrictFilter = true;
+                }
                 else if (lower.Contains("nhà") || lower.Contains("nha") || lower.Contains("house"))
+                {
                     filtered = filtered.Where(l => l.PropertyType?.ToLower() == "house");
+                    hasStrictFilter = true;
+                }
                 else if (lower.Contains("biệt thự") || lower.Contains("biet thu") || lower.Contains("villa"))
+                {
                     filtered = filtered.Where(l => l.PropertyType?.ToLower() == "villa");
+                    hasStrictFilter = true;
+                }
                 else if (lower.Contains("đất") || lower.Contains("dat") || lower.Contains("land"))
+                {
                     filtered = filtered.Where(l => l.PropertyType?.ToLower() == "land");
+                    hasStrictFilter = true;
+                }
+                else if (lower.Contains("phòng trọ") || lower.Contains("phong tro") || lower.Contains("room"))
+                {
+                    filtered = filtered.Where(l => l.PropertyType?.ToLower() == "room");
+                    hasStrictFilter = true;
+                }
 
                 // Filter by district/city keywords
                 var districts = new[] { "quận 1", "quận 2", "quận 3", "quận 4", "quận 5", "quận 6", "quận 7", "quận 8", "quận 9", "quận 10",
                     "bình thạnh", "gò vấp", "tân bình", "phú nhuận", "bình chánh", "hóc môn", "củ chi",
                     "thủ đức", "q1", "q2", "q3", "q7", "q9", "hà nội", "đà nẵng", "hải phòng" };
 
-                foreach (var district in districts)
+                //foreach (var district in districts)
+                //{
+                //    if (lower.Contains(district))
+                //    {
+                //        filtered = filtered.Where(l =>
+                //            (l.District != null && l.District.ToLower().Contains(district)) ||
+                //            (l.City != null && l.City.ToLower().Contains(district)));
+                //        break;
+                //    } 
+                //}
+
+                var mentionedDistricts = districts.Where(d => lower.Contains(d)).ToList();
+                if (mentionedDistricts.Any())
                 {
-                    if (lower.Contains(district))
-                    {
-                        filtered = filtered.Where(l =>
-                            (l.District != null && l.District.ToLower().Contains(district)) ||
-                            (l.City != null && l.City.ToLower().Contains(district)));
-                        break;
-                    }
+                    filtered = filtered.Where(l =>
+                        mentionedDistricts.Any(d => (l.District?.ToLower().Contains(d) ?? false) ||
+                                                    (l.City?.ToLower().Contains(d) ?? false))
+                    );
+                    hasStrictFilter = true;
                 }
 
                 // Filter by price range
@@ -203,18 +261,51 @@ Khi giới thiệu listing, đừng liệt kê chi tiết mà để hệ thống
                 {
                     var multiplier = priceMatch.Groups[2].Value.Contains("tỷ") || priceMatch.Groups[2].Value.Contains("ty") ? 1_000_000_000m : 1_000_000m;
                     filtered = filtered.Where(l => l.Price <= priceVal * multiplier);
+                    hasStrictFilter = true;
                 }
 
                 // Filter by bedrooms
                 var bedroomMatch = Regex.Match(lower, @"(\d+)\s*(phòng ngủ|bedroom|phong ngu)");
                 if (bedroomMatch.Success && int.TryParse(bedroomMatch.Groups[1].Value, out var bedrooms))
+                {
                     filtered = filtered.Where(l => l.Bedrooms == bedrooms);
+                    hasStrictFilter = true;
+                }
 
-                var result = filtered.Take(5).ToList();
+                var keywords = ExtractSearchKeywords(lower);
+                if (keywords.Any())
+                {
+                    var requiredMatches = keywords.Count == 1 ? 1 : Math.Min(2, keywords.Count);
+                    filtered = filtered.Where(l =>
+                    {
+                        var searchBlob = $"{l.Title} {l.Description} {l.StreetName} {l.Ward} {l.District} {l.City}".ToLower();
+                        var matchedCount = keywords.Count(k => searchBlob.Contains(k));
+                        return matchedCount >= requiredMatches;
+                    });
+                    hasStrictFilter = true;
+                }
 
-                // If no match, return top 3 latest listings
+                if (!hasStrictFilter && !hasRecommendationIntent)
+                {
+                    return new List<ListingDto>();
+                }
+
+                var result = filtered
+                    .OrderByDescending(l => l.IsBoosted)
+                    .ThenByDescending(l => l.CreatedAt)
+                    .Take(3)
+                    .ToList();
+
                 if (!result.Any())
-                    result = published.OrderByDescending(l => l.CreatedAt).Take(3).ToList();
+                {
+                    if (!hasRecommendationIntent) return new List<ListingDto>();
+
+                    result = published
+                        .OrderByDescending(l => l.IsBoosted)
+                        .ThenByDescending(l => l.CreatedAt)
+                        .Take(3)
+                        .ToList();
+                }
 
                 return result.Select(MapToDto).ToList();
             }
@@ -222,6 +313,24 @@ Khi giới thiệu listing, đừng liệt kê chi tiết mà để hệ thống
             {
                 return new List<ListingDto>();
             }
+        }
+
+        private List<string> ExtractSearchKeywords(string text)
+        {
+            var stopWords = new HashSet<string>
+            {
+                "toi", "tôi", "muon", "muốn", "tim", "tìm", "kiem", "kiếm", "can", "cần", "xin", "chao", "chào",
+                "bat", "bất", "dong", "động", "san", "sản", "nha", "nhà", "dat", "đất", "canho", "căn", "hộ",
+                "mua", "ban", "bán", "thue", "thuê", "gia", "giá", "duoi", "dưới", "tren", "trên", "tai", "tại",
+                "gan", "gần", "o", "ở", "va", "và", "cho", "the", "la", "là", "mot", "một", "nhung", "những",
+                "phong", "phòng", "tro", "trọ", "pn", "ty", "tỷ", "trieu", "triệu", "q", "quan", "quận"
+            };
+
+            return Regex.Matches(text, @"\p{L}+")
+                .Select(m => m.Value)
+                .Where(token => token.Length >= 2 && !stopWords.Contains(token))
+                .Distinct()
+                .ToList();
         }
 
         private string BuildListingContext(List<ListingDto> listings)
@@ -241,6 +350,16 @@ Khi giới thiệu listing, đừng liệt kê chi tiết mà để hệ thống
             return $"{price:N0} đồng";
         }
 
+        private string SanitizeAiMessage(string aiText)
+        {
+            if (string.IsNullOrWhiteSpace(aiText)) return string.Empty;
+
+            var clean = Regex.Replace(aiText, @"\[SEARCH_DATA:\s*\{.*?\}\]", string.Empty, RegexOptions.Singleline | RegexOptions.IgnoreCase);
+            clean = Regex.Replace(clean, @"\[SEARCH_DATA:?.*$", string.Empty, RegexOptions.Singleline | RegexOptions.IgnoreCase);
+
+            return clean.Trim();
+        }
+
         private ListingDto MapToDto(Listing l) => new ListingDto
         {
             Id = l.Id,
@@ -258,6 +377,7 @@ Khi giới thiệu listing, đừng liệt kê chi tiết mà để hệ thống
             Bathrooms = l.Bathrooms,
             Status = l.Status,
             IsBoosted = l.IsBoosted,
+            DetailUrl = $"/Listings/PropertyDetail/{l.Id}",
             ListingMedia = l.ListingMedia?.Select(m => new ListingMediaDto
             {
                 Id = m.Id,
